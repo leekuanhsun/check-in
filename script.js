@@ -11,16 +11,276 @@ let selectedPersonId = null; // 手機版點擊選擇狀態
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
     try {
-        if (content) {
-            content.classList.add('active');
-            content.style.display = 'flex'; // Ensure visible (override CSS if needed)
-        } else {
-            console.error(`Tab content not found: tab-${tabId}`);
-        }
+        initSystem();
+        initTabs(); // 確保此函數存在且被呼叫
+        setupEventListeners();
+    } catch (e) {
+        console.error("Init Error:", e);
+        alert("系統初始化失敗: " + e.message);
+    }
+});
 
-        // 5. Render specific views if needed
-        if (tabId === 'report') renderReport();
-    });
+function initSystem() {
+    // 檢查 Firebase 設定是否有效
+    if (typeof firebase !== 'undefined' && typeof firebaseConfig !== 'undefined') {
+        if (firebaseConfig.apiKey === "YOUR_API_KEY" || !firebaseConfig.apiKey) {
+            console.warn("Firebase 未設定，切換至本地儲存模式。");
+            useFirebase = false;
+        } else {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                useFirebase = true;
+                console.log("Firebase initialized");
+            } catch (e) {
+                console.error("Firebase init failed:", e);
+                useFirebase = false;
+            }
+        }
+    } else {
+        useFirebase = false;
+    }
+
+    updateModeUI();
+
+    if (useFirebase) {
+        subscribeToData();
+    } else {
+        loadFromLocal();
+    }
+}
+
+function updateModeUI() {
+    const statusEl = document.getElementById('saveStatus');
+    if (statusEl) {
+        if (useFirebase) {
+            statusEl.innerHTML = '<span style="color:#27ae60;">☁️ 雲端同步中</span>';
+        } else {
+            statusEl.innerHTML = '<span style="color:#f39c12;">📂 本地儲存模式</span>';
+        }
+    }
+}
+
+// ================= 資料同步與讀取 =================
+
+function subscribeToData() {
+    if (!db) return;
+
+    db.collection("people").onSnapshot((snapshot) => {
+        const remotePeople = [];
+        snapshot.forEach((doc) => {
+            remotePeople.push({ id: doc.id, ...doc.data() });
+        });
+        state.people = remotePeople;
+        render();
+    }, (error) => console.error("Error getting people:", error));
+
+    db.collection("duties").onSnapshot((snapshot) => {
+        state.duties = [];
+        snapshot.forEach((doc) => {
+            state.duties.push({ id: doc.id, ...doc.data() });
+        });
+        render();
+    }, (error) => console.error("Error getting duties:", error));
+}
+
+function loadFromLocal() {
+    const savedPeople = localStorage.getItem('rollcall_people');
+    const savedDuties = localStorage.getItem('rollcall_duties');
+
+    if (savedPeople) state.people = JSON.parse(savedPeople);
+    if (savedDuties) state.duties = JSON.parse(savedDuties);
+
+    // 預設公差 (如果完全是新的)
+    if (state.duties.length === 0) {
+        state.duties = [
+            { id: 'duty_1', name: '公差' },
+            { id: 'duty_2', name: '休假' },
+            { id: 'duty_3', name: '衛哨' }
+        ];
+        saveToLocal();
+    }
+
+    render();
+}
+
+function saveToLocal() {
+    localStorage.setItem('rollcall_people', JSON.stringify(state.people));
+    localStorage.setItem('rollcall_duties', JSON.stringify(state.duties));
+}
+
+// ================= 資料操作 (自動儲存版) =================
+
+// 1. 新增人員
+async function addPerson(name, unit) {
+    if (!name.trim()) return;
+    const finalUnit = unit.trim() || '預設建置班';
+    const newPerson = {
+        name: name.trim(),
+        unit: finalUnit,
+        dutyId: null,
+        createdAt: new Date().toISOString()
+    };
+
+    if (useFirebase) {
+        try {
+            await db.collection("people").add({
+                ...newPerson,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } catch (e) { alert("新增失敗: " + e.message); }
+    } else {
+        newPerson.id = 'local_' + Date.now() + Math.random().toString(36).substr(2, 9);
+        state.people.push(newPerson);
+        saveToLocal();
+        render();
+    }
+}
+
+// 2. 新增公差
+async function addDuty(name) {
+    if (!name.trim()) return;
+    if (useFirebase) {
+        try {
+            await db.collection("duties").add({
+                name: name.trim(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } catch (e) { console.error(e); }
+    } else {
+        const newDuty = {
+            id: 'duty_' + Date.now(),
+            name: name.trim()
+        };
+        state.duties.push(newDuty);
+        saveToLocal();
+        render();
+    }
+}
+
+// 3. 刪除人員
+async function deletePerson(id) {
+    if (!confirm('確定要刪除此人員嗎？')) return;
+
+    if (useFirebase) {
+        try { await db.collection("people").doc(id).delete(); } catch (e) { console.error(e); }
+    } else {
+        state.people = state.people.filter(p => p.id !== id);
+        saveToLocal();
+        render();
+    }
+}
+
+// 4. 刪除公差
+async function deleteDuty(id) {
+    if (!confirm('確定要刪除此公差類別嗎？')) return;
+
+    if (useFirebase) {
+        try {
+            await db.collection("duties").doc(id).delete();
+            const batch = db.batch();
+            let count = 0;
+            state.people.filter(p => p.dutyId === id).forEach(p => {
+                const ref = db.collection("people").doc(p.id);
+                batch.update(ref, { dutyId: null });
+                count++;
+            });
+            if (count > 0) await batch.commit();
+        } catch (e) { console.error(e); }
+    } else {
+        state.duties = state.duties.filter(d => d.id !== id);
+        state.people.forEach(p => {
+            if (p.dutyId === id) p.dutyId = null;
+        });
+        saveToLocal();
+        render();
+    }
+}
+
+// 5. 移動人員 (自動儲存)
+async function movePerson(personId, targetDutyId) {
+    const finalDutyId = targetDutyId === 'unassigned' ? null : targetDutyId;
+    const person = state.people.find(p => p.id === personId);
+
+    if (person && person.dutyId !== finalDutyId) {
+        // Optimistic UI Update (for local feel)
+        person.dutyId = finalDutyId;
+        render();
+
+        if (useFirebase) {
+            try {
+                // 如果是 local_ 開頭的 ID (在連線前建立的)，無法直接 update firestore
+                if (personId.startsWith('local_')) {
+                    console.warn("Cannot sync local-only person to remote yet (need export/import).");
+                    // 實際場景應該要 addDoc then delete local, 但這裡暫時忽略複雜同步
+                    return;
+                }
+                await db.collection("people").doc(personId).update({ dutyId: finalDutyId });
+            } catch (e) {
+                console.error("Auto-save failed:", e);
+                // Revert on fail?
+            }
+        } else {
+            saveToLocal();
+        }
+    }
+}
+
+// 6. 重置
+async function resetData() {
+    if (!confirm('確定清除所有資料？')) return;
+
+    if (useFirebase) {
+        const batch = db.batch();
+        state.people.forEach(p => batch.delete(db.collection("people").doc(p.id)));
+        state.duties.forEach(d => batch.delete(db.collection("duties").doc(d.id)));
+        await batch.commit();
+    } else {
+        state.people = [];
+        state.duties = [
+            { id: 'duty_1', name: '公差' },
+            { id: 'duty_2', name: '休假' },
+            { id: 'duty_3', name: '衛哨' }
+        ];
+        saveToLocal();
+        render();
+    }
+}
+
+// ================= UI 渲染邏輯 =================
+
+function initTabs() {
+    const tabs = document.querySelectorAll('.nav-tab');
+    console.log("Found tabs:", tabs.length);
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            console.log("Tab clicked:", tab.dataset.tab);
+
+            // 1. Remove active from all tabs
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+            // 2. Hide all contents
+            document.querySelectorAll('.tab-content').forEach(c => {
+                c.classList.remove('active');
+                c.style.display = 'none'; // Ensure hidden
+            });
+
+            // 3. Activate clicked tab
+            tab.classList.add('active');
+
+            // 4. Show target content
+            const tabId = tab.dataset.tab; // e.g., 'rank' -> 'tab-rank'
+            const content = document.getElementById(`tab-${tabId}`);
+            if (content) {
+                content.classList.add('active');
+                content.style.display = 'flex'; // Ensure visible (override CSS if needed)
+            } else {
+                console.error(`Tab content not found: tab-${tabId}`);
+            }
+
+            // 5. Render specific views if needed
+            if (tabId === 'report') renderReport();
+        });
     });
 }
 
@@ -209,35 +469,43 @@ function renderReport() {
 }
 
 function getDutyName(id) {
-    if (!id) return '未分配';
     const d = state.duties.find(x => x.id === id);
     return d ? d.name : '未知';
 }
 
-function allowDrop(ev) {
-    ev.preventDefault();
-    const t = ev.target.closest('.duty-content') || ev.target.closest('.people-list-container');
-    if (t) t.classList.add('drag-over');
-}
-function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
-function drop(ev, targetId) {
-    ev.preventDefault();
-    const pid = ev.dataTransfer.getData("text");
-    document.querySelectorAll('.drag-over').forEach(e => e.classList.remove('drag-over'));
-    movePerson(pid, targetId);
+// 拖放與點擊處理
+
+function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.id);
+    selectedPersonId = ev.target.id;
+    // Highlight drop zones?
 }
 
-// === Click/Tap Interaction Handler ===
-function handlePersonClick(pid) {
-    if (selectedPersonId === pid) {
+function allowDrop(ev) {
+    ev.preventDefault();
+    if (ev.target.classList.contains('duty-content') || ev.target.id === 'unassignedList') {
+        ev.target.classList.add('drag-over');
+    }
+}
+
+function drop(ev, targetDutyId) {
+    ev.preventDefault();
+    if (ev.target.classList) ev.target.classList.remove('drag-over');
+    const personId = ev.dataTransfer.getData("text");
+    movePerson(personId, targetDutyId);
+    selectedPersonId = null;
+    document.querySelectorAll('.person-card').forEach(c => c.classList.remove('selected'));
+}
+
+// Mobile/Click Interaction
+function handlePersonClick(id) {
+    if (selectedPersonId === id) {
         // Deselect
         selectedPersonId = null;
     } else {
-        // Select
-        selectedPersonId = pid;
+        selectedPersonId = id;
     }
     render(); // Re-render to show selection highlight
-    updateTargetHints();
 }
 
 function handleTargetClick(targetDutyId) {
@@ -248,31 +516,15 @@ function handleTargetClick(targetDutyId) {
     }
 }
 
-function updateTargetHints() {
-    // Optional: Visual cue for where to click
-    const targets = document.querySelectorAll('.duty-content, .people-list-container');
-    targets.forEach(t => {
-        if (selectedPersonId) t.classList.add('selectable-target');
-        else t.classList.remove('selectable-target');
-    });
-}
-// =====================================
-
 function setupEventListeners() {
     // Add click listeners to Duty Containers for tap-to-move
     const unList = document.getElementById('unassignedList');
-    // Using delegation on unList parent? No, unList IS the container.
-    // But clicking a person card inside unList bubbles up. We stopped propagation in createPersonCard, so it's fine.
     if (unList) {
         unList.addEventListener('click', () => {
             if (selectedPersonId) handleTargetClick('unassigned');
         });
     }
 
-    // Since duty columns are dynamic, we delegate or add listeners in render, 
-    // BUT we can also use event delegation on the container parent if possible, 
-    // or just rely on the onclick attributes we might add, OR add listener in render.
-    // Let's add delegation on dutiesContainer.
     const dCont = document.getElementById('dutiesContainer');
     if (dCont) {
         dCont.addEventListener('click', (e) => {
@@ -301,7 +553,7 @@ function setupEventListeners() {
         const txt = document.getElementById('importPeopleInput').value;
         if (txt) {
             txt.split('\n').forEach(l => {
-                const [n, u] = l.split(/[,\t]/);
+                const [n, u] = l.split(/[,\\t]/);
                 if (n) addPerson(n, u);
             });
             document.getElementById('importPeopleInput').value = '';
@@ -357,6 +609,9 @@ function setupEventListeners() {
         });
     });
 
+    const unitFilter = document.getElementById('unitFilter');
+    if (unitFilter) unitFilter.addEventListener('change', renderRollCall);
+
     document.addEventListener('dragleave', (e) => {
         if (e.target.classList?.contains('drag-over')) e.target.classList.remove('drag-over');
     });
@@ -368,13 +623,4 @@ function setupEventListeners() {
             renderReport(); // Re-render report to update title
         });
     }
-} // End setupEventListeners
-        } // End else (valid config)
-    } else {
-    useFirebase = false;
-    // Fallback or Alert?
-    // Actually initSystem logic above covered this.
-    // But wait, the nesting is messy.
-    // The previous view showed initSystem definition is okay but might handle nesting wrong.
 }
-} // End initSystem
