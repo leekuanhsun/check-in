@@ -348,56 +348,6 @@ function renderRollCall() {
 
 function createPersonCard(person) {
     const div = document.createElement('div');
-    div.className = 'person-card';
-    if (selectedPersonId === person.id) div.classList.add('selected'); // Highlight if selected
-    div.draggable = true;
-    div.id = person.id;
-
-    // Info Container
-    const infoDiv = document.createElement('div');
-    infoDiv.className = 'person-info';
-    infoDiv.innerHTML = `<span>${person.name} <small style="color:#888;">(${person.unit || '預設'})</small></span>`;
-    div.appendChild(infoDiv);
-
-    // Dropdown Selector
-    const select = document.createElement('select');
-    select.className = 'duty-select';
-
-    // Default "Unassigned/建置班" option
-    const defOpt = document.createElement('option');
-    defOpt.value = 'unassigned';
-    defOpt.innerText = '建置班';
-    if (!person.dutyId) defOpt.selected = true;
-    select.appendChild(defOpt);
-
-    // Dynamic Duty options
-    state.duties.forEach(d => {
-        const opt = document.createElement('option');
-        opt.value = d.id;
-        opt.innerText = d.name;
-        if (person.dutyId === d.id) opt.selected = true;
-        select.appendChild(opt);
-    });
-
-    // Event: Click to stop propagation (don't select card when clicking dropdown)
-    select.addEventListener('click', (e) => e.stopPropagation());
-
-    // Event: Change duty
-    select.addEventListener('change', (e) => {
-        e.stopPropagation();
-        movePerson(person.id, e.target.value);
-    });
-
-    div.appendChild(select);
-
-    // Drag Events
-    div.addEventListener('dragstart', drag);
-
-    // Check Events (for Mobile/Click interaction - still kept for selection highlighting)
-    div.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent bubbling
-        handlePersonClick(person.id);
-    });
 
     return div;
 }
