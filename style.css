@@ -522,18 +522,19 @@ textarea {
 
     .people-list-container,
     .duties-container {
-        max-height: 40vh;
-        /* Limit inner lists instead if we want to keep them somewhat compact */
-        overflow-y: auto;
+        max-height: none;
+        /* Let lists expand fully so user scrolls the PAGE, not the container */
+        overflow: visible;
     }
 
     .duties-container {
         grid-template-columns: 1fr;
-        /* Single column stats */
     }
 
     .duty-column {
         max-height: none;
+        margin-bottom: 15px;
+        /* Add spacer between duty blocks */
     }
 
     /* Tabs scrollable on mobile */
