@@ -465,9 +465,33 @@ function renderReport() {
 }
 
 
-function getDutyName(id) {
-    const d = state.duties.find(x => x.id === id);
-    return d ? d.name : '未知';
+return d ? d.name : '未知';
+}
+
+function initTabs() {
+    const tabs = document.querySelectorAll('.nav-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => {
+                c.classList.remove('active');
+                c.style.display = 'none';
+            });
+
+            tab.classList.add('active');
+            const tabId = tab.dataset.tab;
+            const content = document.getElementById(`tab-${tabId}`);
+            if (content) {
+                content.classList.add('active');
+                if (tabId === 'rollcall') {
+                    content.style.display = 'flex';
+                } else {
+                    content.style.display = 'block';
+                }
+            }
+            if (tabId === 'report') renderReport();
+        });
+    });
 }
 
 function setupEventListeners() {
