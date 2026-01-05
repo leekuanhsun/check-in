@@ -464,6 +464,13 @@ function renderReport() {
     }
 }
 
+}
+
+function getDutyName(id) {
+    const d = state.duties.find(x => x.id === id);
+    return d ? d.name : '未知';
+}
+
 function setupEventListeners() {
     // 移除舊的點擊監聽器，只保留功能性按鈕
 
