@@ -81,26 +81,6 @@ body {
 .app-container {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
-    width: 100%;
-}
-
-.main-header {
-    background-color: var(--panel-bg);
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    z-index: 10;
-}
-
-/* Navigation Tabs */
-.main-nav {
-    background-color: #e9ecef;
-    padding: 0 20px;
     display: flex;
     gap: 5px;
     border-bottom: 1px solid #ddd;
@@ -445,25 +425,6 @@ textarea {
 }
 
 .duty-content {
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
-    min-height: 80px;
-    /* Reserve space for at least one card */
-    padding-bottom: 30px;
-    /* Extra space at bottom */
-}
-
-transition: background-color 0.2s;
-min-height: 100px;
-}
-
-.duty-content.drag-over {
-    background-color: #e8f5e9;
-}
-
-/* Search Header */
-.search-container input {
     padding: 8px 12px;
     border: 1px solid #ddd;
     border-radius: 20px;
@@ -626,11 +587,12 @@ min-height: 100px;
     border: 2px dashed #2ecc71;
     cursor: pointer;
 }
+
 /* Report Summary Styles */
 .unit-card {
     margin-bottom: 20px;
     background-color: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: var(--border-radius);
     overflow: hidden;
 }
@@ -639,6 +601,7 @@ min-height: 100px;
     list-style: none;
     cursor: pointer;
 }
+
 .unit-card summary::-webkit-details-marker {
     display: none;
 }
@@ -658,10 +621,12 @@ min-height: 100px;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch;
     }
+
     .main-content {
         overflow: visible !important;
         height: auto !important;
     }
+
     .tab-content {
         overflow: visible !important;
         height: auto !important;

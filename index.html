@@ -7,156 +7,141 @@
     <title>智慧點名與公差管理系統</title>
     <link rel="stylesheet" href="style.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-</head>
+    </div>
+    </div>
+    </header>
 
-<body>
-    <div class="app-container">
-        <header class="main-header">
-            <h1>智慧點名與公差管理系統</h1>
-            <div class="header-controls">
-                <!-- 儲存狀態顯示 (自動儲存) -->
-                <div id="saveStatus" style="font-weight: bold; margin-right: 15px; display: flex; align-items: center;">
-                </div>
+    <!-- 導航列 -->
+    <nav class="main-nav">
+        <button class="nav-tab active" data-tab="rollcall">點名操作</button>
+        <button class="nav-tab" data-tab="settings">設定管理</button>
+        <button class="nav-tab" data-tab="report">建置班報表</button>
+    </nav>
 
-                <!-- 搜尋僅在點名頁或報表頁有效，暫時全域顯示 -->
-                <div class="search-container">
-                    <input type="text" id="searchInput" placeholder="搜尋姓名或公差...">
-                </div>
-            </div>
-        </header>
+    <main class="main-content-wrapper">
 
-        <!-- 導航列 -->
-        <nav class="main-nav">
-            <button class="nav-tab active" data-tab="rollcall">點名操作</button>
-            <button class="nav-tab" data-tab="settings">設定管理</button>
-            <button class="nav-tab" data-tab="report">建置班報表</button>
-        </nav>
-
-        <main class="main-content-wrapper">
-
-            <!-- 分頁 1: 點名操作 (Roll Call) -->
-            <div id="tab-rollcall" class="tab-content active">
-                <main class="main-content">
-                    <!-- 左側：人員管理面板 (僅顯示，不新增) -->
-                    <section class="panel people-panel">
-                        <div class="panel-header">
-                            <div style="display:flex; flex-direction:column; gap:5px;">
-                                <h2>人員名單</h2>
-                                <select id="unitFilter"
-                                    style="padding: 4px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.9em;">
-                                    <option value="all">所有建置班</option>
-                                </select>
-                            </div>
-                            <div class="count-badge">未分配: <span id="unassignedCount">0</span></div>
+        <!-- 分頁 1: 點名操作 (Roll Call) -->
+        <div id="tab-rollcall" class="tab-content active">
+            <main class="main-content">
+                <!-- 左側：人員管理面板 (僅顯示，不新增) -->
+                <section class="panel people-panel">
+                    <div class="panel-header">
+                        <div style="display:flex; flex-direction:column; gap:5px;">
+                            <h2>人員名單</h2>
+                            <select id="unitFilter"
+                                style="padding: 4px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.9em;">
+                                <option value="all">所有建置班</option>
+                            </select>
                         </div>
-                        <div class="people-list-container" id="unassignedList" ondrop="drop(event, 'unassigned')"
-                            ondragover="allowDrop(event)">
-                            <!-- 未分配人員卡片將顯示於此 -->
-                            <div class="empty-state">暫無人員</div>
-                        </div>
-                    </section>
-
-                    <!-- 右側：公差分配區 -->
-                    <section class="panel duty-panel">
-                        <div class="panel-header">
-                            <h2>公差分配</h2>
-                        </div>
-                        <div class="duties-container" id="dutiesContainer">
-                            <!-- 公差區塊將動態生成 -->
-                        </div>
-                    </section>
-                </main>
-            </div>
-
-            <!-- 設定管理面板 -->
-            <div id="tab-settings" class="tab-content">
-                <!-- 人員管理區塊 -->
-                <div class="panel settings-container">
-                    <h2>設定管理</h2>
-                    <div class="settings-section">
-                        <h3>新增/管理人員</h3>
-                        <div class="input-group">
-                            <input type="text" id="newPersonName" placeholder="姓名">
-                            <input type="text" id="newPersonUnit" placeholder="建置班 (例如: 一班, 勤務排)">
-                            <button id="addPersonBtn" class="btn btn-primary">新增人員</button>
-                        </div>
-                        <div class="import-group">
-                            <textarea id="importPeopleInput" placeholder="批次匯入 (格式: 姓名,建置班 (換行))&#10;或是僅姓名 (將使用預設班級)"
-                                rows="3"></textarea>
-                            <button id="importPeopleBtn" class="btn btn-secondary">匯入</button>
-                        </div>
-
-                        <h4>人員列表</h4>
-                        <div class="settings-list-header">
-                            <span>姓名</span>
-                            <span>建置班</span>
-                            <span>操作</span>
-                        </div>
-                        <div id="settingsPeopleList" class="settings-list">
-                            <!-- 人員列表項目 -->
-                        </div>
+                        <div class="count-badge">未分配: <span id="unassignedCount">0</span></div>
                     </div>
-                </div>
-
-                <!-- 公差管理區塊 (獨立面板) -->
-                <div class="panel settings-container" style="margin-top: 20px;">
-                    <div class="settings-section">
-                        <h3>新增/管理公差</h3>
-                        <div class="input-group">
-                            <input type="text" id="newDutyInput" placeholder="新增公差名稱...">
-                            <button id="addDutyBtn" class="btn btn-primary">新增公差</button>
-                        </div>
-
-                        <h4>公差列表</h4>
-                        <div id="settingsDutyList" class="settings-list">
-                            <!-- 公差列表項目 -->
-                        </div>
+                    <div class="people-list-container" id="unassignedList" ondrop="drop(event, 'unassigned')"
+                        ondragover="allowDrop(event)">
+                        <!-- 未分配人員卡片將顯示於此 -->
+                        <div class="empty-state">暫無人員</div>
                     </div>
-                </div>
+                </section>
 
-                <!-- 系統操作區塊 (獨立面板) -->
-                <div class="panel settings-container" style="margin-top: 20px;">
-                    <div class="settings-section">
-                        <h3>系統操作</h3>
-                        <button id="resetDataBtn" class="btn btn-danger">重置所有資料</button>
-                        <button id="exportJSONBtn" class="btn btn-secondary" style="margin-top: 10px;">匯出備份
-                            (JSON)</button>
+                <!-- 右側：公差分配區 -->
+                <section class="panel duty-panel">
+                    <div class="panel-header">
+                        <h2>公差分配</h2>
+                    </div>
+                    <div class="duties-container" id="dutiesContainer">
+                        <!-- 公差區塊將動態生成 -->
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- 設定管理面板 -->
+        <div id="tab-settings" class="tab-content">
+            <!-- 人員管理區塊 -->
+            <div class="panel settings-container">
+                <h2>設定管理</h2>
+                <div class="settings-section">
+                    <h3>新增/管理人員</h3>
+                    <div class="input-group">
+                        <input type="text" id="newPersonName" placeholder="姓名">
+                        <input type="text" id="newPersonUnit" placeholder="建置班 (例如: 一班, 勤務排)">
+                        <button id="addPersonBtn" class="btn btn-primary">新增人員</button>
+                    </div>
+                    <div class="import-group">
+                        <textarea id="importPeopleInput" placeholder="批次匯入 (格式: 姓名,建置班 (換行))&#10;或是僅姓名 (將使用預設班級)"
+                            rows="3"></textarea>
+                        <button id="importPeopleBtn" class="btn btn-secondary">匯入</button>
+                    </div>
+
+                    <h4>人員列表</h4>
+                    <div class="settings-list-header">
+                        <span>姓名</span>
+                        <span>建置班</span>
+                        <span>操作</span>
+                    </div>
+                    <div id="settingsPeopleList" class="settings-list">
+                        <!-- 人員列表項目 -->
                     </div>
                 </div>
             </div>
 
-            <!-- 分頁 3: 建置班報表 (Report) -->
-            <div id="tab-report" class="tab-content">
-                <div class="report-container panel">
-                    <div class="panel-header" style="justify-content: space-between; display: flex;">
-                        <h2>建置班統計報表</h2>
-                        <button id="copyReportBtn" class="btn btn-success">複製報表文字</button>
-                    </div>
-                    <!-- 新增統計摘要 -->
-                    <div class="report-summary">
-                        <div class="summary-card total">
-                            <h3>總人數</h3>
-                            <span id="totalPeopleCount">0</span>
-                        </div>
-                        <div class="summary-card duty">
-                            <h3>公差總人數</h3>
-                            <span id="totalDutyCount">0</span>
-                        </div>
+            <!-- 公差管理區塊 (獨立面板) -->
+            <div class="panel settings-container" style="margin-top: 20px;">
+                <div class="settings-section">
+                    <h3>新增/管理公差</h3>
+                    <div class="input-group">
+                        <input type="text" id="newDutyInput" placeholder="新增公差名稱...">
+                        <button id="addDutyBtn" class="btn btn-primary">新增公差</button>
                     </div>
 
-                    <!-- 公差細項總覽 -->
-                    <div id="globalDutyStats" class="duty-stats-bar">
-                        <!-- 動態生成: 公差A: 3 | 公差B: 2 ... -->
-                    </div>
-
-                    <div id="reportContent" class="report-grid">
-                        <!-- 報表內容 -->
+                    <h4>公差列表</h4>
+                    <div id="settingsDutyList" class="settings-list">
+                        <!-- 公差列表項目 -->
                     </div>
                 </div>
             </div>
 
-        </main>
+            <!-- 系統操作區塊 (獨立面板) -->
+            <div class="panel settings-container" style="margin-top: 20px;">
+                <div class="settings-section">
+                    <h3>系統操作</h3>
+                    <button id="resetDataBtn" class="btn btn-danger">重置所有資料</button>
+                    <button id="exportJSONBtn" class="btn btn-secondary" style="margin-top: 10px;">匯出備份
+                        (JSON)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分頁 3: 建置班報表 (Report) -->
+        <div id="tab-report" class="tab-content">
+            <div class="report-container panel">
+                <div class="panel-header" style="justify-content: space-between; display: flex;">
+                    <h2>建置班統計報表</h2>
+                    <button id="copyReportBtn" class="btn btn-success">複製報表文字</button>
+                </div>
+                <!-- 新增統計摘要 -->
+                <div class="report-summary">
+                    <div class="summary-card total">
+                        <h3>總人數</h3>
+                        <span id="totalPeopleCount">0</span>
+                    </div>
+                    <div class="summary-card duty">
+                        <h3>公差總人數</h3>
+                        <span id="totalDutyCount">0</span>
+                    </div>
+                </div>
+
+                <!-- 公差細項總覽 -->
+                <div id="globalDutyStats" class="duty-stats-bar">
+                    <!-- 動態生成: 公差A: 3 | 公差B: 2 ... -->
+                </div>
+
+                <div id="reportContent" class="report-grid">
+                    <!-- 報表內容 -->
+                </div>
+            </div>
+        </div>
+
+    </main>
     </div>
 
     <!-- 匯總模態框 (Modal) - 保留舊有的一鍵匯總功能，或可整合進報表頁的複製功能 -->
@@ -169,6 +154,6 @@
     <!-- Config & Logic -->
     <script src="firebase-config.js"></script>
     <script src="script.js"></script>
-</body>
+    </body>
 
 </html>
