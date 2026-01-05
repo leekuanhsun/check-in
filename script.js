@@ -441,17 +441,21 @@ function renderReport() {
         reportTitle.innerText = `${sessionName ? '[' + sessionName + '] ' : ''}建置班統計報表`;
     }
 
+    // 5. title update ...
+
     const totalCountEl = document.getElementById('totalPeopleCount');
     const totalDutyEl = document.getElementById('totalDutyCount');
     if (totalCountEl) totalCountEl.innerText = state.people.length;
 
+    const currentSession = state.currentSession;
     let dutiesCount = 0;
     const dutyStats = {};
 
     state.people.forEach(p => {
-        if (p.dutyId) {
+        const dId = p.assignments ? p.assignments[currentSession] : null;
+        if (dId) {
             dutiesCount++;
-            const dName = getDutyName(p.dutyId);
+            const dName = getDutyName(dId);
             dutyStats[dName] = (dutyStats[dName] || 0) + 1;
         }
     });
@@ -485,7 +489,8 @@ function renderReport() {
     for (const [unitName, people] of Object.entries(units)) {
         const uDutyStats = {};
         people.forEach(p => {
-            const d = getDutyName(p.dutyId);
+            const dId = p.assignments ? p.assignments[currentSession] : null;
+            const d = getDutyName(dId);
             uDutyStats[d] = (uDutyStats[d] || 0) + 1;
         });
         const statsStr = Object.entries(uDutyStats).map(([k, v]) => `${k}:${v}`).join(' | ');
@@ -498,8 +503,9 @@ function renderReport() {
         <div class="unit-stats" style="padding: 0 10px 10px;">${statsStr}</div>
     `;
         people.forEach(p => {
-            const dName = getDutyName(p.dutyId);
-            const statusClass = p.dutyId ? 'active-duty' : 'unassigned';
+            const dId = p.assignments ? p.assignments[currentSession] : null;
+            const dName = getDutyName(dId);
+            const statusClass = dId ? 'active-duty' : 'unassigned';
             html += `<div class="unit-person-row"><span>${p.name}</span><span class="status-tag ${statusClass}">${dName}</span></div>`;
         });
         card.innerHTML = html;
@@ -610,8 +616,9 @@ function setupEventListeners() {
     // Session Selector Listener
     const sessionSelect = document.getElementById('sessionSelect');
     if (sessionSelect) {
-        sessionSelect.addEventListener('change', () => {
-            renderReport(); // Re-render report to update title
+        sessionSelect.addEventListener('change', (e) => {
+            state.currentSession = e.target.value;
+            render(); // Re-render everything (RollCall + Report + Settings)
         });
     }
 }
