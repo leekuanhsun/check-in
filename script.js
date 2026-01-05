@@ -464,7 +464,6 @@ function renderReport() {
     }
 }
 
-}
 
 function getDutyName(id) {
     const d = state.duties.find(x => x.id === id);
