@@ -79,6 +79,9 @@
                         <label>建置班</label>
                         <input type="text" id="newPersonUnit" placeholder="請輸入建置班 (例如: 一班)">
 
+                        <label>組別</label>
+                        <input type="text" id="newPersonGroup" placeholder="請輸入組別 (例如: 第一組)">
+
                         <button id="addPersonBtn" class="btn btn-primary" style="margin-top: 10px;">新增人員</button>
                     </div>
                     <!-- 批次匯入功能已移除 -->
@@ -87,6 +90,7 @@
                     <div class="settings-list-header">
                         <span>姓名</span>
                         <span>建置班</span>
+                        <span>組別</span>
                         <span>操作</span>
                     </div>
                     <div id="settingsPeopleList" class="settings-list">
@@ -164,7 +168,7 @@
 
     <!-- Config & Logic -->
     <script src="firebase-config.js"></script>
-    <script src="script.js?v=20260105_6"></script>
+    <script src="script.js?v=20260105_7"></script>
     </body>
 
 </html>

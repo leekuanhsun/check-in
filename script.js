@@ -137,12 +137,14 @@ function render() {
 // ================= 資料操作 (自動儲存版) =================
 
 // 1. 新增人員
-async function addPerson(name, unit) {
+async function addPerson(name, unit, group) {
     if (!name.trim()) return;
     const finalUnit = unit.trim() || '預設建置班';
+    const finalGroup = group.trim() || '';
     const newPerson = {
         name: name.trim(),
         unit: finalUnit,
+        group: finalGroup,
         assignments: {}, // 初始化空的分配表
         createdAt: new Date().toISOString()
     };
@@ -359,12 +361,13 @@ function createPersonCard(person) {
     const div = document.createElement('div');
     div.className = 'person-card';
 
-    // Header row: Name and Unit
+    // Header row: Name and Unit/Group
     const header = document.createElement('div');
     header.className = 'person-header';
+    const groupText = person.group ? ` | ${person.group}` : '';
     header.innerHTML = `
         <div class="person-name">${person.name}</div>
-        <div class="person-unit">${person.unit || '預設'}</div>
+        <div class="person-unit">${person.unit || '預設'}${groupText}</div>
     `;
     div.appendChild(header);
 
@@ -411,9 +414,8 @@ function renderSettings() {
         state.people.forEach(p => {
             const item = document.createElement('div');
             item.className = 'settings-item';
-            // 注意：這裡使用 onclick 屬性直接呼叫 global function
             // 為了避免作用域問題，deletePerson 必須是 Global 的
-            item.innerHTML = `<span>${p.name}</span><span>${p.unit || ''}</span><button class="btn btn-danger" onclick="deletePerson('${p.id}')">刪除</button>`;
+            item.innerHTML = `<span>${p.name}</span><span>${p.unit || ''}</span><span>${p.group || ''}</span><button class="btn btn-danger" onclick="deletePerson('${p.id}')">刪除</button>`;
             peopleList.appendChild(item);
         });
     }
@@ -553,10 +555,12 @@ function setupEventListeners() {
         addP.addEventListener('click', () => {
             const nameEl = document.getElementById('newPersonName');
             const unitEl = document.getElementById('newPersonUnit');
+            const groupEl = document.getElementById('newPersonGroup');
             if (nameEl.value) {
-                addPerson(nameEl.value, unitEl.value);
+                addPerson(nameEl.value, unitEl.value, groupEl ? groupEl.value : '');
                 nameEl.value = '';
-                // unitEl.value = ''; // 通常建置班會連續輸入，保留比較方便，或者清空也可
+                // unitEl.value = ''; 
+                // groupEl.value = '';
             }
         });
     }
