@@ -504,17 +504,50 @@ function setupEventListeners() {
         });
     });
 
-    const unitFilter = document.getElementById('unitFilter');
-    if (unitFilter) unitFilter.addEventListener('change', renderRollCall);
-    ```javascript
+    const dutyList = document.getElementById('settingsDutyList');
+    if (dutyList) {
         dutyList.innerHTML = '';
         state.duties.forEach(d => {
             const item = document.createElement('div');
             item.className = 'settings-item';
-            item.innerHTML = `< span > ${ d.name }</span ><span></span><button class="btn btn-danger" onclick="deleteDuty('${d.id}')">刪除</button>`;
+            item.innerHTML = `<span>${d.name}</span><span></span><button class="btn btn-danger" onclick="deleteDuty('${d.id}')">刪除</button>`;
             dutyList.appendChild(item);
         });
     }
+}
+
+function initTabs() {
+    const tabs = document.querySelectorAll('.nav-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // 1. Remove active from all tabs
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+            // 2. Hide all contents
+            document.querySelectorAll('.tab-content').forEach(c => {
+                c.classList.remove('active');
+                c.style.display = 'none';
+            });
+
+            // 3. Activate clicked tab
+            tab.classList.add('active');
+
+            // 4. Show target content
+            const tabId = tab.dataset.tab;
+            const content = document.getElementById(`tab-${tabId}`);
+            if (content) {
+                content.classList.add('active');
+                if (tabId === 'rollcall') {
+                    content.style.display = 'flex'; // Rollcall needs flex
+                } else {
+                    content.style.display = 'block';
+                }
+            }
+
+            // 5. Render specific views if needed
+            if (tabId === 'report') renderReport();
+        });
+    });
 }
 
 function renderReport() {
@@ -526,7 +559,7 @@ function renderReport() {
     const sessionName = sessionSelect ? sessionSelect.value : '';
     const reportTitle = document.querySelector('#tab-report h2');
     if (reportTitle) {
-        reportTitle.innerText = `${ sessionName ? '[' + sessionName + '] ' : '' } 建置班統計報表`;
+        reportTitle.innerText = `${sessionName ? '[' + sessionName + '] ' : ''} 建置班統計報表`;
     }
 
     // Stats
@@ -556,7 +589,7 @@ function renderReport() {
             Object.entries(dutyStats).forEach(([key, val]) => {
                 const item = document.createElement('div');
                 item.className = 'duty-stat-item';
-                item.innerHTML = `< strong > ${ key }:</strong > <span>${val}</span>`;
+                item.innerHTML = `< strong > ${key}:</strong > <span>${val}</span>`;
                 globalStatsContainer.appendChild(item);
             });
         }
@@ -577,7 +610,7 @@ function renderReport() {
             const d = getDutyName(p.dutyId);
             uDutyStats[d] = (uDutyStats[d] || 0) + 1;
         });
-        const statsStr = Object.entries(uDutyStats).map(([k, v]) => `${ k }:${ v } `).join(' | ');
+        const statsStr = Object.entries(uDutyStats).map(([k, v]) => `${k}:${v} `).join(' | ');
 
         const card = document.createElement('details'); // Use details for expand/collapse
         card.className = 'unit-card';
@@ -679,7 +712,7 @@ function setupEventListeners() {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `rollcall_backup_${ new Date().toISOString().slice(0, 10) }.json`;
+            a.download = `rollcall_backup_${new Date().toISOString().slice(0, 10)}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
