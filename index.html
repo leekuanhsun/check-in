@@ -155,25 +155,25 @@
                     <!-- 報表內容 -->
                 </div>
             </div>
+        </div>
 
-            <!-- 分頁 4: 組別報表 (Group Report) -->
-            <div id="tab-group-report" class="tab-content">
-                <div class="report-container panel">
-                    <div class="panel-header" style="justify-content: space-between; display: flex;">
-                        <h2>組別統計報表</h2>
-                        <button id="copyGroupReportBtn" class="btn btn-success">複製報表文字</button>
+        <!-- 分頁 4: 組別報表 (Group Report) -->
+        <div id="tab-group-report" class="tab-content">
+            <div class="report-container panel">
+                <div class="panel-header" style="justify-content: space-between; display: flex;">
+                    <h2>組別統計報表</h2>
+                    <button id="copyGroupReportBtn" class="btn btn-success">複製報表文字</button>
+                </div>
+                <!-- 統計摘要 -->
+                <div class="report-summary">
+                    <div class="summary-card total">
+                        <h3>總人數</h3>
+                        <span id="groupTotalPeopleCount">0</span>
                     </div>
-                    <!-- 統計摘要 -->
-                    <div class="report-summary">
-                        <div class="summary-card total">
-                            <h3>總人數</h3>
-                            <span id="groupTotalPeopleCount">0</span>
-                        </div>
-                    </div>
+                </div>
 
-                    <div id="groupReportContent" class="report-grid">
-                        <!-- 報表內容 -->
-                    </div>
+                <div id="groupReportContent" class="report-grid">
+                    <!-- 報表內容 -->
                 </div>
             </div>
         </div>
@@ -190,7 +190,7 @@
 
     <!-- Config & Logic -->
     <script src="firebase-config.js"></script>
-    <script src="script.js?v=20260105_10"></script>
+    <script src="script.js?v=20260105_11"></script>
     </body>
 
 </html>
