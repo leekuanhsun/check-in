@@ -547,6 +547,11 @@ function renderGroupReport() {
     // Sort keys to make output stable
     const sortedKeys = Object.keys(groups).sort();
 
+    if (sortedKeys.length === 0) {
+        reportContainer.innerHTML = '<div class="empty-state">暫無人員資料</div>';
+        return;
+    }
+
     for (const groupName of sortedKeys) {
         const people = groups[groupName];
         const gDutyStats = {};
