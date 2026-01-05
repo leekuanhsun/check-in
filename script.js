@@ -233,7 +233,9 @@ async function movePerson(personId, targetDutyId) {
 
 // 6. 重置
 async function resetData() {
-    if (!confirm('確定清除所有資料？')) return;
+    if (!confirm('【警告 1/3】確定要清除所有資料嗎？此動作無法復原。')) return;
+    if (!confirm('【警告 2/3】您真的確定嗎？清除後所有人員與公差設定都會消失。')) return;
+    if (!confirm('【警告 3/3】這是最後一次確認。按下「確定」將立即刪除所有資料！')) return;
 
     if (useFirebase) {
         const batch = db.batch();
