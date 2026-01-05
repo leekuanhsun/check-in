@@ -443,11 +443,12 @@ function renderReport() {
         });
         const statsStr = Object.entries(uDutyStats).map(([k, v]) => `${k}:${v}`).join(' | ');
 
-        const card = document.createElement('div');
+        const card = document.createElement('details'); // Use details for expand/collapse
         card.className = 'unit-card';
+        card.open = true; // Default expanded as requested
         let html = `
-            <div class="unit-header"><span>${unitName}</span><span>${people.length} 人</span></div>
-            <div class="unit-stats">${statsStr}</div>
+            <summary class="unit-header"><span>${unitName}</span><span>${people.length} 人</span></summary>
+            <div class="unit-stats" style="padding: 0 10px 10px;">${statsStr}</div>
         `;
         people.forEach(p => {
             const dName = getDutyName(p.dutyId);
