@@ -132,6 +132,7 @@ function render() {
     renderRollCall();
     renderSettings();
     renderReport();
+    renderGroupReport();
 }
 
 // ================= 資料操作 (自動儲存版) =================
@@ -515,6 +516,65 @@ function renderReport() {
     }
 }
 
+function renderGroupReport() {
+    const reportContainer = document.getElementById('groupReportContent');
+    if (!reportContainer) return;
+
+    // Title Update
+    const sessionSelect = document.getElementById('sessionSelect');
+    const sessionName = sessionSelect ? sessionSelect.value : '';
+    const reportTitle = document.querySelector('#tab-group-report h2');
+    if (reportTitle) {
+        reportTitle.innerText = `${sessionName ? '[' + sessionName + '] ' : ''}組別統計報表`;
+    }
+
+    const totalCountEl = document.getElementById('groupTotalPeopleCount');
+    if (totalCountEl) totalCountEl.innerText = state.people.length;
+
+    const currentSession = state.currentSession;
+
+    // Groups
+    reportContainer.innerHTML = '';
+    const groups = {};
+    const unassignedGroup = '未分組';
+
+    state.people.forEach(p => {
+        const g = p.group || unassignedGroup;
+        if (!groups[g]) groups[g] = [];
+        groups[g].push(p);
+    });
+
+    // Sort keys to make output stable
+    const sortedKeys = Object.keys(groups).sort();
+
+    for (const groupName of sortedKeys) {
+        const people = groups[groupName];
+        const gDutyStats = {};
+        people.forEach(p => {
+            const dId = p.assignments ? p.assignments[currentSession] : null;
+            const d = getDutyName(dId);
+            gDutyStats[d] = (gDutyStats[d] || 0) + 1;
+        });
+        const statsStr = Object.entries(gDutyStats).map(([k, v]) => `${k}:${v}`).join(' | ');
+
+        const card = document.createElement('details');
+        card.className = 'unit-card'; // Reuse unit-card style
+        card.open = true;
+        let html = `
+        <summary class="unit-header"><span>${groupName}</span><span>${people.length} 人</span></summary>
+        <div class="unit-stats" style="padding: 0 10px 10px;">${statsStr}</div>
+    `;
+        people.forEach(p => {
+            const dId = p.assignments ? p.assignments[currentSession] : null;
+            const dName = getDutyName(dId);
+            const statusClass = dId ? 'active-duty' : 'unassigned';
+            html += `<div class="unit-person-row"><span>${p.name} <span style="font-size:0.8em; color:#666;">(${p.unit || '-'})</span></span><span class="status-tag ${statusClass}">${dName}</span></div>`;
+        });
+        card.innerHTML = html;
+        reportContainer.appendChild(card);
+    }
+}
+
 
 function getDutyName(id) {
     const d = state.duties.find(x => x.id === id);
@@ -543,6 +603,7 @@ function initTabs() {
                 }
             }
             if (tabId === 'report') renderReport();
+            if (tabId === 'group-report') renderGroupReport();
         });
     });
 }
@@ -584,6 +645,14 @@ function setupEventListeners() {
         const container = document.getElementById('reportContent');
         if (container) {
             navigator.clipboard.writeText(container.innerText).then(() => alert('報表已複製'));
+        }
+    });
+
+    const copyGroupRep = document.getElementById('copyGroupReportBtn');
+    if (copyGroupRep) copyGroupRep.addEventListener('click', () => {
+        const container = document.getElementById('groupReportContent');
+        if (container) {
+            navigator.clipboard.writeText(container.innerText).then(() => alert('組別報表已複製'));
         }
     });
 
