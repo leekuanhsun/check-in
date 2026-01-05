@@ -234,235 +234,181 @@ async function resetData() {
         const batch = db.batch();
         state.people.forEach(p => batch.delete(db.collection("people").doc(p.id)));
         state.duties.forEach(d => batch.delete(db.collection("duties").doc(d.id)));
-        await batch.commit();
-    } else {
-        state.people = [];
-        state.duties = [
-            { id: 'duty_1', name: '公差' },
-            { id: 'duty_2', name: '休假' },
-            { id: 'duty_3', name: '衛哨' }
-        ];
-        saveToLocal();
-        render();
+
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput && searchInput.value) searchInput.dispatchEvent(new Event('input'));
     }
-}
 
-// ================= UI 渲染邏輯 =================
+    function renderRollCall() {
+        const container = document.getElementById('unassignedList');
+        const unitFilter = document.getElementById('unitFilter');
+        if (!container) return;
 
-function initTabs() {
-    const tabs = document.querySelectorAll('.nav-tab');
-    console.log("Found tabs:", tabs.length);
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            console.log("Tab clicked:", tab.dataset.tab);
+        if (unitFilter) {
+            const allUnits = new Set(state.people.map(p => p.unit || '預設建置班'));
+            const currentVal = unitFilter.value;
+            const opts = Array.from(unitFilter.options).map(o => o.value);
 
-            // 1. Remove active from all tabs
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-
-            // 2. Hide all contents
-            document.querySelectorAll('.tab-content').forEach(c => {
-                c.classList.remove('active');
-                c.style.display = 'none'; // Ensure hidden
+            allUnits.forEach(u => {
+                if (!opts.includes(u)) {
+                    const opt = document.createElement('option');
+                    opt.value = u;
+                    opt.innerText = u;
+                    unitFilter.appendChild(opt);
+                }
             });
+        }
 
-            // 3. Activate clicked tab
-            tab.classList.add('active');
+        const filterValue = unitFilter ? unitFilter.value : 'all';
+        const unassignedPeople = state.people.filter(p => !p.dutyId && (filterValue === 'all' || (p.unit || '預設建置班') === filterValue));
 
-            // 4. Show target content
-            const tabId = tab.dataset.tab; // e.g., 'rank' -> 'tab-rank'
-            const content = document.getElementById(`tab-${tabId}`);
-            if (content) {
-                content.classList.add('active');
-                content.style.display = 'flex'; // Ensure visible (override CSS if needed)
-            } else {
-                console.error(`Tab content not found: tab-${tabId}`);
-            }
+        container.innerHTML = '';
+        if (unassignedPeople.length === 0) {
+            container.innerHTML = '<div class="empty-state">暫無未分配人員</div>';
+        } else {
+            unassignedPeople.forEach(person => {
+                container.appendChild(createPersonCard(person));
+            });
+        }
+        document.getElementById('unassignedCount').innerText = unassignedPeople.length;
 
-            // 5. Render specific views if needed
-            if (tabId === 'report') renderReport();
-        });
-    });
-}
-
-function render() {
-    renderRollCall();
-    renderSettings();
-    renderReport();
-
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput && searchInput.value) searchInput.dispatchEvent(new Event('input'));
-}
-
-function renderRollCall() {
-    const container = document.getElementById('unassignedList');
-    const unitFilter = document.getElementById('unitFilter');
-    if (!container) return;
-
-    if (unitFilter) {
-        const allUnits = new Set(state.people.map(p => p.unit || '預設建置班'));
-        const currentVal = unitFilter.value;
-        const opts = Array.from(unitFilter.options).map(o => o.value);
-
-        allUnits.forEach(u => {
-            if (!opts.includes(u)) {
-                const opt = document.createElement('option');
-                opt.value = u;
-                opt.innerText = u;
-                unitFilter.appendChild(opt);
-            }
-        });
-    }
-
-    const filterValue = unitFilter ? unitFilter.value : 'all';
-    const unassignedPeople = state.people.filter(p => !p.dutyId && (filterValue === 'all' || (p.unit || '預設建置班') === filterValue));
-
-    container.innerHTML = '';
-    if (unassignedPeople.length === 0) {
-        container.innerHTML = '<div class="empty-state">暫無未分配人員</div>';
-    } else {
-        unassignedPeople.forEach(person => {
-            container.appendChild(createPersonCard(person));
-        });
-    }
-    document.getElementById('unassignedCount').innerText = unassignedPeople.length;
-
-    const dutiesContainer = document.getElementById('dutiesContainer');
-    if (dutiesContainer) {
-        dutiesContainer.innerHTML = '';
-        state.duties.forEach(duty => {
-            const count = state.people.filter(p => p.dutyId === duty.id).length;
-            const col = document.createElement('div');
-            col.className = 'duty-column';
-            col.innerHTML = `
+        const dutiesContainer = document.getElementById('dutiesContainer');
+        if (dutiesContainer) {
+            dutiesContainer.innerHTML = '';
+            state.duties.forEach(duty => {
+                const count = state.people.filter(p => p.dutyId === duty.id).length;
+                const col = document.createElement('div');
+                col.className = 'duty-column';
+                col.innerHTML = `
                 <div class="duty-header"><span>${duty.name} <span class="badge">(${count})</span></span></div>
                 <div class="duty-content" id="${duty.id}"></div>
             `;
-            const content = col.querySelector('.duty-content');
-            const assigned = state.people.filter(p => p.dutyId === duty.id);
-            if (assigned.length === 0) content.innerHTML = '<div class="empty-state" style="font-size:0.8em; margin-top:20px;">使用選單分配</div>';
-            else assigned.forEach(p => content.appendChild(createPersonCard(p)));
-            dutiesContainer.appendChild(col);
-        });
-    }
-}
-
-function createPersonCard(person) {
-    const div = document.createElement('div');
-
-    return div;
-}
-
-function renderSettings() {
-    const peopleList = document.getElementById('settingsPeopleList');
-    if (peopleList) {
-        peopleList.innerHTML = '';
-        state.people.forEach(p => {
-            const item = document.createElement('div');
-            item.className = 'settings-item';
-            item.innerHTML = `<span>${p.name}</span><span>${p.unit || ''}</span><button class="btn btn-danger" onclick="deletePerson('${p.id}')">刪除</button>`;
-            peopleList.appendChild(item);
-        });
-    }
-    const dutyList = document.getElementById('settingsDutyList');
-    if (dutyList) {
-        dutyList.innerHTML = '';
-        state.duties.forEach(d => {
-            const item = document.createElement('div');
-            item.className = 'settings-item';
-            item.innerHTML = `<span>${d.name}</span><span></span><button class="btn btn-danger" onclick="deleteDuty('${d.id}')">刪除</button>`;
-            dutyList.appendChild(item);
-        });
-    }
-}
-
-function renderReport() {
-    const reportContainer = document.getElementById('reportContent');
-    if (!reportContainer) return;
-
-    // Title Update
-    const sessionSelect = document.getElementById('sessionSelect');
-    const sessionName = sessionSelect ? sessionSelect.value : '';
-    const reportTitle = document.querySelector('#tab-report h2');
-    if (reportTitle) {
-        reportTitle.innerText = `${sessionName ? '[' + sessionName + '] ' : ''}建置班統計報表`;
-    }
-
-    // Stats
-    const totalCountEl = document.getElementById('totalPeopleCount');
-    const totalDutyEl = document.getElementById('totalDutyCount');
-    if (totalCountEl) totalCountEl.innerText = state.people.length;
-
-    let dutiesCount = 0;
-    const dutyStats = {};
-
-    state.people.forEach(p => {
-        if (p.dutyId) {
-            dutiesCount++;
-            const dName = getDutyName(p.dutyId);
-            dutyStats[dName] = (dutyStats[dName] || 0) + 1;
-        }
-    });
-    if (totalDutyEl) totalDutyEl.innerText = dutiesCount;
-
-    // Global Stats Bar
-    const globalStatsContainer = document.getElementById('globalDutyStats');
-    if (globalStatsContainer) {
-        globalStatsContainer.innerHTML = '';
-        if (dutiesCount === 0) {
-            globalStatsContainer.innerHTML = '<span style="color:#888;">無公差人員</span>';
-        } else {
-            Object.entries(dutyStats).forEach(([key, val]) => {
-                const item = document.createElement('div');
-                item.className = 'duty-stat-item';
-                item.innerHTML = `<strong>${key}:</strong><span>${val}</span>`;
-                globalStatsContainer.appendChild(item);
+                const content = col.querySelector('.duty-content');
+                const assigned = state.people.filter(p => p.dutyId === duty.id);
+                if (assigned.length === 0) content.innerHTML = '<div class="empty-state" style="font-size:0.8em; margin-top:20px;">使用選單分配</div>';
+                else assigned.forEach(p => content.appendChild(createPersonCard(p)));
+                dutiesContainer.appendChild(col);
             });
         }
     }
 
-    // Units
-    reportContainer.innerHTML = '';
-    const units = {};
-    state.people.forEach(p => {
-        const u = p.unit || '預設建置班';
-        if (!units[u]) units[u] = [];
-        units[u].push(p);
-    });
+    function createPersonCard(person) {
+        const div = document.createElement('div');
 
-    for (const [unitName, people] of Object.entries(units)) {
-        const uDutyStats = {};
-        people.forEach(p => {
-            const d = getDutyName(p.dutyId);
-            uDutyStats[d] = (uDutyStats[d] || 0) + 1;
+        return div;
+    }
+
+    function renderSettings() {
+        const peopleList = document.getElementById('settingsPeopleList');
+        if (peopleList) {
+            peopleList.innerHTML = '';
+            state.people.forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'settings-item';
+                item.innerHTML = `<span>${p.name}</span><span>${p.unit || ''}</span><button class="btn btn-danger" onclick="deletePerson('${p.id}')">刪除</button>`;
+                peopleList.appendChild(item);
+            });
+        }
+        const dutyList = document.getElementById('settingsDutyList');
+        if (dutyList) {
+            dutyList.innerHTML = '';
+            state.duties.forEach(d => {
+                const item = document.createElement('div');
+                item.className = 'settings-item';
+                item.innerHTML = `<span>${d.name}</span><span></span><button class="btn btn-danger" onclick="deleteDuty('${d.id}')">刪除</button>`;
+                dutyList.appendChild(item);
+            });
+        }
+    }
+
+    function renderReport() {
+        const reportContainer = document.getElementById('reportContent');
+        if (!reportContainer) return;
+
+        // Title Update
+        const sessionSelect = document.getElementById('sessionSelect');
+        const sessionName = sessionSelect ? sessionSelect.value : '';
+        const reportTitle = document.querySelector('#tab-report h2');
+        if (reportTitle) {
+            reportTitle.innerText = `${sessionName ? '[' + sessionName + '] ' : ''}建置班統計報表`;
+        }
+
+        // Stats
+        const totalCountEl = document.getElementById('totalPeopleCount');
+        const totalDutyEl = document.getElementById('totalDutyCount');
+        if (totalCountEl) totalCountEl.innerText = state.people.length;
+
+        let dutiesCount = 0;
+        const dutyStats = {};
+
+        state.people.forEach(p => {
+            if (p.dutyId) {
+                dutiesCount++;
+                const dName = getDutyName(p.dutyId);
+                dutyStats[dName] = (dutyStats[dName] || 0) + 1;
+            }
         });
-        const statsStr = Object.entries(uDutyStats).map(([k, v]) => `${k}:${v}`).join(' | ');
+        if (totalDutyEl) totalDutyEl.innerText = dutiesCount;
 
-        const card = document.createElement('details'); // Use details for expand/collapse
-        card.className = 'unit-card';
-        card.open = true; // Default expanded as requested
-        let html = `
+        // Global Stats Bar
+        const globalStatsContainer = document.getElementById('globalDutyStats');
+        if (globalStatsContainer) {
+            globalStatsContainer.innerHTML = '';
+            if (dutiesCount === 0) {
+                globalStatsContainer.innerHTML = '<span style="color:#888;">無公差人員</span>';
+            } else {
+                Object.entries(dutyStats).forEach(([key, val]) => {
+                    const item = document.createElement('div');
+                    item.className = 'duty-stat-item';
+                    item.innerHTML = `<strong>${key}:</strong><span>${val}</span>`;
+                    globalStatsContainer.appendChild(item);
+                });
+            }
+        }
+
+        // Units
+        reportContainer.innerHTML = '';
+        const units = {};
+        state.people.forEach(p => {
+            const u = p.unit || '預設建置班';
+            if (!units[u]) units[u] = [];
+            units[u].push(p);
+        });
+
+        for (const [unitName, people] of Object.entries(units)) {
+            const uDutyStats = {};
+            people.forEach(p => {
+                const d = getDutyName(p.dutyId);
+                uDutyStats[d] = (uDutyStats[d] || 0) + 1;
+            });
+            const statsStr = Object.entries(uDutyStats).map(([k, v]) => `${k}:${v}`).join(' | ');
+
+            const card = document.createElement('details'); // Use details for expand/collapse
+            card.className = 'unit-card';
+            card.open = true; // Default expanded as requested
+            let html = `
             <summary class="unit-header"><span>${unitName}</span><span>${people.length} 人</span></summary>
             <div class="unit-stats" style="padding: 0 10px 10px;">${statsStr}</div>
         `;
-        people.forEach(p => {
-            const dName = getDutyName(p.dutyId);
-            const statusClass = p.dutyId ? 'active-duty' : 'unassigned';
-            html += `<div class="unit-person-row"><span>${p.name}</span><span class="status-tag ${statusClass}">${dName}</span></div>`;
-        });
-        card.innerHTML = html;
-        reportContainer.appendChild(card);
+            people.forEach(p => {
+                const dName = getDutyName(p.dutyId);
+                const statusClass = p.dutyId ? 'active-duty' : 'unassigned';
+                html += `<div class="unit-person-row"><span>${p.name}</span><span class="status-tag ${statusClass}">${dName}</span></div>`;
+            });
+            card.innerHTML = html;
+            reportContainer.appendChild(card);
+        }
     }
-}
 
-function getDutyName(id) {
-    const d = state.duties.find(x => x.id === id);
-    return d ? d.name : '未知';
-}
-if (selectedPersonId) {
-    movePerson(selectedPersonId, targetDutyId);
-    selectedPersonId = null; // Clear selection after move
-    render();
-}
+    function getDutyName(id) {
+        const d = state.duties.find(x => x.id === id);
+        return d ? d.name : '未知';
+    }
+    if (selectedPersonId) {
+        movePerson(selectedPersonId, targetDutyId);
+        selectedPersonId = null; // Clear selection after move
+        render();
+    }
 }
 
 function setupEventListeners() {
