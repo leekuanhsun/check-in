@@ -387,325 +387,354 @@ textarea {
     flex: 1;
     overflow-y: auto;
     background-color: #f8f9fa;
+    padding: 10px;
+    /* Add padding for aesthetics */
+}
 
-    .duty-select {
-        padding: 4px 8px;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        background-color: #fff;
-        font-size: 0.9em;
-        cursor: pointer;
-        min-width: 100px;
-        /* Ensure valid tap target */
-        max-width: 140px;
-    }
+.person-card {
+    background-color: white;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: var(--transition);
+    border: 2px solid transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-    .duty-select:focus {
-        border-color: var(--primary-color);
-        outline: none;
-    }
+.person-card .person-name {
+    font-weight: bold;
+    font-size: 1rem;
+}
 
-    .person-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-    }
+.person-card .person-unit {
+    font-size: 0.85rem;
+    color: #888;
+    background-color: #f1f3f5;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
 
-    .person-card.hidden {
-        display: none !important;
-    }
+.duty-select {
+    padding: 4px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 0.9em;
+    cursor: pointer;
+    min-width: 100px;
+    max-width: 140px;
+}
 
-    .duties-container {
-        flex: 1;
-        overflow-y: auto;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 15px;
-        padding: 5px;
-    }
+.duty-select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
 
-    .duty-column {
-        background-color: #f8f9fa;
-        border-radius: var(--border-radius);
-        border: 1px solid #e0e0e0;
-        display: flex;
+.person-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.person-card.hidden {
+    display: none !important;
+}
+
+.duties-container {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+    padding: 5px;
+}
+
+.duty-column {
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
+    border: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* Fill container */
+    max-height: 400px;
+}
+
+.duty-header {
+    background-color: #e9ecef;
+    padding: 10px;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+    font-weight: bold;
+    text-align: center;
+}
+
+.duty-content {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    width: 250px;
+    transition: var(--transition);
+}
+
+.search-container input:focus {
+    width: 300px;
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+}
+
+.empty-state {
+    text-align: center;
+    color: #adb5bd;
+    margin-top: 20px;
+    font-style: italic;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .main-header {
         flex-direction: column;
-        height: 100%;
-        /* Fill container */
-        max-height: 400px;
+        gap: 10px;
+        align-items: stretch;
     }
 
-    .duty-header {
-        background-color: #e9ecef;
-        padding: 10px;
-        border-top-left-radius: var(--border-radius);
-        border-top-right-radius: var(--border-radius);
-        font-weight: bold;
-        text-align: center;
+    .header-controls {
+        flex-direction: column;
+        gap: 10px;
     }
 
-    .duty-content {
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-        border-radius: 20px;
-        width: 250px;
-        transition: var(--transition);
+    .search-container input {
+        width: 100%;
     }
 
     .search-container input:focus {
-        width: 300px;
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+        width: 100%;
     }
 
-    .empty-state {
-        text-align: center;
-        color: #adb5bd;
-        margin-top: 20px;
-        font-style: italic;
+    .main-content {
+        flex-direction: column;
+        overflow-y: auto;
+        /* Allow full page scroll on mobile */
     }
 
-    /* Mobile Responsive */
-    @media (max-width: 768px) {
-        .main-header {
-            flex-direction: column;
-            gap: 10px;
-            align-items: stretch;
-        }
+    .panel {
+        height: auto;
+        /* max-height: 50vh;  <-- Removed global restriction */
+        overflow: visible;
+        /* Let it flow */
+    }
 
-        .header-controls {
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .search-container input {
-            width: 100%;
-        }
-
-        .search-container input:focus {
-            width: 100%;
-        }
-
-        .main-content {
-            flex-direction: column;
-            overflow-y: auto;
-            /* Allow full page scroll on mobile */
-        }
-
-        .panel {
-            height: auto;
-            /* max-height: 50vh;  <-- Removed global restriction */
-            overflow: visible;
-            /* Let it flow */
-        }
-
-        /* Only restrict Roll Call panels to allow split view scrolling if needed, 
+    /* Only restrict Roll Call panels to allow split view scrolling if needed, 
        or let them flow too? 
        If we let them flow, the user scrolls DOWN to see duties. This is usually better on mobile.
        Previous issue: "slide" (scroll). 
        Let's allow FULL PAGE scrolling for everything on mobile.
     */
 
-        .people-list-container,
-        .duties-container {
-            max-height: none;
-            /* Let lists expand fully so user scrolls the PAGE, not the container */
-            overflow: visible;
-        }
-
-        .duties-container {
-            grid-template-columns: 1fr;
-        }
-
-        .duty-column {
-            max-height: none;
-            margin-bottom: 15px;
-            /* Add spacer between duty blocks */
-        }
-
-        /* Tabs scrollable on mobile */
-        .main-nav {
-            overflow-x: auto;
-            white-space: nowrap;
-            padding-bottom: 5px;
-            /* Scrollbar space */
-        }
-
-        .person-card {
-            padding: 12px 15px;
-            /* Larger touch target */
-        }
-
-        /* Make buttons full width */
-        .settings-item button,
-        .btn {
-            padding: 10px;
-            width: 100%;
-        }
-
-        /* Stack inputs vertically */
-        .input-group,
-        .import-group {
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .input-group input,
-        .input-group button,
-        .import-group textarea,
-        .import-group button {
-            width: 100%;
-            margin: 0;
-        }
-
-        /* Adjust list header to disappear or adjust */
-        .settings-list-header {
-            display: none;
-            /* Hide header on mobile, standard pattern */
-        }
-
-        .settings-item {
-            grid-template-columns: 1fr 1fr auto;
-            gap: 5px;
-            font-size: 0.9em;
-        }
-
-        /* Flatten Settings Panel for Mobile */
-        .settings-container.panel {
-            box-shadow: none !important;
-            border-radius: 0;
-            background-color: transparent;
-            padding: 0;
-            margin: 0;
-        }
-
-        .settings-container h2 {
-            padding: 10px 5px;
-            font-size: 1.2rem;
-        }
-
-        .settings-section {
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            /* Subtle shadow for sections instead of main card */
-        }
+    .people-list-container,
+    .duties-container {
+        max-height: none;
+        /* Let lists expand fully so user scrolls the PAGE, not the container */
+        overflow: visible;
     }
 
-    /* Selection State (Mobile Alternative) */
-    .person-card.selected {
-        background-color: #dbeafe;
-        border: 2px solid var(--primary-color);
-        transform: scale(1.02);
+    .duties-container {
+        grid-template-columns: 1fr;
     }
 
-    .duty-content.selectable-target {
-        background-color: #e8f5e9;
-        border: 2px dashed #2ecc71;
-        cursor: pointer;
+    .duty-column {
+        max-height: none;
+        margin-bottom: 15px;
+        /* Add spacer between duty blocks */
     }
 
-    /* Report Summary Styles */
-    .unit-card {
-        margin-bottom: 20px;
-        background-color: white;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        border-radius: var(--border-radius);
-        overflow: hidden;
+    /* Tabs scrollable on mobile */
+    .main-nav {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 5px;
+        /* Scrollbar space */
     }
 
-    .unit-card summary {
-        list-style: none;
-        cursor: pointer;
+    .person-card {
+        padding: 12px 15px;
+        /* Larger touch target */
     }
 
-    .unit-card summary::-webkit-details-marker {
-        display: none;
-    }
-
-    .unit-header {
-        background-color: var(--primary-color);
-        color: white;
+    /* Make buttons full width */
+    .settings-item button,
+    .btn {
         padding: 10px;
-        display: flex;
-        justify-content: space-between;
+        width: 100%;
     }
 
-
-    /* Force Mobile Scroll Fix */
-    @media (max-width: 768px) {
-        .main-content-wrapper {
-            overflow-y: auto !important;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .main-content {
-            overflow: visible !important;
-            height: auto !important;
-        }
-
-        .tab-content {
-            overflow: visible !important;
-            height: auto !important;
-            display: block;
-        }
-    }
-
-    /* App Header */
-    .app-header {
-        background-color: #fff;
-        padding: 15px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #e0e0e0;
-        flex-wrap: wrap;
+    /* Stack inputs vertically */
+    .input-group,
+    .import-group {
+        flex-direction: column;
         gap: 10px;
     }
 
-    .app-header h1 {
-        font-size: 1.5rem;
-        color: var(--primary-dark);
+    .input-group input,
+    .input-group button,
+    .import-group textarea,
+    .import-group button {
+        width: 100%;
         margin: 0;
     }
 
+    /* Adjust list header to disappear or adjust */
+    .settings-list-header {
+        display: none;
+        /* Hide header on mobile, standard pattern */
+    }
+
+    .settings-item {
+        grid-template-columns: 1fr 1fr auto;
+        gap: 5px;
+        font-size: 0.9em;
+    }
+
+    /* Flatten Settings Panel for Mobile */
+    .settings-container.panel {
+        box-shadow: none !important;
+        border-radius: 0;
+        background-color: transparent;
+        padding: 0;
+        margin: 0;
+    }
+
+    .settings-container h2 {
+        padding: 10px 5px;
+        font-size: 1.2rem;
+    }
+
+    .settings-section {
+        background-color: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        /* Subtle shadow for sections instead of main card */
+    }
+}
+
+/* Selection State (Mobile Alternative) */
+.person-card.selected {
+    background-color: #dbeafe;
+    border: 2px solid var(--primary-color);
+    transform: scale(1.02);
+}
+
+.duty-content.selectable-target {
+    background-color: #e8f5e9;
+    border: 2px dashed #2ecc71;
+    cursor: pointer;
+}
+
+/* Report Summary Styles */
+.unit-card {
+    margin-bottom: 20px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.unit-card summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+.unit-card summary::-webkit-details-marker {
+    display: none;
+}
+
+.unit-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+
+/* Force Mobile Scroll Fix */
+@media (max-width: 768px) {
+    .main-content-wrapper {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .main-content {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    .tab-content {
+        overflow: visible !important;
+        height: auto !important;
+        display: block;
+    }
+}
+
+/* App Header */
+.app-header {
+    background-color: #fff;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.app-header h1 {
+    font-size: 1.5rem;
+    color: var(--primary-dark);
+    margin: 0;
+}
+
+.session-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.session-selector select {
+    padding: 8px 12px;
+    border-radius: var(--border-radius);
+    border: 1px solid #ced4da;
+    font-size: 1rem;
+    color: #495057;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.session-selector select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+}
+
+/* Responsive Header */
+@media (max-width: 600px) {
+    .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
     .session-selector {
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        width: 100%;
+        justify-content: space-between;
     }
 
     .session-selector select {
-        padding: 8px 12px;
-        border-radius: var(--border-radius);
-        border: 1px solid #ced4da;
-        font-size: 1rem;
-        color: #495057;
-        background-color: #fff;
-        cursor: pointer;
+        flex: 1;
     }
-
-    .session-selector select:focus {
-        border-color: var(--primary-color);
-        outline: none;
-        box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
-    }
-
-    /* Responsive Header */
-    @media (max-width: 600px) {
-        .app-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .session-selector {
-            width: 100%;
-            justify-content: space-between;
-        }
-
-        .session-selector select {
-            flex: 1;
-        }
-    }
+}
