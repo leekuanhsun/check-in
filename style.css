@@ -627,3 +627,60 @@ textarea {
             display: block;
         }
     }
+
+    /* App Header */
+    .app-header {
+        background-color: #fff;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e0e0e0;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .app-header h1 {
+        font-size: 1.5rem;
+        color: var(--primary-dark);
+        margin: 0;
+    }
+
+    .session-selector {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .session-selector select {
+        padding: 8px 12px;
+        border-radius: var(--border-radius);
+        border: 1px solid #ced4da;
+        font-size: 1rem;
+        color: #495057;
+        background-color: #fff;
+        cursor: pointer;
+    }
+
+    .session-selector select:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+    }
+
+    /* Responsive Header */
+    @media (max-width: 600px) {
+        .app-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .session-selector {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .session-selector select {
+            flex: 1;
+        }
+    }

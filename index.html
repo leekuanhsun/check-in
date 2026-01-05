@@ -8,6 +8,22 @@
     <link rel="stylesheet" href="style.css">
     <!-- Google Fonts -->
     <!-- 導航列 -->
+    <header class="app-header">
+        <h1>智慧點名系統</h1>
+        <div class="session-selector">
+            <label for="sessionSelect">點名時段：</label>
+            <select id="sessionSelect">
+                <option value="早點名">早點名</option>
+                <option value="早上餐廳">早上餐廳</option>
+                <option value="早上教學區">早上教學區</option>
+                <option value="中午餐廳">中午餐廳</option>
+                <option value="下午教學區">下午教學區</option>
+                <option value="晚上餐廳">晚上餐廳</option>
+                <option value="晚自習">晚自習</option>
+                <option value="晚點名">晚點名</option>
+            </select>
+        </div>
+    </header>
     <nav class="main-nav">
         <button class="nav-tab active" data-tab="rollcall">點名操作</button>
         <button class="nav-tab" data-tab="settings">設定管理</button>
