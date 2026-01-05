@@ -386,7 +386,83 @@ function renderSettings() {
     }
 }
 
-// ... renderReport (unchanged) ...
+function renderReport() {
+    const reportContainer = document.getElementById('reportContent');
+    if (!reportContainer) return;
+
+    // Title Update
+    const sessionSelect = document.getElementById('sessionSelect');
+    const sessionName = sessionSelect ? sessionSelect.value : '';
+    const reportTitle = document.querySelector('#tab-report h2');
+    if (reportTitle) {
+        reportTitle.innerText = `${sessionName ? '[' + sessionName + '] ' : ''}建置班統計報表`;
+    }
+
+    const totalCountEl = document.getElementById('totalPeopleCount');
+    const totalDutyEl = document.getElementById('totalDutyCount');
+    if (totalCountEl) totalCountEl.innerText = state.people.length;
+
+    let dutiesCount = 0;
+    const dutyStats = {};
+
+    state.people.forEach(p => {
+        if (p.dutyId) {
+            dutiesCount++;
+            const dName = getDutyName(p.dutyId);
+            dutyStats[dName] = (dutyStats[dName] || 0) + 1;
+        }
+    });
+    if (totalDutyEl) totalDutyEl.innerText = dutiesCount;
+
+    // Global Stats Bar
+    const globalStatsContainer = document.getElementById('globalDutyStats');
+    if (globalStatsContainer) {
+        globalStatsContainer.innerHTML = '';
+        if (dutiesCount === 0) {
+            globalStatsContainer.innerHTML = '<span style="color:#888;">無公差人員</span>';
+        } else {
+            Object.entries(dutyStats).forEach(([key, val]) => {
+                const item = document.createElement('div');
+                item.className = 'duty-stat-item';
+                item.innerHTML = `<strong>${key}:</strong><span>${val}</span>`;
+                globalStatsContainer.appendChild(item);
+            });
+        }
+    }
+
+    // Units
+    reportContainer.innerHTML = '';
+    const units = {};
+    state.people.forEach(p => {
+        const u = p.unit || '預設建置班';
+        if (!units[u]) units[u] = [];
+        units[u].push(p);
+    });
+
+    for (const [unitName, people] of Object.entries(units)) {
+        const uDutyStats = {};
+        people.forEach(p => {
+            const d = getDutyName(p.dutyId);
+            uDutyStats[d] = (uDutyStats[d] || 0) + 1;
+        });
+        const statsStr = Object.entries(uDutyStats).map(([k, v]) => `${k}:${v}`).join(' | ');
+
+        const card = document.createElement('details');
+        card.className = 'unit-card';
+        card.open = true;
+        let html = `
+        <summary class="unit-header"><span>${unitName}</span><span>${people.length} 人</span></summary>
+        <div class="unit-stats" style="padding: 0 10px 10px;">${statsStr}</div>
+    `;
+        people.forEach(p => {
+            const dName = getDutyName(p.dutyId);
+            const statusClass = p.dutyId ? 'active-duty' : 'unassigned';
+            html += `<div class="unit-person-row"><span>${p.name}</span><span class="status-tag ${statusClass}">${dName}</span></div>`;
+        });
+        card.innerHTML = html;
+        reportContainer.appendChild(card);
+    }
+}
 
 function setupEventListeners() {
     // 移除舊的點擊監聽器，只保留功能性按鈕
