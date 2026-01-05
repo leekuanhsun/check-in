@@ -448,8 +448,14 @@ textarea {
     flex: 1;
     padding: 10px;
     overflow-y: auto;
-    transition: background-color 0.2s;
-    min-height: 100px;
+    min-height: 80px;
+    /* Reserve space for at least one card */
+    padding-bottom: 30px;
+    /* Extra space at bottom */
+}
+
+transition: background-color 0.2s;
+min-height: 100px;
 }
 
 .duty-content.drag-over {

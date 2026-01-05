@@ -69,11 +69,11 @@
                 </main>
             </div>
 
-            <!-- 分頁 2: 設定管理 (Settings) -->
-            <div id="tab-settings" class="tab-content">
-                <div class="settings-container panel">
+            <!-- 設定管理面板 -->
+            <div id="settings-tab" class="tab-content">
+                <!-- 人員管理區塊 -->
+                <div class="panel settings-container">
                     <h2>設定管理</h2>
-
                     <div class="settings-section">
                         <h3>新增/管理人員</h3>
                         <div class="input-group">
@@ -97,9 +97,10 @@
                             <!-- 人員列表項目 -->
                         </div>
                     </div>
+                </div>
 
-                    <hr>
-
+                <!-- 公差管理區塊 (獨立面板) -->
+                <div class="panel settings-container" style="margin-top: 20px;">
                     <div class="settings-section">
                         <h3>新增/管理公差</h3>
                         <div class="input-group">
@@ -112,11 +113,15 @@
                             <!-- 公差列表項目 -->
                         </div>
                     </div>
+                </div>
 
-                    <hr>
+                <!-- 系統操作區塊 (獨立面板) -->
+                <div class="panel settings-container" style="margin-top: 20px;">
                     <div class="settings-section">
                         <h3>系統操作</h3>
                         <button id="resetDataBtn" class="btn btn-danger">重置所有資料</button>
+                        <button id="exportJSONBtn" class="btn btn-secondary" style="margin-top: 10px;">匯出備份
+                            (JSON)</button>
                     </div>
                 </div>
             </div>
