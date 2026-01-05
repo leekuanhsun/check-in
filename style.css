@@ -650,3 +650,21 @@ min-height: 100px;
     display: flex;
     justify-content: space-between;
 }
+
+
+/* Force Mobile Scroll Fix */
+@media (max-width: 768px) {
+    .main-content-wrapper {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    .main-content {
+        overflow: visible !important;
+        height: auto !important;
+    }
+    .tab-content {
+        overflow: visible !important;
+        height: auto !important;
+        display: block;
+    }
+}
