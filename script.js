@@ -465,7 +465,9 @@ function renderReport() {
 }
 
 
-return d ? d.name : '未知';
+function getDutyName(id) {
+    const d = state.duties.find(x => x.id === id);
+    return d ? d.name : '未知';
 }
 
 function initTabs() {
