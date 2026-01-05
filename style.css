@@ -508,13 +508,22 @@ textarea {
 
     .panel {
         height: auto;
-        max-height: 50vh;
-        /* Limit height per panel so both are visible or scrollable */
-        overflow: hidden;
+        /* max-height: 50vh;  <-- Removed global restriction */
+        overflow: visible;
+        /* Let it flow */
     }
+
+    /* Only restrict Roll Call panels to allow split view scrolling if needed, 
+       or let them flow too? 
+       If we let them flow, the user scrolls DOWN to see duties. This is usually better on mobile.
+       Previous issue: "slide" (scroll). 
+       Let's allow FULL PAGE scrolling for everything on mobile.
+    */
 
     .people-list-container,
     .duties-container {
+        max-height: 40vh;
+        /* Limit inner lists instead if we want to keep them somewhat compact */
         overflow-y: auto;
     }
 
