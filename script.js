@@ -17,150 +17,32 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
         console.error("Init Error:", e);
         alert("系統初始化失敗: " + e.message);
-    }
-});
 
-function initSystem() {
-    // 檢查 Firebase 設定是否有效
-    if (typeof firebase !== 'undefined' && typeof firebaseConfig !== 'undefined') {
-        name: name.trim(),
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-} catch (e) { console.error(e); }
-                } else {
-    const newDuty = {
-        id: 'duty_' + Date.now(),
-        name: name.trim()
-    };
-    state.duties.push(newDuty);
-    saveToLocal();
-    render();
-}
-            }
+        // 1. Remove active from all tabs
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
 
-// 3. 刪除人員
-async function deletePerson(id) {
-    if (!confirm('確定要刪除此人員嗎？')) return;
-
-    if (useFirebase) {
-        try { await db.collection("people").doc(id).delete(); } catch (e) { console.error(e); }
-    } else {
-        state.people = state.people.filter(p => p.id !== id);
-        saveToLocal();
-        render();
-    }
-}
-
-// 4. 刪除公差
-async function deleteDuty(id) {
-    if (!confirm('確定要刪除此公差類別嗎？')) return;
-
-    if (useFirebase) {
-        try {
-            await db.collection("duties").doc(id).delete();
-            const batch = db.batch();
-            let count = 0;
-            state.people.filter(p => p.dutyId === id).forEach(p => {
-                const ref = db.collection("people").doc(p.id);
-                batch.update(ref, { dutyId: null });
-                count++;
-            });
-            if (count > 0) await batch.commit();
-        } catch (e) { console.error(e); }
-    } else {
-        state.duties = state.duties.filter(d => d.id !== id);
-        state.people.forEach(p => {
-            if (p.dutyId === id) p.dutyId = null;
+        // 2. Hide all contents
+        document.querySelectorAll('.tab-content').forEach(c => {
+            c.classList.remove('active');
+            c.style.display = 'none'; // Ensure hidden
         });
-        saveToLocal();
-        render();
-    }
-}
 
-// 5. 移動人員 (自動儲存)
-async function movePerson(personId, targetDutyId) {
-    const finalDutyId = targetDutyId === 'unassigned' ? null : targetDutyId;
-    const person = state.people.find(p => p.id === personId);
+        // 3. Activate clicked tab
+        tab.classList.add('active');
 
-    if (person && person.dutyId !== finalDutyId) {
-        // Optimistic UI Update (for local feel)
-        person.dutyId = finalDutyId;
-        render();
-
-        if (useFirebase) {
-            try {
-                // 如果是 local_ 開頭的 ID (在連線前建立的)，無法直接 update firestore
-                if (personId.startsWith('local_')) {
-                    console.warn("Cannot sync local-only person to remote yet (need export/import).");
-                    // 實際場景應該要 addDoc then delete local, 但這裡暫時忽略複雜同步
-                    return;
-                }
-                await db.collection("people").doc(personId).update({ dutyId: finalDutyId });
-            } catch (e) {
-                console.error("Auto-save failed:", e);
-                // Revert on fail?
-            }
+        // 4. Show target content
+        const tabId = tab.dataset.tab; // e.g., 'rank' -> 'tab-rank'
+        const content = document.getElementById(`tab-${tabId}`);
+        if (content) {
+            content.classList.add('active');
+            content.style.display = 'flex'; // Ensure visible (override CSS if needed)
         } else {
-            saveToLocal();
+            console.error(`Tab content not found: tab-${tabId}`);
         }
-    }
-}
 
-// 6. 重置
-async function resetData() {
-    if (!confirm('確定清除所有資料？')) return;
-
-    if (useFirebase) {
-        const batch = db.batch();
-        state.people.forEach(p => batch.delete(db.collection("people").doc(p.id)));
-        state.duties.forEach(d => batch.delete(db.collection("duties").doc(d.id)));
-        await batch.commit();
-    } else {
-        state.people = [];
-        state.duties = [
-            { id: 'duty_1', name: '公差' },
-            { id: 'duty_2', name: '休假' },
-            { id: 'duty_3', name: '衛哨' }
-        ];
-        saveToLocal();
-        render();
-    }
-}
-
-// ================= UI 渲染邏輯 =================
-
-function initTabs() {
-    const tabs = document.querySelectorAll('.nav-tab');
-    console.log("Found tabs:", tabs.length);
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            console.log("Tab clicked:", tab.dataset.tab);
-
-            // 1. Remove active from all tabs
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-
-            // 2. Hide all contents
-            document.querySelectorAll('.tab-content').forEach(c => {
-                c.classList.remove('active');
-                c.style.display = 'none'; // Ensure hidden
-            });
-
-            // 3. Activate clicked tab
-            tab.classList.add('active');
-
-            // 4. Show target content
-            const tabId = tab.dataset.tab; // e.g., 'rank' -> 'tab-rank'
-            const content = document.getElementById(`tab-${tabId}`);
-            if (content) {
-                content.classList.add('active');
-                content.style.display = 'flex'; // Ensure visible (override CSS if needed)
-            } else {
-                console.error(`Tab content not found: tab-${tabId}`);
-            }
-
-            // 5. Render specific views if needed
-            if (tabId === 'report') renderReport();
-        });
+        // 5. Render specific views if needed
+        if (tabId === 'report') renderReport();
+    });
     });
 }
 
