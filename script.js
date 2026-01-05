@@ -11,28 +11,6 @@ let selectedPersonId = null; // 手機版點擊選擇狀態
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
     try {
-        initSystem();
-        initTabs(); // 確保此函數存在且被呼叫
-        setupEventListeners();
-    } catch (e) {
-        console.error("Init Error:", e);
-        alert("系統初始化失敗: " + e.message);
-
-        // 1. Remove active from all tabs
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-
-        // 2. Hide all contents
-        document.querySelectorAll('.tab-content').forEach(c => {
-            c.classList.remove('active');
-            c.style.display = 'none'; // Ensure hidden
-        });
-
-        // 3. Activate clicked tab
-        tab.classList.add('active');
-
-        // 4. Show target content
-        const tabId = tab.dataset.tab; // e.g., 'rank' -> 'tab-rank'
-        const content = document.getElementById(`tab-${tabId}`);
         if (content) {
             content.classList.add('active');
             content.style.display = 'flex'; // Ensure visible (override CSS if needed)
