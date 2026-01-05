@@ -583,6 +583,29 @@ textarea {
         gap: 5px;
         font-size: 0.9em;
     }
+
+    /* Flatten Settings Panel for Mobile */
+    .settings-container.panel {
+        box-shadow: none !important;
+        border-radius: 0;
+        background-color: transparent;
+        padding: 0;
+        margin: 0;
+    }
+
+    .settings-container h2 {
+        padding: 10px 5px;
+        font-size: 1.2rem;
+    }
+
+    .settings-section {
+        background-color: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        /* Subtle shadow for sections instead of main card */
+    }
 }
 
 /* Selection State (Mobile Alternative) */
