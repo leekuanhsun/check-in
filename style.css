@@ -544,6 +544,34 @@ textarea {
     .settings-item button,
     .btn {
         padding: 10px;
+        width: 100%;
+    }
+
+    /* Stack inputs vertically */
+    .input-group,
+    .import-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .input-group input,
+    .input-group button,
+    .import-group textarea,
+    .import-group button {
+        width: 100%;
+        margin: 0;
+    }
+
+    /* Adjust list header to disappear or adjust */
+    .settings-list-header {
+        display: none;
+        /* Hide header on mobile, standard pattern */
+    }
+
+    .settings-item {
+        grid-template-columns: 1fr 1fr auto;
+        gap: 5px;
+        font-size: 0.9em;
     }
 }
 
