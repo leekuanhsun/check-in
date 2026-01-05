@@ -376,6 +376,14 @@ function renderReport() {
     const reportContainer = document.getElementById('reportContent');
     if (!reportContainer) return;
 
+    // Title Update
+    const sessionSelect = document.getElementById('sessionSelect');
+    const sessionName = sessionSelect ? sessionSelect.value : '';
+    const reportTitle = document.querySelector('#tab-report h2');
+    if (reportTitle) {
+        reportTitle.innerText = `${sessionName ? '[' + sessionName + '] ' : ''}建置班統計報表`;
+    }
+
     const totalCountEl = document.getElementById('totalPeopleCount');
     const totalDutyEl = document.getElementById('totalDutyCount');
     if (totalCountEl) totalCountEl.innerText = state.people.length;
@@ -509,21 +517,7 @@ function setupEventListeners() {
         });
     }
 
-    const impP = document.getElementById('importPeopleBtn');
-    if (impP) impP.addEventListener('click', () => {
-        const txt = document.getElementById('importPeopleInput').value;
-        if (txt) {
-            txt.split('\n').forEach(l => {
-                // 支援 空格, tab, 逗號 分隔
-                if (!l.trim()) return;
-                const parts = l.split(/[,\\t\\s]+/);
-                const n = parts[0];
-                const u = parts[1] || '';
-                if (n) addPerson(n, u);
-            });
-            document.getElementById('importPeopleInput').value = '';
-        }
-    });
+
 
     const addD = document.getElementById('addDutyBtn');
     if (addD) addD.addEventListener('click', () => {
@@ -574,4 +568,12 @@ function setupEventListeners() {
 
     const unitFilter = document.getElementById('unitFilter');
     if (unitFilter) unitFilter.addEventListener('change', renderRollCall);
+
+    // Session Selector Listener
+    const sessionSelect = document.getElementById('sessionSelect');
+    if (sessionSelect) {
+        sessionSelect.addEventListener('change', () => {
+            renderReport(); // Re-render report to update title
+        });
+    }
 }

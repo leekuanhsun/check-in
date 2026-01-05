@@ -144,6 +144,31 @@ body {
     }
 }
 
+/* Stacked Input Form */
+.input-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 100%;
+}
+
+.input-stack label {
+    font-weight: bold;
+    color: var(--secondary-color);
+    margin-bottom: -5px;
+}
+
+.input-stack input {
+    padding: 12px;
+    font-size: 1rem;
+}
+
+.input-stack button {
+    padding: 12px;
+    font-size: 1.1rem;
+    width: 100%;
+}
+
 /* Roll Call View (Reuse main-content styles) */
 .main-content {
     display: flex;

@@ -72,16 +72,16 @@
                 <h2>設定管理</h2>
                 <div class="settings-section">
                     <h3>新增/管理人員</h3>
-                    <div class="input-group">
-                        <input type="text" id="newPersonName" placeholder="姓名">
-                        <input type="text" id="newPersonUnit" placeholder="建置班 (例如: 一班, 勤務排)">
-                        <button id="addPersonBtn" class="btn btn-primary">新增人員</button>
+                    <div class="input-stack">
+                        <label>姓名</label>
+                        <input type="text" id="newPersonName" placeholder="請輸入姓名">
+
+                        <label>建置班</label>
+                        <input type="text" id="newPersonUnit" placeholder="請輸入建置班 (例如: 一班)">
+
+                        <button id="addPersonBtn" class="btn btn-primary" style="margin-top: 10px;">新增人員</button>
                     </div>
-                    <div class="import-group">
-                        <textarea id="importPeopleInput" placeholder="批次匯入 (格式: 姓名,建置班 (換行))&#10;或是僅姓名 (將使用預設班級)"
-                            rows="3"></textarea>
-                        <button id="importPeopleBtn" class="btn btn-secondary">匯入</button>
-                    </div>
+                    <!-- 批次匯入功能已移除 -->
 
                     <h4>人員列表</h4>
                     <div class="settings-list-header">
