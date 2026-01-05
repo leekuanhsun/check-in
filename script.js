@@ -2,7 +2,8 @@
 // 全域資料存儲
 let state = {
     people: [],
-    duties: []
+    duties: [],
+    currentSession: '早點名' // 預設時段
 };
 let db = null; // Firestore instance
 let useFirebase = false; // 模式旗標
@@ -14,6 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
         initSystem();
         initTabs();
         setupEventListeners();
+
+        // 初始化時段選擇器狀態
+        const sessionStore = document.getElementById('sessionSelect');
+        if (sessionStore) {
+            state.currentSession = sessionStore.value;
+        }
     } catch (e) {
         console.error("Init Error:", e);
         alert("系統初始化失敗: " + e.message);
@@ -88,7 +95,19 @@ function loadFromLocal() {
     const savedPeople = localStorage.getItem('rollcall_people');
     const savedDuties = localStorage.getItem('rollcall_duties');
 
-    if (savedPeople) state.people = JSON.parse(savedPeople);
+    if (savedPeople) {
+        state.people = JSON.parse(savedPeople);
+        // 資料遷移: 舊版 dutyId 轉為 assignments
+        state.people.forEach(p => {
+            if (!p.assignments) {
+                p.assignments = {};
+                if (p.dutyId) {
+                    p.assignments['早點名'] = p.dutyId; // 假設舊資料屬於早點名，或可選擇丟棄
+                    delete p.dutyId;
+                }
+            }
+        });
+    }
     if (savedDuties) state.duties = JSON.parse(savedDuties);
 
     // 預設公差 (如果完全是新的)
@@ -124,7 +143,7 @@ async function addPerson(name, unit) {
     const newPerson = {
         name: name.trim(),
         unit: finalUnit,
-        dutyId: null,
+        assignments: {}, // 初始化空的分配表
         createdAt: new Date().toISOString()
     };
 
@@ -204,29 +223,39 @@ async function deleteDuty(id) {
 }
 
 // 5. 移動人員
+// 5. 移動人員
 async function movePerson(personId, targetDutyId) {
     const finalDutyId = targetDutyId === 'unassigned' ? null : targetDutyId;
     const person = state.people.find(p => p.id === personId);
+    const session = state.currentSession;
 
-    if (person && person.dutyId !== finalDutyId) {
-        person.dutyId = finalDutyId;
+    if (person) {
+        if (!person.assignments) person.assignments = {};
 
-        // Optimistic UI Update
-        render();
+        // 檢查是否真的變更
+        if (person.assignments[session] !== finalDutyId) {
+            person.assignments[session] = finalDutyId;
 
-        if (useFirebase) {
-            try {
-                if (personId.startsWith('local_')) {
-                    console.warn("Cannot sync local-only person to remote yet.");
-                    return;
+            // Optimistic UI Update
+            render();
+
+            if (useFirebase) {
+                try {
+                    if (personId.startsWith('local_')) {
+                        console.warn("Cannot sync local-only person to remote yet.");
+                        return;
+                    }
+                    // 更新 Firestore: 使用點符號語法更新特定 key，例如 "assignments.早點名"
+                    // 注意：key 包含空格或特殊字元可能需要處理，這裡先假設簡單字串
+                    await db.collection("people").doc(personId).update({
+                        [`assignments.${session}`]: finalDutyId
+                    });
+                } catch (e) {
+                    console.error("Auto-save failed:", e);
                 }
-                await db.collection("people").doc(personId).update({ dutyId: finalDutyId });
-            } catch (e) {
-                console.error("Auto-save failed:", e);
-                // 實際應用可能需要 rollback
+            } else {
+                saveToLocal();
             }
-        } else {
-            saveToLocal();
         }
     }
 }
