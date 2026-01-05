@@ -749,3 +749,57 @@ textarea {
         flex: 1;
     }
 }
+
+/* Report Table Styles */
+.report-table-container {
+    overflow-x: auto;
+    margin-bottom: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.report-table th,
+.report-table td {
+    padding: 12px 15px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.report-table th {
+    background-color: #f8f9fa;
+    color: var(--primary-dark);
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.report-table tr:last-child td {
+    border-bottom: none;
+}
+
+.report-table tr:hover {
+    background-color: #f1f3f5;
+}
+
+.report-table .group-name {
+    text-align: left;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.report-table .zero-count {
+    color: #ccc;
+    font-size: 0.9em;
+}
+
+.report-table .has-count {
+    font-weight: bold;
+    color: var(--primary-color);
+}

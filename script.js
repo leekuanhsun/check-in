@@ -552,6 +552,58 @@ function renderGroupReport() {
         return;
     }
 
+    // 1. Generate Summary Table
+    const tableContainer = document.createElement('div');
+    tableContainer.className = 'report-table-container';
+
+    const table = document.createElement('table');
+    table.className = 'report-table';
+
+    // Collect all duty IDs present (or all duties from state)
+    // using state.duties ensures consistent column order
+    const dutyColumns = state.duties;
+
+    // Header
+    const thead = document.createElement('thead');
+    let headerHtml = '<tr><th style="text-align:left;">組別</th><th>總人數</th>';
+    dutyColumns.forEach(d => {
+        headerHtml += `<th>${d.name}</th>`;
+    });
+    headerHtml += '</tr>';
+    thead.innerHTML = headerHtml;
+    table.appendChild(thead);
+
+    // Body
+    const tbody = document.createElement('tbody');
+    for (const groupName of sortedKeys) {
+        const people = groups[groupName];
+        const gDutyCounts = {};
+
+        people.forEach(p => {
+            const dId = p.assignments ? p.assignments[currentSession] : null;
+            if (dId) {
+                gDutyCounts[dId] = (gDutyCounts[dId] || 0) + 1;
+            }
+        });
+
+        const tr = document.createElement('tr');
+        let rowHtml = `<td class="group-name">${groupName}</td><td><strong>${people.length}</strong></td>`;
+
+        dutyColumns.forEach(d => {
+            const count = gDutyCounts[d.id] || 0;
+            const classStr = count > 0 ? 'has-count' : 'zero-count';
+            const displayCount = count > 0 ? count : '-';
+            rowHtml += `<td class="${classStr}">${displayCount}</td>`;
+        });
+
+        tr.innerHTML = rowHtml;
+        tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    tableContainer.appendChild(table);
+    reportContainer.appendChild(tableContainer);
+
+    // 2. Generate Detail Cards (Original Logic)
     for (const groupName of sortedKeys) {
         const people = groups[groupName];
         const gDutyStats = {};
