@@ -29,79 +29,6 @@ function initSystem() {
         } else {
             try {
                 firebase.initializeApp(firebaseConfig);
-                db = firebase.firestore();
-                useFirebase = true;
-                console.log("Firebase initialized");
-            } catch (e) {
-                console.error("Firebase init failed:", e);
-                useFirebase = false;
-            }
-
-            function updateModeUI() {
-                const statusEl = document.getElementById('saveStatus');
-                if (statusEl) {
-                    if (useFirebase) {
-                        statusEl.innerHTML = '<span style="color:#27ae60;">☁️ 雲端同步中</span>';
-                    } else {
-                        statusEl.innerHTML = '<span style="color:#f39c12;">📂 本地儲存模式</span>';
-                    }
-                }
-            }
-
-            // ================= 資料同步與讀取 =================
-
-            function subscribeToData() {
-                if (!db) return;
-
-                db.collection("people").onSnapshot((snapshot) => {
-                    const remotePeople = [];
-                    snapshot.forEach((doc) => {
-                        remotePeople.push({ id: doc.id, ...doc.data() });
-                    });
-                    state.people = remotePeople;
-                    render();
-                }, (error) => console.error("Error getting people:", error));
-
-                db.collection("duties").onSnapshot((snapshot) => {
-                    state.duties = [];
-                    snapshot.forEach((doc) => {
-                        state.duties.push({ id: doc.id, ...doc.data() });
-                    });
-                    render();
-                }, (error) => console.error("Error getting duties:", error));
-            }
-
-            function loadFromLocal() {
-                const savedPeople = localStorage.getItem('rollcall_people');
-                const savedDuties = localStorage.getItem('rollcall_duties');
-
-                if (savedPeople) state.people = JSON.parse(savedPeople);
-                if (savedDuties) state.duties = JSON.parse(savedDuties);
-
-                // 預設公差 (如果完全是新的)
-                if (state.duties.length === 0) {
-                    state.duties = [
-                        { id: 'duty_1', name: '公差' },
-                        { id: 'duty_2', name: '休假' },
-                        { id: 'duty_3', name: '衛哨' }
-                    ];
-                    saveToLocal();
-                }
-
-                render();
-            }
-
-            function saveToLocal() {
-                localStorage.setItem('rollcall_people', JSON.stringify(state.people));
-                localStorage.setItem('rollcall_duties', JSON.stringify(state.duties));
-            }
-
-            // ================= 資料操作 (自動儲存版) =================
-
-            // 1. 新增人員
-            async function addPerson(name, unit) {
-                if (!name.trim()) return;
-                const finalUnit = unit.trim() || '預設建置班';
                 const newPerson = {
                     name: name.trim(),
                     unit: finalUnit,
@@ -604,10 +531,24 @@ function initSystem() {
                     });
                 });
 
-                const unitFilter = document.getElementById('unitFilter');
-                if (unitFilter) unitFilter.addEventListener('change', renderRollCall);
-
                 document.addEventListener('dragleave', (e) => {
                     if (e.target.classList?.contains('drag-over')) e.target.classList.remove('drag-over');
                 });
-            }
+
+                // Session Selector Listener
+                const sessionSelect = document.getElementById('sessionSelect');
+                if (sessionSelect) {
+                    sessionSelect.addEventListener('change', () => {
+                        renderReport(); // Re-render report to update title
+                    });
+                }
+            } // End setupEventListeners
+        } // End else (valid config)
+    } else {
+        useFirebase = false;
+        // Fallback or Alert?
+        // Actually initSystem logic above covered this.
+        // But wait, the nesting is messy.
+        // The previous view showed initSystem definition is okay but might handle nesting wrong.
+    }
+} // End initSystem
