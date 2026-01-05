@@ -384,6 +384,31 @@ textarea {
     align-items: center;
     transition: transform 0.2s;
     user-select: none;
+    flex-wrap: wrap;
+    /* Allow wrapping on small screens if needed */
+    gap: 8px;
+    /* Space between name and select */
+}
+
+.person-info {
+    font-weight: 500;
+}
+
+.duty-select {
+    padding: 4px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 0.9em;
+    cursor: pointer;
+    min-width: 100px;
+    /* Ensure valid tap target */
+    max-width: 140px;
+}
+
+.duty-select:focus {
+    border-color: var(--primary-color);
+    outline: none;
 }
 
 .person-card:hover {
