@@ -584,15 +584,19 @@ function renderGroupReport() {
         const people = groups[groupName];
         const gDutyCounts = {};
 
+        let groupDutyCount = 0;
         people.forEach(p => {
             const dId = p.assignments ? p.assignments[currentSession] : null;
             if (dId) {
                 gDutyCounts[dId] = (gDutyCounts[dId] || 0) + 1;
+                groupDutyCount++;
             }
         });
 
         const tr = document.createElement('tr');
-        let rowHtml = `<td class="group-name">${groupName}</td><td><strong>${people.length}</strong></td>`;
+        const shouldAttend = people.length;
+        const actualAttend = shouldAttend - groupDutyCount;
+        let rowHtml = `<td class="group-name">${groupName}</td><td><strong>${shouldAttend}</strong></td><td class="has-count">${actualAttend}</td>`;
 
         dutyColumns.forEach(d => {
             const count = gDutyCounts[d.id] || 0;
