@@ -447,7 +447,9 @@ function renderReport() {
     // 5. title update ...
 
     const totalCountEl = document.getElementById('totalPeopleCount');
+    const actualCountEl = document.getElementById('actualPeopleCount');
     const totalDutyEl = document.getElementById('totalDutyCount');
+
     if (totalCountEl) totalCountEl.innerText = state.people.length;
 
     const currentSession = state.currentSession;
