@@ -299,36 +299,77 @@ async function resetData() {
 function renderRollCall() {
     const container = document.getElementById('unassignedList');
     const unitFilter = document.getElementById('unitFilter');
+    const groupFilter = document.getElementById('groupFilter');
     if (!container) return;
 
     // 更新篩選器選單
     if (unitFilter) {
-        const allUnits = new Set(state.people.map(p => p.unit || '預設建置班'));
-        const currentVal = unitFilter.value;
-        const opts = Array.from(unitFilter.options).map(o => o.value);
+        // ... (Unit filter population logic remains the same, but let's optimize to not clear every time if possible, or just keep it simple)
+        // Ideally we should separate option population from render loop to avoid re-rendering options constantly, 
+        // but for now let's keep the pattern but add group logic. 
+        // Actually, re-populating on every render might be annoying if selection is lost, 
+        // but renderRollCall is called on filter change. 
+        // Let's protect the selection.
 
-        allUnits.forEach(u => {
-            if (!opts.includes(u)) {
-                const opt = document.createElement('option');
-                opt.value = u;
-                opt.innerText = u;
-                unitFilter.appendChild(opt);
-            }
-        });
+        const populateOptions = (selectEl, options, defaultLabel) => {
+            const currentVal = selectEl.value;
+            // distinct values
+            const existingOpts = Array.from(selectEl.options).map(o => o.value);
+            options.forEach(opt => {
+                if (!existingOpts.includes(opt)) {
+                    const el = document.createElement('option');
+                    el.value = opt;
+                    el.innerText = opt;
+                    selectEl.appendChild(el);
+                }
+            });
+            // Restore selection if it still exists (it should)
+            selectEl.value = currentVal;
+        };
+
+        const allUnits = new Set(state.people.map(p => p.unit || '預設建置班'));
+        populateOptions(unitFilter, allUnits, '所有建置班');
     }
 
-    const filterValue = unitFilter ? unitFilter.value : 'all';
+    if (groupFilter) {
+        const populateOptions = (selectEl, options, defaultLabel) => {
+            const currentVal = selectEl.value;
+            const existingOpts = Array.from(selectEl.options).map(o => o.value);
+            options.forEach(opt => {
+                if (!existingOpts.includes(opt)) {
+                    const el = document.createElement('option');
+                    el.value = opt;
+                    el.innerText = opt;
+                    selectEl.appendChild(el);
+                }
+            });
+            selectEl.value = currentVal;
+        };
+
+        const allGroups = new Set(state.people.map(p => p.group || '未分組'));
+        populateOptions(groupFilter, allGroups, '所有組別');
+    }
+
+    const unitVal = unitFilter ? unitFilter.value : 'all';
+    const groupVal = groupFilter ? groupFilter.value : 'all';
+
     // 篩選未分配且符合單位的人 (依據當前時段)
     const currentSession = state.currentSession;
 
     const unassignedPeople = state.people.filter(p => {
         const dutyId = p.assignments ? p.assignments[currentSession] : null;
-        return !dutyId && (filterValue === 'all' || (p.unit || '預設建置班') === filterValue);
+        const matchUnit = unitVal === 'all' || (p.unit || '預設建置班') === unitVal;
+        const matchGroup = groupVal === 'all' || (p.group || '未分組') === groupVal;
+
+        return !dutyId && matchUnit && matchGroup;
     });
 
     container.innerHTML = '';
     if (unassignedPeople.length === 0) {
-        container.innerHTML = '<div class="empty-state">暫無未分配人員</div>';
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.innerText = '暫無人員';
+        container.appendChild(empty);
     } else {
         unassignedPeople.forEach(person => {
             container.appendChild(createPersonCard(person));
@@ -830,6 +871,9 @@ function setupEventListeners() {
 
     const unitFilter = document.getElementById('unitFilter');
     if (unitFilter) unitFilter.addEventListener('change', renderRollCall);
+
+    const groupFilter = document.getElementById('groupFilter');
+    if (groupFilter) groupFilter.addEventListener('change', renderRollCall);
 
     // Session Selector Listener
     const sessionSelect = document.getElementById('sessionSelect');
