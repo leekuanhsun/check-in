@@ -480,6 +480,9 @@ function renderReport() {
         }
     }
 
+    // Update Actual Count (Total - Duty)
+    if (actualCountEl) actualCountEl.innerText = totalPeople - dutiesCount;
+
     // Units
     reportContainer.innerHTML = '';
     const units = {};
