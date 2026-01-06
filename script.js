@@ -568,7 +568,7 @@ function renderGroupReport() {
 
     // Header
     const thead = document.createElement('thead');
-    let headerHtml = '<tr><th style="text-align:left;">組別</th><th>總人數</th>';
+    let headerHtml = '<tr><th style="text-align:left;">組別</th><th>應到</th><th>實到</th>';
     dutyColumns.forEach(d => {
         headerHtml += `<th>${d.name}</th>`;
     });
