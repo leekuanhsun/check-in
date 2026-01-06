@@ -686,6 +686,7 @@ function generateCopyText(mode) {
 
         output += `${key}\n`;
         output += `應到：${shouldAttend}\n`;
+        output += `公差：${dutyCount}\n`; // Added Duty Count
         if (dutyPeopleLines.length > 0) {
             output += dutyPeopleLines.join('\n') + '\n';
         }
