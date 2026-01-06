@@ -642,6 +642,90 @@ function renderGroupReport() {
         card.innerHTML = html;
         reportContainer.appendChild(card);
     }
+}
+}
+
+function generateCopyText(mode) {
+    const currentSession = state.currentSession;
+    const groups = {};
+    const unassignedLabel = '未分配';
+
+    // Global Stats Variables
+    let globalShouldAttend = 0;
+    let globalDutyCount = 0;
+    const globalDutyMap = {}; // name -> array of person names
+
+    // Grouping
+    state.people.forEach(p => {
+        let key = '';
+        if (mode === 'unit') key = p.unit || '預設建置班';
+        else key = p.group || '未分組';
+
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(p);
+
+        // Global Calc
+        globalShouldAttend++;
+        const dId = p.assignments ? p.assignments[currentSession] : null;
+        if (dId) {
+            globalDutyCount++;
+            const dName = getDutyName(dId);
+            if (!globalDutyMap[dName]) globalDutyMap[dName] = [];
+            globalDutyMap[dName].push(p.name);
+        }
+    });
+
+    const sortedKeys = Object.keys(groups).sort();
+    let output = '';
+
+    // Add Session Title
+    const sessionSelect = document.getElementById('sessionSelect');
+    const sessionName = sessionSelect ? sessionSelect.value : '';
+    output += `[${sessionName}] ${mode === 'unit' ? '建置班' : '組別'}統計報表\n\n`;
+
+    sortedKeys.forEach(key => {
+        const people = groups[key];
+        let dutyCount = 0;
+        const dutyPeopleLines = [];
+
+        people.forEach(p => {
+            const dId = p.assignments ? p.assignments[currentSession] : null;
+            if (dId) {
+                dutyCount++;
+                const dName = getDutyName(dId);
+                dutyPeopleLines.push(`${p.name} (${dName})`);
+            }
+        });
+
+        const shouldAttend = people.length;
+        const actualAttend = shouldAttend - dutyCount;
+
+        output += `${key}\n`;
+        output += `應到：${shouldAttend}\n`;
+        output += `公差：${dutyCount}\n`;
+        if (dutyPeopleLines.length > 0) {
+            output += dutyPeopleLines.join('\n') + '\n';
+        }
+        output += `實到：${actualAttend}\n`;
+        output += `----------------\n`;
+    });
+
+    // Append Global Summary
+    output += `\n`; // Spacer
+    output += `應到：${globalShouldAttend}\n`;
+    output += `實到：${globalShouldAttend - globalDutyCount}\n`;
+    output += `總公差\n`;
+
+    Object.keys(globalDutyMap).forEach(dName => {
+        const names = globalDutyMap[dName];
+        output += `${dName}${names.length}員：${names.join(' ')}\n`;
+    });
+
+    return output;
+}
+
+function getDutyName(id) {
+    if (!id) return '無';
     const d = state.duties.find(x => x.id === id);
     return d ? d.name : '無';
 }
