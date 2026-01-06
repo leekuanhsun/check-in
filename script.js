@@ -634,8 +634,9 @@ function renderGroupReport() {
 
 
 function getDutyName(id) {
+    if (!id) return '無';
     const d = state.duties.find(x => x.id === id);
-    return d ? d.name : '未知';
+    return d ? d.name : '無';
 }
 
 function initTabs() {
