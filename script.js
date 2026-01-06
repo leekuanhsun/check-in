@@ -643,7 +643,7 @@ function renderGroupReport() {
         reportContainer.appendChild(card);
     }
 }
-}
+
 
 function generateCopyText(mode) {
     const currentSession = state.currentSession;
