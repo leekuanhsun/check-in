@@ -292,20 +292,40 @@ textarea {
 /* Report Summary Stats */
 .report-summary {
     display: flex;
-    gap: 20px;
+    gap: 15px;
     margin-bottom: 20px;
-    padding: 0 10px;
+    padding: 5px 10px;
+    /* Allow horizontal scrolling on mobile */
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scrolling on iOS */
+    padding-bottom: 15px;
+    /* Space for scrollbar */
 }
 
 .summary-card {
-    background: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 15px 25px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
+    flex: 1;
+    min-width: 140px;
+    /* Ensure minimum width */
+    flex-shrink: 0;
+    /* Prevent shrinking */
+    background: #fff;
+    padding: 15px;
+    border-radius: var(--border-radius);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    border: 1px solid #eee;
+}
+
+background: white;
+border: 1px solid #e0e0e0;
+border-radius: 8px;
+padding: 15px 25px;
+display: flex;
+align-items: center;
+gap: 15px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .summary-card h3 {
