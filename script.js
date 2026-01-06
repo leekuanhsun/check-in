@@ -452,6 +452,9 @@ function renderReport() {
 
     if (totalCountEl) totalCountEl.innerText = state.people.length;
 
+    // Fix: Define totalPeople
+    const totalPeople = state.people.length;
+
     const currentSession = state.currentSession;
     let dutiesCount = 0;
     const dutyStats = {};
