@@ -295,13 +295,20 @@ textarea {
     gap: 15px;
     margin-bottom: 20px;
     padding: 5px 10px;
-    /* Allow horizontal scrolling on mobile */
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    /* Smooth scrolling on iOS */
-    padding-bottom: 15px;
-    /* Space for scrollbar */
+}
+
+/* Mobile: Wrap stats to fit screen */
+@media (max-width: 600px) {
+    .report-summary {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .summary-card {
+        flex: 1 1 40%;
+        /* 2 cards per row approx */
+        min-width: 120px;
+    }
 }
 
 .summary-card {
