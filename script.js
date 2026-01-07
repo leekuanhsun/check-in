@@ -453,10 +453,9 @@ function renderSettings() {
     const peopleList = document.getElementById('settingsPeopleList');
     if (peopleList) {
         peopleList.innerHTML = '';
-        state.people.forEach(p => {
+        state.people.slice().reverse().forEach(p => { // Show newest first
             const item = document.createElement('div');
             item.className = 'settings-item';
-            // 為了避免作用域問題，deletePerson 必須是 Global 的
             item.innerHTML = `<span>${p.name}</span><span>${p.unit || ''}</span><span>${p.group || ''}</span><button class="btn btn-danger" onclick="deletePerson('${p.id}')">刪除</button>`;
             peopleList.appendChild(item);
         });
@@ -465,10 +464,11 @@ function renderSettings() {
     if (dutyList) {
         dutyList.innerHTML = '';
         state.duties.forEach(d => {
-            const item = document.createElement('div');
-            item.className = 'settings-item';
-            item.innerHTML = `<span>${d.name}</span><span></span><button class="btn btn-danger" onclick="deleteDuty('${d.id}')">刪除</button>`;
-            dutyList.appendChild(item);
+            const tag = document.createElement('span');
+            tag.className = 'duty-tag';
+            // Tag format: Name [x]
+            tag.innerHTML = `${d.name} <span class="delete-btn" onclick="deleteDuty('${d.id}')" title="刪除">×</span>`;
+            dutyList.appendChild(tag);
         });
     }
 }
@@ -831,6 +831,43 @@ function setupEventListeners() {
                 nameEl.value = '';
                 // unitEl.value = ''; 
                 // groupEl.value = '';
+            }
+        });
+    }
+
+    const batchImportBtn = document.getElementById('batchImportBtn');
+    if (batchImportBtn) {
+        batchImportBtn.addEventListener('click', () => {
+            const input = document.getElementById('batchImportInput');
+            const text = input.value.trim();
+            if (!text) return alert('請輸入內容');
+
+            const lines = text.split('\n');
+            let addedCount = 0;
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+                // Format: Unit Group Name (space separated)
+                const parts = line.split(/\s+/);
+                if (parts.length >= 3) {
+                    const unit = parts[0];
+                    const group = parts[1];
+                    // Name is the last part(s), or just the 3rd. Let's assume Name is the rest. 
+                    // Actually, simple format: Unit Group Name. Name might be multiple chars.
+                    const name = parts.slice(2).join('');
+                    if (unit && group && name) {
+                        addPerson(name, unit, group);
+                        addedCount++;
+                    }
+                }
+            });
+
+            if (addedCount > 0) {
+                alert(`雖功匯入 ${addedCount} 位人員`);
+                input.value = '';
+            } else {
+                alert('匯入失敗，請確認格式：班級 組別 姓名');
             }
         });
     }

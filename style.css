@@ -342,15 +342,49 @@ textarea {
     }
 }
 
-background: white;
-border: 1px solid #e0e0e0;
-border-radius: 8px;
-padding: 15px 25px;
-display: flex;
-align-items: center;
-gap: 15px;
-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+/* 標籤式公差管理 */
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 0;
 }
+
+.duty-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background-color: #f1f3f4;
+    border: 1px solid #dadce0;
+    border-radius: 16px;
+    font-size: 0.95em;
+    color: #3c4043;
+    transition: all 0.2s;
+    cursor: default;
+}
+
+.duty-tag:hover {
+    background-color: #e8eaed;
+}
+
+.duty-tag .delete-btn {
+    margin-left: 8px;
+    color: #dc3545;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1.1em;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    border-radius: 50%;
+    padding: 2px 5px;
+}
+
+.duty-tag .delete-btn:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
 
 .summary-card h3 {
     margin: 0;
