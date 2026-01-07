@@ -771,14 +771,14 @@ function generateCopyText(mode) {
     });
 
     // Append Global Summary
-    output += `\n`; // Spacer
+    output += `統計總數\n`;
     output += `應到：${globalShouldAttend}\n`;
     output += `實到：${globalShouldAttend - globalDutyCount}\n`;
-    output += `總公差\n`;
+    output += `公差\n`;
 
     Object.keys(globalDutyMap).forEach(dName => {
         const names = globalDutyMap[dName];
-        output += `${dName}${names.length}員：${names.join(' ')}\n`;
+        output += `${dName}${names.length}：${names.join(' ')}\n`;
     });
 
     return output;
