@@ -583,12 +583,12 @@ function renderReport() {
         });
         const statsStr = Object.entries(uDutyStats).map(([k, v]) => `${k}:${v}`).join(' | ');
 
-        const card = document.createElement('details');
+        const card = document.createElement('div');
         card.className = 'unit-card';
-        card.open = true;
+        // card.open = true; // No longer needed for div
         let html = `
-        <summary class="unit-header"><span>${unitName}</span><span>${people.length} 人</span></summary>
-        <div class="unit-stats" style="padding: 0 10px 10px;">${statsStr}</div>
+        <div class="unit-header"><span>${unitName}</span><span>${people.length} 人</span></div>
+        <div class="unit-stats" style="padding: 0 0 10px;">${statsStr}</div>
     `;
         people.forEach(p => {
             const dId = p.assignments ? p.assignments[currentSession] : null;
