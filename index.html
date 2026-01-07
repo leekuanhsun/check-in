@@ -168,33 +168,53 @@
                 <div id="globalDutyStats" class="duty-stats-bar">
                     <!-- 動態生成: 公差A: 3 | 公差B: 2 ... -->
                 </div>
-                <div id="tab-group-report" class="tab-content">
-                    <div class="report-container panel">
-                        <div class="panel-header" style="justify-content: space-between; display: flex;">
-                            <h2>組別統計報表</h2>
-                            <button id="copyGroupReportBtn" class="btn btn-success">複製報表文字</button>
-                        </div>
-                        <!-- 統計摘要 -->
-                        <div class="report-summary">
-                            <div class="summary-card total">
-                                <h3>應到</h3>
-                                <span id="groupTotalPeopleCount">0</span>
-                            </div>
-                            <div class="summary-card success">
-                                <h3>實到</h3>
-                                <span id="groupActualPeopleCount">0</span>
-                            </div>
-                            <div class="summary-card duty">
-                                <h3>公差</h3>
-                                <span id="groupTotalDutyCount">0</span>
-                            </div>
-                        </div>
 
-                        <div id="groupReportContent" class="report-grid">
-                            <!-- 報表內容 -->
-                        </div>
+                <div id="reportContent" class="report-grid">
+                    <!-- 報表內容 -->
+                </div>
+
+                <!-- 進階輸出區塊 -->
+                <div class="advanced-export-section">
+                    <h3>進階輸出：單一建置班全時段報表</h3>
+                    <div class="advanced-export-controls">
+                        <select id="exportUnitSelect">
+                            <option value="">選擇建置班...</option>
+                        </select>
+                        <button id="copyUnitAllSessionBtn" class="btn btn-info"
+                            style="background-color: #17a2b8; color: white;">複製全時段報表</button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- 分頁 4: 組別報表 (Group Report) -->
+        <div id="tab-group-report" class="tab-content">
+            <div class="report-container panel">
+                <div class="panel-header" style="justify-content: space-between; display: flex;">
+                    <h2>組別統計報表</h2>
+                    <button id="copyGroupReportBtn" class="btn btn-success">複製報表文字</button>
+                </div>
+                <!-- 統計摘要 -->
+                <div class="report-summary">
+                    <div class="summary-card total">
+                        <h3>應到</h3>
+                        <span id="groupTotalPeopleCount">0</span>
+                    </div>
+                    <div class="summary-card success">
+                        <h3>實到</h3>
+                        <span id="groupActualPeopleCount">0</span>
+                    </div>
+                    <div class="summary-card duty">
+                        <h3>公差</h3>
+                        <span id="groupTotalDutyCount">0</span>
+                    </div>
+                </div>
+
+                <div id="groupReportContent" class="report-grid">
+                    <!-- 報表內容 -->
+                </div>
+            </div>
+        </div>
 
     </main>
     </div>
@@ -212,7 +232,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script src="firebase-config.js"></script>
-    <script src="script.js?v=20260105_52"></script>
+    <script src="script.js?v=20260105_53"></script>
     </body>
 
 </html>
