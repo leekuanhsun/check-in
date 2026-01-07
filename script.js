@@ -518,6 +518,9 @@ function renderReport() {
         reportTitle.innerText = `${sessionName ? '[' + sessionName + '] ' : ''}建置班統計報表`;
     }
 
+    // Update Advanced Export Unit Select
+    updateExportUnitSelect();
+
     // 5. title update ...
 
     const totalCountEl = document.getElementById('totalPeopleCount');
@@ -823,6 +826,60 @@ function getDutyName(id) {
     return d ? d.name : '無';
 }
 
+function updateExportUnitSelect() {
+    const select = document.getElementById('exportUnitSelect');
+    if (!select) return;
+
+    // Check if distinct from last render to avoid flickering/resetting selection? 
+    // For simplicity, re-populate if filtering changes, or just populate once.
+    // Let's populate every time but keep selection if possible.
+    const currentVal = select.value;
+    select.innerHTML = '<option value="">選擇建置班...</option>';
+
+    const units = [...new Set(state.people.map(p => p.unit || '預設建置班'))].sort();
+    units.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u;
+        opt.innerText = u;
+        if (u === currentVal) opt.selected = true;
+        select.appendChild(opt);
+    });
+}
+
+function generateUnitAllSessionReport(unitName) {
+    if (!unitName) return '請先選擇建置班';
+
+    const sessionSelect = document.getElementById('sessionSelect');
+    const allSessions = Array.from(sessionSelect.options).map(o => o.value);
+
+    let output = `[${unitName}] 全時段公差彙整\n\n`;
+
+    // Filter people in this unit
+    const unitPeople = state.people.filter(p => (p.unit || '預設建置班') === unitName);
+
+    allSessions.forEach(sess => {
+        const dutyLines = [];
+        unitPeople.forEach(p => {
+            const dId = p.assignments ? p.assignments[sess] : null;
+            if (dId) {
+                const dName = getDutyName(dId);
+                dutyLines.push(`- ${p.name} (${dName})`);
+            }
+        });
+
+        if (dutyLines.length > 0) {
+            output += `${sess}：\n`;
+            output += dutyLines.join('\n') + '\n\n';
+        }
+    });
+
+    if (output.trim() === `[${unitName}] 全時段公差彙整`) {
+        output += "無任何公差分配";
+    }
+
+    return output;
+}
+
 function initTabs() {
     const tabs = document.querySelectorAll('.nav-tab');
     tabs.forEach(tab => {
@@ -897,6 +954,14 @@ function setupEventListeners() {
     if (copyGroupRep) copyGroupRep.addEventListener('click', () => {
         const text = generateCopyText('group');
         navigator.clipboard.writeText(text).then(() => alert('組別報表已複製'));
+    });
+
+    const copyUnitAll = document.getElementById('copyUnitAllSessionBtn');
+    if (copyUnitAll) copyUnitAll.addEventListener('click', () => {
+        const unit = document.getElementById('exportUnitSelect').value;
+        if (!unit) { alert('請選擇建置班'); return; }
+        const text = generateUnitAllSessionReport(unit);
+        navigator.clipboard.writeText(text).then(() => alert(`${unit} 全時段報表已複製`));
     });
 
     const exportBtn = document.getElementById('exportJSONBtn'); // 注意 ID 大小寫修正 (原 HTML 是 exportJSONBtn)
