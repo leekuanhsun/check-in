@@ -5,12 +5,13 @@
 // 3. 複製 SDK 設定與配置 (firebaseConfig) 貼上並覆蓋以下的設定物件
 
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyBii0uXMjjWus5uKQMXOS6LyD5fGWVmiu4",
+    authDomain: "check-75552.firebaseapp.com",
+    projectId: "check-75552",
+    storageBucket: "check-75552.firebasestorage.app",
+    messagingSenderId: "206462826526",
+    appId: "1:206462826526:web:68645789f1a995c766560f",
+    measurementId: "G-88Z0L9N8ZM"
 };
 
 // 初始化 Firebase (這些變數將在 script.js 中使用)
