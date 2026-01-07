@@ -158,64 +158,31 @@
                         <h3>實到</h3>
                         <span id="actualPeopleCount">0</span>
                     </div>
-                    <div class="summary-card duty">
-                        <h3>公差</h3>
-                        <span id="totalDutyCount">0</span>
+                    <div class="panel-header" style="justify-content: space-between; display: flex;">
+                        <h2>組別統計報表</h2>
+                        <button id="copyGroupReportBtn" class="btn btn-success">複製報表文字</button>
                     </div>
-                </div>
+                    <!-- 統計摘要 -->
+                    <div class="report-summary">
+                        <div class="summary-card total">
+                            <h3>應到</h3>
+                            <span id="groupTotalPeopleCount">0</span>
+                        </div>
+                        <div class="summary-card success">
+                            <h3>實到</h3>
+                            <span id="groupActualPeopleCount">0</span>
+                        </div>
+                        <div class="summary-card duty">
+                            <h3>公差</h3>
+                            <span id="groupTotalDutyCount">0</span>
+                        </div>
+                    </div>
 
-                <!-- 公差細項總覽 -->
-                <div id="globalDutyStats" class="duty-stats-bar">
-                    <!-- 動態生成: 公差A: 3 | 公差B: 2 ... -->
-                </div>
-
-                <div id="reportContent" class="report-grid">
-                    <!-- 報表內容 -->
-                </div>
-
-                <!-- 進階輸出區塊 -->
-                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
-                    <h3 style="font-size: 1.1em; color: #666; margin-bottom: 10px;">進階輸出：單一建置班全時段報表</h3>
-                    <div style="display: flex; gap: 10px;">
-                        <select id="exportUnitSelect"
-                            style="padding: 8px; border-radius: 4px; border: 1px solid #ccc; min-width: 150px;">
-                            <option value="">選擇建置班...</option>
-                        </select>
-                        <button id="copyUnitAllSessionBtn" class="btn btn-info"
-                            style="background-color: #17a2b8; color: white;">複製全時段報表</button>
+                    <div id="groupReportContent" class="report-grid">
+                        <!-- 報表內容 -->
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- 分頁 4: 組別報表 (Group Report) -->
-        <div id="tab-group-report" class="tab-content">
-            <div class="report-container panel">
-                <div class="panel-header" style="justify-content: space-between; display: flex;">
-                    <h2>組別統計報表</h2>
-                    <button id="copyGroupReportBtn" class="btn btn-success">複製報表文字</button>
-                </div>
-                <!-- 統計摘要 -->
-                <div class="report-summary">
-                    <div class="summary-card total">
-                        <h3>應到</h3>
-                        <span id="groupTotalPeopleCount">0</span>
-                    </div>
-                    <div class="summary-card success">
-                        <h3>實到</h3>
-                        <span id="groupActualPeopleCount">0</span>
-                    </div>
-                    <div class="summary-card duty">
-                        <h3>公差</h3>
-                        <span id="groupTotalDutyCount">0</span>
-                    </div>
-                </div>
-
-                <div id="groupReportContent" class="report-grid">
-                    <!-- 報表內容 -->
-                </div>
-            </div>
-        </div>
 
     </main>
     </div>
@@ -233,7 +200,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script src="firebase-config.js"></script>
-    <script src="script.js?v=20260105_51"></script>
+    <script src="script.js?v=20260105_52"></script>
     </body>
 
 </html>
