@@ -578,7 +578,18 @@ function renderGroupReport() {
     }
 
     const totalCountEl = document.getElementById('groupTotalPeopleCount');
+    const actualCountEl = document.getElementById('groupActualPeopleCount');
+
     if (totalCountEl) totalCountEl.innerText = state.people.length;
+
+    // Calculate Global Actual Count for Group Report
+    let totalDutyCount = 0;
+    state.people.forEach(p => {
+        if (p.assignments && p.assignments[state.currentSession]) {
+            totalDutyCount++;
+        }
+    });
+    if (actualCountEl) actualCountEl.innerText = state.people.length - totalDutyCount;
 
     const currentSession = state.currentSession;
 
