@@ -424,7 +424,7 @@ function createPersonCard(person) {
     // Default option (Unassigned)
     const defaultOpt = document.createElement('option');
     defaultOpt.value = 'unassigned';
-    defaultOpt.innerText = '未分配';
+    defaultOpt.innerText = '無公差';
     if (!currentDutyId) defaultOpt.selected = true;
     select.appendChild(defaultOpt);
 
