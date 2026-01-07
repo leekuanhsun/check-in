@@ -579,6 +579,7 @@ function renderGroupReport() {
 
     const totalCountEl = document.getElementById('groupTotalPeopleCount');
     const actualCountEl = document.getElementById('groupActualPeopleCount');
+    const totalDutyCountEl = document.getElementById('groupTotalDutyCount');
 
     if (totalCountEl) totalCountEl.innerText = state.people.length;
 
@@ -590,6 +591,7 @@ function renderGroupReport() {
         }
     });
     if (actualCountEl) actualCountEl.innerText = state.people.length - totalDutyCount;
+    if (totalDutyCountEl) totalDutyCountEl.innerText = totalDutyCount;
 
     const currentSession = state.currentSession;
 
