@@ -165,6 +165,39 @@ async function addPerson(name, unit, group) {
     }
 }
 
+async function handleBatchAdd() {
+    const input = document.getElementById('batchInput');
+    if (!input) return;
+
+    const text = input.value.trim();
+    if (!text) {
+        alert('請輸入資料');
+        return;
+    }
+
+    const lines = text.split('\n');
+    let successCount = 0;
+
+    if (!confirm(`即將匯入 ${lines.length} 筆資料，確定嗎？`)) return;
+
+    for (const line of lines) {
+        const parts = line.trim().split(/\s+/); // Split by whitespace
+        if (parts.length >= 1) {
+            const name = parts[0];
+            const unit = parts[1] || '';
+            const group = parts[2] || '';
+
+            if (name) {
+                await addPerson(name, unit, group);
+                successCount++;
+            }
+        }
+    }
+
+    alert(`已完成匯入 ${successCount} 筆資料`);
+    input.value = '';
+}
+
 // 2. 新增公差
 async function addDuty(name) {
     if (!name.trim()) return;
@@ -449,19 +482,6 @@ function createPersonCard(person) {
 
 // Remove old handlePersonClick and handleTargetClick as they are replaced by dropdown logic
 
-// Helper to render Duty Tags in Modal
-function renderModalDutyList() {
-    const container = document.getElementById('modalDutyList');
-    if (!container) return;
-    container.innerHTML = '';
-    state.duties.forEach(d => {
-        const span = document.createElement('span');
-        span.className = 'duty-tag';
-        span.innerHTML = `${d.name} <i class="remove-duty" onclick="deleteDuty('${d.id}')">&times;</i>`;
-        container.appendChild(span);
-    });
-}
-
 function renderSettings() {
     const peopleList = document.getElementById('settingsPeopleList');
     if (peopleList) {
@@ -469,11 +489,21 @@ function renderSettings() {
         state.people.forEach(p => {
             const item = document.createElement('div');
             item.className = 'settings-item';
+            // 為了避免作用域問題，deletePerson 必須是 Global 的
             item.innerHTML = `<span>${p.name}</span><span>${p.unit || ''}</span><span>${p.group || ''}</span><button class="btn btn-danger" onclick="deletePerson('${p.id}')">刪除</button>`;
             peopleList.appendChild(item);
         });
     }
-    // Duty List is now in Modal (renderModalDutyList), called on open
+    const dutyList = document.getElementById('settingsDutyList');
+    if (dutyList) {
+        dutyList.innerHTML = '';
+        state.duties.forEach(d => {
+            const item = document.createElement('div');
+            item.className = 'settings-item';
+            item.innerHTML = `<span>${d.name}</span><span></span><button class="btn btn-danger" onclick="deleteDuty('${d.id}')">刪除</button>`;
+            dutyList.appendChild(item);
+        });
+    }
 }
 
 function renderReport() {
@@ -838,6 +868,11 @@ function setupEventListeners() {
         });
     }
 
+    const batchAdd = document.getElementById('batchAddBtn');
+    if (batchAdd) {
+        batchAdd.addEventListener('click', handleBatchAdd);
+    }
+
 
 
     const addD = document.getElementById('addDutyBtn');
@@ -887,9 +922,22 @@ function setupEventListeners() {
             // 排除設定頁的表頭
             if (el.classList.contains('settings-item') && !el.parentElement.id.includes('List')) return;
 
-            sessionSelect.addEventListener('change', (e) => {
-                state.currentSession = e.target.value;
-                render(); // Re-render everything (RollCall + Report + Settings)
-            });
-        }
+            el.classList.toggle('hidden', !el.innerText.toLowerCase().includes(q));
+        });
+    });
+
+    const unitFilter = document.getElementById('unitFilter');
+    if (unitFilter) unitFilter.addEventListener('change', renderRollCall);
+
+    const groupFilter = document.getElementById('groupFilter');
+    if (groupFilter) groupFilter.addEventListener('change', renderRollCall);
+
+    // Session Selector Listener
+    const sessionSelect = document.getElementById('sessionSelect');
+    if (sessionSelect) {
+        sessionSelect.addEventListener('change', (e) => {
+            state.currentSession = e.target.value;
+            render(); // Re-render everything (RollCall + Report + Settings)
+        });
+    }
 }
