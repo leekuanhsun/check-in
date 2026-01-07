@@ -158,31 +158,43 @@
                         <h3>實到</h3>
                         <span id="actualPeopleCount">0</span>
                     </div>
-                    <div class="panel-header" style="justify-content: space-between; display: flex;">
-                        <h2>組別統計報表</h2>
-                        <button id="copyGroupReportBtn" class="btn btn-success">複製報表文字</button>
-                    </div>
-                    <!-- 統計摘要 -->
-                    <div class="report-summary">
-                        <div class="summary-card total">
-                            <h3>應到</h3>
-                            <span id="groupTotalPeopleCount">0</span>
-                        </div>
-                        <div class="summary-card success">
-                            <h3>實到</h3>
-                            <span id="groupActualPeopleCount">0</span>
-                        </div>
-                        <div class="summary-card duty">
-                            <h3>公差</h3>
-                            <span id="groupTotalDutyCount">0</span>
-                        </div>
-                    </div>
-
-                    <div id="groupReportContent" class="report-grid">
-                        <!-- 報表內容 -->
+                    <div class="summary-card duty">
+                        <h3>公差</h3>
+                        <span id="totalDutyCount">0</span>
                     </div>
                 </div>
-            </div>
+
+                <!-- 公差細項總覽 -->
+                <div id="globalDutyStats" class="duty-stats-bar">
+                    <!-- 動態生成: 公差A: 3 | 公差B: 2 ... -->
+                </div>
+                <div id="tab-group-report" class="tab-content">
+                    <div class="report-container panel">
+                        <div class="panel-header" style="justify-content: space-between; display: flex;">
+                            <h2>組別統計報表</h2>
+                            <button id="copyGroupReportBtn" class="btn btn-success">複製報表文字</button>
+                        </div>
+                        <!-- 統計摘要 -->
+                        <div class="report-summary">
+                            <div class="summary-card total">
+                                <h3>應到</h3>
+                                <span id="groupTotalPeopleCount">0</span>
+                            </div>
+                            <div class="summary-card success">
+                                <h3>實到</h3>
+                                <span id="groupActualPeopleCount">0</span>
+                            </div>
+                            <div class="summary-card duty">
+                                <h3>公差</h3>
+                                <span id="groupTotalDutyCount">0</span>
+                            </div>
+                        </div>
+
+                        <div id="groupReportContent" class="report-grid">
+                            <!-- 報表內容 -->
+                        </div>
+                    </div>
+                </div>
 
     </main>
     </div>
