@@ -449,28 +449,31 @@ function createPersonCard(person) {
 
 // Remove old handlePersonClick and handleTargetClick as they are replaced by dropdown logic
 
+// Helper to render Duty Tags in Modal
+function renderModalDutyList() {
+    const container = document.getElementById('modalDutyList');
+    if (!container) return;
+    container.innerHTML = '';
+    state.duties.forEach(d => {
+        const span = document.createElement('span');
+        span.className = 'duty-tag';
+        span.innerHTML = `${d.name} <i class="remove-duty" onclick="deleteDuty('${d.id}')">&times;</i>`;
+        container.appendChild(span);
+    });
+}
+
 function renderSettings() {
     const peopleList = document.getElementById('settingsPeopleList');
     if (peopleList) {
         peopleList.innerHTML = '';
-        state.people.slice().reverse().forEach(p => { // Show newest first
+        state.people.forEach(p => {
             const item = document.createElement('div');
             item.className = 'settings-item';
             item.innerHTML = `<span>${p.name}</span><span>${p.unit || ''}</span><span>${p.group || ''}</span><button class="btn btn-danger" onclick="deletePerson('${p.id}')">刪除</button>`;
             peopleList.appendChild(item);
         });
     }
-    const dutyList = document.getElementById('settingsDutyList');
-    if (dutyList) {
-        dutyList.innerHTML = '';
-        state.duties.forEach(d => {
-            const tag = document.createElement('span');
-            tag.className = 'duty-tag';
-            // Tag format: Name [x]
-            tag.innerHTML = `${d.name} <span class="delete-btn" onclick="deleteDuty('${d.id}')" title="刪除">×</span>`;
-            dutyList.appendChild(tag);
-        });
-    }
+    // Duty List is now in Modal (renderModalDutyList), called on open
 }
 
 function renderReport() {
@@ -835,43 +838,6 @@ function setupEventListeners() {
         });
     }
 
-    const batchImportBtn = document.getElementById('batchImportBtn');
-    if (batchImportBtn) {
-        batchImportBtn.addEventListener('click', () => {
-            const input = document.getElementById('batchImportInput');
-            const text = input.value.trim();
-            if (!text) return alert('請輸入內容');
-
-            const lines = text.split('\n');
-            let addedCount = 0;
-
-            lines.forEach(line => {
-                line = line.trim();
-                if (!line) return;
-                // Format: Unit Group Name (space separated)
-                const parts = line.split(/\s+/);
-                if (parts.length >= 3) {
-                    const unit = parts[0];
-                    const group = parts[1];
-                    // Name is the last part(s), or just the 3rd. Let's assume Name is the rest. 
-                    // Actually, simple format: Unit Group Name. Name might be multiple chars.
-                    const name = parts.slice(2).join('');
-                    if (unit && group && name) {
-                        addPerson(name, unit, group);
-                        addedCount++;
-                    }
-                }
-            });
-
-            if (addedCount > 0) {
-                alert(`雖功匯入 ${addedCount} 位人員`);
-                input.value = '';
-            } else {
-                alert('匯入失敗，請確認格式：班級 組別 姓名');
-            }
-        });
-    }
-
 
 
     const addD = document.getElementById('addDutyBtn');
@@ -921,22 +887,9 @@ function setupEventListeners() {
             // 排除設定頁的表頭
             if (el.classList.contains('settings-item') && !el.parentElement.id.includes('List')) return;
 
-            el.classList.toggle('hidden', !el.innerText.toLowerCase().includes(q));
-        });
-    });
-
-    const unitFilter = document.getElementById('unitFilter');
-    if (unitFilter) unitFilter.addEventListener('change', renderRollCall);
-
-    const groupFilter = document.getElementById('groupFilter');
-    if (groupFilter) groupFilter.addEventListener('change', renderRollCall);
-
-    // Session Selector Listener
-    const sessionSelect = document.getElementById('sessionSelect');
-    if (sessionSelect) {
-        sessionSelect.addEventListener('change', (e) => {
-            state.currentSession = e.target.value;
-            render(); // Re-render everything (RollCall + Report + Settings)
-        });
-    }
+            sessionSelect.addEventListener('change', (e) => {
+                state.currentSession = e.target.value;
+                render(); // Re-render everything (RollCall + Report + Settings)
+            });
+        }
 }

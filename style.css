@@ -342,49 +342,15 @@ textarea {
     }
 }
 
-
-/* 標籤式公差管理 */
-.tags-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 10px 0;
+background: white;
+border: 1px solid #e0e0e0;
+border-radius: 8px;
+padding: 15px 25px;
+display: flex;
+align-items: center;
+gap: 15px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
-
-.duty-tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 12px;
-    background-color: #f1f3f4;
-    border: 1px solid #dadce0;
-    border-radius: 16px;
-    font-size: 0.95em;
-    color: #3c4043;
-    transition: all 0.2s;
-    cursor: default;
-}
-
-.duty-tag:hover {
-    background-color: #e8eaed;
-}
-
-.duty-tag .delete-btn {
-    margin-left: 8px;
-    color: #dc3545;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 1.1em;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    border-radius: 50%;
-    padding: 2px 5px;
-}
-
-.duty-tag .delete-btn:hover {
-    background-color: rgba(220, 53, 69, 0.1);
-}
-
 
 .summary-card h3 {
     margin: 0;
@@ -756,19 +722,119 @@ textarea {
 @media (max-width: 768px) {
     .main-content-wrapper {
         overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch;
     }
+}
 
-    .main-content {
-        overflow: visible !important;
-        height: auto !important;
-    }
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
 
-    .tab-content {
-        overflow: visible !important;
-        height: auto !important;
-        display: block;
-    }
+.modal-container {
+    background: #fff;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.modal-close {
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #999;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+}
+
+/* Duty Tags Styles */
+.duty-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.duty-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 0.9em;
+    color: #333;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.duty-tag .remove-duty {
+    margin-left: 8px;
+    color: #ff5252;
+    cursor: pointer;
+    font-style: normal;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+}
+
+.duty-tag .remove-duty:hover {
+    background: #ffebee;
+}
+
+-webkit-overflow-scrolling: touch;
+}
+
+.main-content {
+    overflow: visible !important;
+    height: auto !important;
+}
+
+.tab-content {
+    overflow: visible !important;
+    height: auto !important;
+    display: block;
+}
 }
 
 /* App Header */
