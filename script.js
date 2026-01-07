@@ -740,14 +740,16 @@ function generateCopyText(mode) {
     sortedKeys.forEach(key => {
         const people = groups[key];
         let dutyCount = 0;
-        const dutyPeopleLines = [];
+        const localDutyMap = {};
 
         people.forEach(p => {
             const dId = p.assignments ? p.assignments[currentSession] : null;
             if (dId) {
                 dutyCount++;
                 const dName = getDutyName(dId);
-                dutyPeopleLines.push(`${p.name} (${dName})`);
+
+                if (!localDutyMap[dName]) localDutyMap[dName] = [];
+                localDutyMap[dName].push(p.name);
             }
         });
 
@@ -757,8 +759,12 @@ function generateCopyText(mode) {
         output += `${key}\n`;
         output += `應到：${shouldAttend}\n`;
         output += `公差：${dutyCount}\n`;
-        if (dutyPeopleLines.length > 0) {
-            output += dutyPeopleLines.join('\n') + '\n';
+
+        // 格式: 伙委2:李冠勳 李柏鍵
+        if (dutyCount > 0) {
+            Object.entries(localDutyMap).forEach(([dName, pNames]) => {
+                output += `${dName}${pNames.length}:${pNames.join(' ')}\n`;
+            });
         }
         output += `實到：${actualAttend}\n`;
         output += `----------------\n`;
