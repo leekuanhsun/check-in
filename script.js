@@ -614,13 +614,14 @@ function renderReport() {
     }
 }
 
+
 function renderGroupReport() {
     const reportContainer = document.getElementById('groupReportContent');
     if (!reportContainer) return;
 
-    // Title Update
     const sessionSelect = document.getElementById('sessionSelect');
     const sessionName = sessionSelect ? sessionSelect.value : '';
+
     const reportTitle = document.querySelector('#tab-group-report h2');
     if (reportTitle) {
         reportTitle.innerText = `${sessionName ? '[' + sessionName + '] ' : ''}組別統計報表`;
@@ -630,177 +631,173 @@ function renderGroupReport() {
     const actualCountEl = document.getElementById('groupActualPeopleCount');
     const totalDutyCountEl = document.getElementById('groupTotalDutyCount');
 
-    if (totalCountEl) totalCountEl.innerText = state.people.length;
+    // Filter Logic
+    let visiblePeople = state.people || [];
+    if (state.reportVisibleGroups) {
+        // Must handle '未分組' correctly if stored in state.reportVisibleGroups
+        // Typically P.group is undefined or empty string, mapping to '未分組'
+        visiblePeople = visiblePeople.filter(p => {
+            const g = p.group || '未分組';
+            return state.reportVisibleGroups.has(g);
+        });
+    }
 
-    // Calculate Global Actual Count for Group Report
+    if (totalCountEl) totalCountEl.innerText = visiblePeople.length;
+
+    // Calculate Global Actual Count for Group Report based on filtered list
     let totalDutyCount = 0;
-    state.people.forEach(p => {
+    visiblePeople.forEach(p => {
         if (p.assignments && p.assignments[state.currentSession]) {
             totalDutyCount++;
-            // ================= 分頁 4: 組別報表 =================
-            function renderGroupReport() {
-                const reportContainer = document.getElementById('groupReportContent');
-                if (!reportContainer) return;
+        }
+    });
+    if (actualCountEl) actualCountEl.innerText = visiblePeople.length - totalDutyCount;
+    if (totalDutyCountEl) totalDutyCountEl.innerText = totalDutyCount;
 
-                const sessionSelect = document.getElementById('sessionSelect');
-                const sessionName = sessionSelect ? sessionSelect.value : '';
+    const currentSession = state.currentSession;
 
-                const reportTitle = document.querySelector('#tab-group-report h2');
-                if (reportTitle) {
-                    reportTitle.innerText = `${sessionName ? '[' + sessionName + '] ' : ''}組別統計報表`;
-                }
+    // Groups
+    reportContainer.innerHTML = '';
+    const groups = {};
+    const unassignedGroup = '未分組';
 
-                const totalCountEl = document.getElementById('groupTotalPeopleCount');
-                const actualCountEl = document.getElementById('groupActualPeopleCount');
-                const totalDutyCountEl = document.getElementById('groupTotalDutyCount');
+    visiblePeople.forEach(p => {
+        const g = p.group || unassignedGroup;
+        if (!groups[g]) groups[g] = [];
+        groups[g].push(p);
+    });
 
-                // Filter Logic
-                let visiblePeople = state.people || [];
-                if (state.reportVisibleGroups) {
-                    // Must handle '未分組' correctly if stored in state.reportVisibleGroups
-                    // Typically P.group is undefined or empty string, mapping to '未分組'
-                    visiblePeople = visiblePeople.filter(p => {
-                        const g = p.group || '未分組';
-                        return state.reportVisibleGroups.has(g);
-                    });
-                }
+    // Sort keys to make output stable
+    const sortedKeys = Object.keys(groups).sort((a, b) => compareCustomOrder(a, b, GROUP_ORDER));
 
-                if (totalCountEl) totalCountEl.innerText = visiblePeople.length;
+    if (sortedKeys.length === 0) {
+        reportContainer.innerHTML = '<div class="empty-state">暫無人員資料</div>';
+        return;
+    }
 
-                // Calculate Global Actual Count for Group Report based on filtered list
-                let totalDutyCount = 0;
-                visiblePeople.forEach(p => {
-                    if (p.assignments && p.assignments[state.currentSession]) {
-                        totalDutyCount++;
-                    }
-                });
-                if (actualCountEl) actualCountEl.innerText = visiblePeople.length - totalDutyCount;
-                if (totalDutyCountEl) totalDutyCountEl.innerText = totalDutyCount;
+    // 1. Generate Summary Table
+    const tableContainer = document.createElement('div');
+    tableContainer.className = 'report-table-container';
 
-                const currentSession = state.currentSession;
+    const table = document.createElement('table');
+    table.className = 'report-table';
 
-                // Groups
-                reportContainer.innerHTML = '';
-                const groups = {};
-                const unassignedGroup = '未分組';
+    // Collect all duty IDs present (or all duties from state)
+    // using state.duties ensures consistent column order
+    const dutyColumns = state.duties;
 
-                visiblePeople.forEach(p => {
-                    const g = p.group || unassignedGroup;
-                    if (!groups[g]) groups[g] = [];
-                    groups[g].push(p);
-                });
+    // Header
+    const thead = document.createElement('thead');
+    let headerHtml = '<tr><th style="text-align:left;">組別</th><th>應到</th><th>實到</th>';
+    dutyColumns.forEach(d => {
+        headerHtml += `<th>${d.name}</th>`;
+    });
+    headerHtml += '</tr>';
+    thead.innerHTML = headerHtml;
+    table.appendChild(thead);
 
-                // Sort keys to make output stable
-                const sortedKeys = Object.keys(groups).sort((a, b) => compareCustomOrder(a, b, GROUP_ORDER));
+    // Body
+    const tbody = document.createElement('tbody');
+    for (const groupName of sortedKeys) {
+        const people = groups[groupName];
+        const gDutyCounts = {};
 
-                if (sortedKeys.length === 0) {
-                    reportContainer.innerHTML = '<div class="empty-state">暫無人員資料</div>';
-                    return;
-                }
+        let groupDutyCount = 0;
+        people.forEach(p => {
+            const dId = p.assignments ? p.assignments[currentSession] : null;
+            if (dId) {
+                gDutyCounts[dId] = (gDutyCounts[dId] || 0) + 1;
+                groupDutyCount++;
+            }
+        });
 
-                // 1. Generate Summary Table
-                const tableContainer = document.createElement('div');
-                tableContainer.className = 'report-table-container';
+        const tr = document.createElement('tr');
+        const shouldAttend = people.length;
+        const actualAttend = shouldAttend - groupDutyCount;
+        let rowHtml = `<td class="group-name">${groupName}</td><td><strong>${shouldAttend}</strong></td><td class="has-count">${actualAttend}</td>`;
 
-                const table = document.createElement('table');
-                table.className = 'report-table';
+        dutyColumns.forEach(d => {
+            const count = gDutyCounts[d.id] || 0;
+            const classStr = count > 0 ? 'has-count' : 'zero-count';
+            const displayCount = count > 0 ? count : '-';
+            rowHtml += `<td class="${classStr}">${displayCount}</td>`;
+        });
 
-                // Collect all duty IDs present (or all duties from state)
-                // using state.duties ensures consistent column order
-                const dutyColumns = state.duties;
+        tr.innerHTML = rowHtml;
+        tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    tableContainer.appendChild(table);
+    reportContainer.appendChild(tableContainer);
 
-                // Header
-                const thead = document.createElement('thead');
-                let headerHtml = '<tr><th style="text-align:left;">組別</th><th>應到</th><th>實到</th>';
-                dutyColumns.forEach(d => {
-                    headerHtml += `<th>${d.name}</th>`;
-                });
-                headerHtml += '</tr>';
-                thead.innerHTML = headerHtml;
-                table.appendChild(thead);
+    // 2. Generate Detail Cards (Original Logic)
+    for (const groupName of sortedKeys) {
+        const people = groups[groupName];
+        const gDutyStats = {};
+        people.forEach(p => {
+            const dId = p.assignments ? p.assignments[currentSession] : null;
+            const d = getDutyName(dId);
+            gDutyStats[d] = (gDutyStats[d] || 0) + 1;
+        });
+        const statsStr = Object.entries(gDutyStats).map(([k, v]) => `${k}:${v}`).join(' | ');
 
-                // Body
-                const tbody = document.createElement('tbody');
-                for (const groupName of sortedKeys) {
-                    const people = groups[groupName];
-                    const gDutyCounts = {};
-
-                    let groupDutyCount = 0;
-                    people.forEach(p => {
-                        const dId = p.assignments ? p.assignments[currentSession] : null;
-                        if (dId) {
-                            gDutyCounts[dId] = (gDutyCounts[dId] || 0) + 1;
-                            groupDutyCount++;
-                        }
-                    });
-
-                    const tr = document.createElement('tr');
-                    const shouldAttend = people.length;
-                    const actualAttend = shouldAttend - groupDutyCount;
-                    let rowHtml = `<td class="group-name">${groupName}</td><td><strong>${shouldAttend}</strong></td><td class="has-count">${actualAttend}</td>`;
-
-                    dutyColumns.forEach(d => {
-                        const count = gDutyCounts[d.id] || 0;
-                        const classStr = count > 0 ? 'has-count' : 'zero-count';
-                        const displayCount = count > 0 ? count : '-';
-                        rowHtml += `<td class="${classStr}">${displayCount}</td>`;
-                    });
-
-                    tr.innerHTML = rowHtml;
-                    tbody.appendChild(tr);
-                }
-                table.appendChild(tbody);
-                tableContainer.appendChild(table);
-                reportContainer.appendChild(tableContainer);
-
-                // 2. Generate Detail Cards (Original Logic)
-                for (const groupName of sortedKeys) {
-                    const people = groups[groupName];
-                    const gDutyStats = {};
-                    people.forEach(p => {
-                        const dId = p.assignments ? p.assignments[currentSession] : null;
-                        const d = getDutyName(dId);
-                        gDutyStats[d] = (gDutyStats[d] || 0) + 1;
-                    });
-                    const statsStr = Object.entries(gDutyStats).map(([k, v]) => `${k}:${v}`).join(' | ');
-
-                    const card = document.createElement('details');
-                    card.className = 'unit-card'; // Reuse unit-card style
-                    card.open = true;
-                    let html = `
+        const card = document.createElement('details');
+        card.className = 'unit-card'; // Reuse unit-card style
+        card.open = true;
+        let html = `
         <summary class="unit-header"><span>${groupName}</span><span>${people.length} 人</span></summary>
         <div class="unit-stats" style="padding: 0 10px 10px;">${statsStr}</div>
     `;
-                    people.forEach(p => {
-                        const dId = p.assignments ? p.assignments[currentSession] : null;
-                        const dName = getDutyName(dId);
-                        const statusClass = dId ? 'active-duty' : 'unassigned';
-                        html += `<div class="unit-person-row"><span>${p.name} <span style="font-size:0.8em; color:#666;">(${p.unit || '-'})</span></span><span class="status-tag ${statusClass}">${dName}</span></div>`;
-                    });
-                    card.innerHTML = html;
-                    reportContainer.appendChild(card);
-                }
-            }
+        people.forEach(p => {
+            const dId = p.assignments ? p.assignments[currentSession] : null;
+            const dName = getDutyName(dId);
+            const statusClass = dId ? 'active-duty' : 'unassigned';
+            html += `<div class="unit-person-row"><span>${p.name} <span style="font-size:0.8em; color:#666;">(${p.unit || '-'})</span></span><span class="status-tag ${statusClass}">${dName}</span></div>`;
+        });
+        card.innerHTML = html;
+        reportContainer.appendChild(card);
+    }
+}
 
 
-            function generateCopyText(mode) {
-                const currentSession = state.currentSession;
-                const groups = {};
-                const unassignedLabel = '未分配';
+function generateCopyText(mode) {
+    const currentSession = state.currentSession;
+    const groups = {};
+    const unassignedLabel = '未分配';
 
-                // Global Stats Variables
-                groups[key].push(p);
+    // Global Stats Variables
+    let globalShouldAttend = 0;
+    let globalDutyCount = 0;
+    const globalDutyMap = {}; // name -> array of person names
 
-                // Global Calc
-                globalShouldAttend++;
-                const dId = p.assignments ? p.assignments[currentSession] : null;
-                if (dId) {
-                    globalDutyCount++;
-                    const dName = getDutyName(dId);
-                    if (!globalDutyMap[dName]) globalDutyMap[dName] = [];
-                    globalDutyMap[dName].push(p.name);
-                }
-            });
+    // Filter people if in Unit Mode and filter is active
+    let processPeople = state.people || [];
+    if (mode === 'unit' && state.reportVisibleUnits) {
+        processPeople = processPeople.filter(p => state.reportVisibleUnits.has(p.unit || '預設建置班'));
+    }
+    if (mode === 'group' && state.reportVisibleGroups) {
+        processPeople = processPeople.filter(p => state.reportVisibleGroups.has(p.group || '未分組'));
+    }
+
+    // Grouping
+    processPeople.forEach(p => {
+        let key = '';
+        if (mode === 'unit') key = p.unit || '預設建置班';
+        else key = p.group || '未分組';
+
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(p);
+
+        // Global Calc
+        globalShouldAttend++;
+        const dId = p.assignments ? p.assignments[currentSession] : null;
+        if (dId) {
+            globalDutyCount++;
+            const dName = getDutyName(dId);
+            if (!globalDutyMap[dName]) globalDutyMap[dName] = [];
+            globalDutyMap[dName].push(p.name);
+        }
+    });
 
     const sortedKeys = Object.keys(groups).sort((a, b) =>
         compareCustomOrder(a, b, mode === 'unit' ? UNIT_ORDER : GROUP_ORDER)
@@ -936,7 +933,7 @@ function updateReportFilterState() {
 }
 
 updateReportFilterState();
-        }
+
 
 function initReportGroupFilter() {
     const container = document.getElementById('groupCheckboxes');
