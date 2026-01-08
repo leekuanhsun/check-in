@@ -674,7 +674,35 @@ function renderGroupReport() {
     if (actualCountEl) actualCountEl.innerText = visiblePeople.length - totalDutyCount;
     if (totalDutyCountEl) totalDutyCountEl.innerText = totalDutyCount;
 
+    if (totalDutyCountEl) totalDutyCountEl.innerText = totalDutyCount;
+
     const currentSession = state.currentSession;
+
+    // --- Start Added Logic: Global Duty Stats for Group Report ---
+    const groupStatsContainer = document.getElementById('groupGlobalDutyStats');
+    if (groupStatsContainer) {
+        groupStatsContainer.innerHTML = '';
+        if (totalDutyCount === 0) {
+            groupStatsContainer.innerHTML = '<span style="color:#888;">無公差人員</span>';
+        } else {
+            const dutyStats = {};
+            visiblePeople.forEach(p => {
+                const dId = p.assignments ? p.assignments[currentSession] : null;
+                if (dId) {
+                    const dName = getDutyName(dId);
+                    dutyStats[dName] = (dutyStats[dName] || 0) + 1;
+                }
+            });
+
+            Object.entries(dutyStats).forEach(([key, val]) => {
+                const item = document.createElement('div');
+                item.className = 'duty-stat-item';
+                item.innerHTML = `<strong>${key}:</strong><span>${val}</span>`;
+                groupStatsContainer.appendChild(item);
+            });
+        }
+    }
+    // --- End Added Logic ---
 
     // Groups
     reportContainer.innerHTML = '';
