@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initSystem();
         initTabs();
         initReportUnitFilter(); // Initialize Report Filter
+        initReportGroupFilter(); // Initialize Group Report Filter
         setupEventListeners();
 
         // 初始化時段選擇器狀態
@@ -351,101 +352,76 @@ async function resetData() {
 
     // 如果有搜尋字串，重新觸發 input 事件以清除或更新
     const searchInput = document.getElementById('searchInput');
-    if (searchInput && searchInput.value) {
-        searchInput.value = '';
-    }
+    selectEl.remove(1);
 }
 
-// ================= UI 渲染邏輯 =================
+sortedOpts.forEach(opt => {
+    const el = document.createElement('option');
+    el.value = opt;
+    el.innerText = opt;
+    selectEl.appendChild(el);
+});
 
-function renderRollCall() {
-    const container = document.getElementById('unassignedList');
-    const unitFilter = document.getElementById('unitFilter');
-    const groupFilter = document.getElementById('groupFilter');
-    if (!container) return;
-
-    // 更新篩選器選單
-    const populateOptions = (selectEl, options, sortOrder) => {
-        const currentVal = selectEl.value;
-        // distinct values and sort
-        const sortedOpts = [...options].sort((a, b) => compareCustomOrder(a, b, sortOrder));
-
-        // Re-render options to ensure order (This might reset selection if not careful, but we restore it)
-        // To ensure order, we must clear and append. But first option is usually "All"
-        // The existing code was appending only new ones, which means order depends on discovered order. This is bad for filtering.
-        // Let's rewrite to clear and rebuild (except first option)
-
-        while (selectEl.options.length > 1) {
-            selectEl.remove(1);
-        }
-
-        sortedOpts.forEach(opt => {
-            const el = document.createElement('option');
-            el.value = opt;
-            el.innerText = opt;
-            selectEl.appendChild(el);
-        });
-
-        selectEl.value = currentVal;
+selectEl.value = currentVal;
     };
 
-    if (unitFilter && state.people) {
-        const allUnits = new Set(state.people.map(p => p.unit || '預設建置班'));
-        populateOptions(unitFilter, allUnits, UNIT_ORDER);
-    }
+if (unitFilter && state.people) {
+    const allUnits = new Set(state.people.map(p => p.unit || '預設建置班'));
+    populateOptions(unitFilter, allUnits, UNIT_ORDER);
+}
 
-    if (groupFilter && state.people) {
-        const allGroups = new Set(state.people.map(p => p.group || '未分組'));
-        populateOptions(groupFilter, allGroups, GROUP_ORDER);
-    }
+if (groupFilter && state.people) {
+    const allGroups = new Set(state.people.map(p => p.group || '未分組'));
+    populateOptions(groupFilter, allGroups, GROUP_ORDER);
+}
 
-    const unitVal = unitFilter ? unitFilter.value : 'all';
-    const groupVal = groupFilter ? groupFilter.value : 'all';
+const unitVal = unitFilter ? unitFilter.value : 'all';
+const groupVal = groupFilter ? groupFilter.value : 'all';
 
-    // 篩選未分配且符合單位的人 (依據當前時段)
-    const currentSession = state.currentSession;
+// 篩選未分配且符合單位的人 (依據當前時段)
+const currentSession = state.currentSession;
 
-    const unassignedPeople = state.people.filter(p => {
-        const dutyId = p.assignments ? p.assignments[currentSession] : null;
-        const matchUnit = unitVal === 'all' || (p.unit || '預設建置班') === unitVal;
-        const matchGroup = groupVal === 'all' || (p.group || '未分組') === groupVal;
+const unassignedPeople = state.people.filter(p => {
+    const dutyId = p.assignments ? p.assignments[currentSession] : null;
+    const matchUnit = unitVal === 'all' || (p.unit || '預設建置班') === unitVal;
+    const matchGroup = groupVal === 'all' || (p.group || '未分組') === groupVal;
 
-        return !dutyId && matchUnit && matchGroup;
+    return !dutyId && matchUnit && matchGroup;
+});
+
+container.innerHTML = '';
+if (unassignedPeople.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty-state';
+    empty.innerText = '暫無人員';
+    container.appendChild(empty);
+} else {
+    unassignedPeople.forEach(person => {
+        container.appendChild(createPersonCard(person));
     });
+}
+const unCount = document.getElementById('unassignedCount');
+if (unCount) unCount.innerText = unassignedPeople.length;
 
-    container.innerHTML = '';
-    if (unassignedPeople.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'empty-state';
-        empty.innerText = '暫無人員';
-        container.appendChild(empty);
-    } else {
-        unassignedPeople.forEach(person => {
-            container.appendChild(createPersonCard(person));
-        });
-    }
-    const unCount = document.getElementById('unassignedCount');
-    if (unCount) unCount.innerText = unassignedPeople.length;
-
-    const dutiesContainer = document.getElementById('dutiesContainer');
-    if (dutiesContainer) {
-        dutiesContainer.innerHTML = '';
-        state.duties.forEach(duty => {
-            // 統計該時段分配到此公差的人數
-            const count = state.people.filter(p => p.assignments && p.assignments[currentSession] === duty.id).length;
-            const col = document.createElement('div');
-            col.className = 'duty-column';
-            col.innerHTML = `
+const dutiesContainer = document.getElementById('dutiesContainer');
+if (dutiesContainer) {
+    dutiesContainer.innerHTML = '';
+    state.duties.forEach(duty => {
+        // 統計該時段分配到此公差的人數
+        const count = state.people.filter(p => p.assignments && p.assignments[currentSession] === duty.id).length;
+        const col = document.createElement('div');
+        col.className = 'duty-column';
+        col.innerHTML = `
             <div class="duty-header"><span>${duty.name} <span class="badge">(${count})</span></span></div>
             <div class="duty-content" id="${duty.id}"></div>
         `;
-            const content = col.querySelector('.duty-content');
-            const assigned = state.people.filter(p => p.assignments && p.assignments[currentSession] === duty.id);
-            if (assigned.length === 0) content.innerHTML = '<div class="empty-state" style="font-size:0.8em; margin-top:20px;">無人分配</div>';
-            else assigned.forEach(p => content.appendChild(createPersonCard(p)));
-            dutiesContainer.appendChild(col);
-        });
-    }
+        const content = col.querySelector('.duty-content');
+        const assigned = state.people.filter(p => p.assignments && p.assignments[currentSession] === duty.id);
+        if (assigned.length === 0) content.innerHTML = '<div class="empty-state" style="font-size:0.8em; margin-top:20px;">無人分配</div>';
+        else assigned.forEach(p => content.appendChild(createPersonCard(p)));
+        dutiesContainer.appendChild(col);
+    });
+}
 }
 
 function createPersonCard(person) {
@@ -661,152 +637,170 @@ function renderGroupReport() {
     state.people.forEach(p => {
         if (p.assignments && p.assignments[state.currentSession]) {
             totalDutyCount++;
-        }
-    });
-    if (actualCountEl) actualCountEl.innerText = state.people.length - totalDutyCount;
-    if (totalDutyCountEl) totalDutyCountEl.innerText = totalDutyCount;
+            // ================= 分頁 4: 組別報表 =================
+            function renderGroupReport() {
+                const reportContainer = document.getElementById('groupReportContent');
+                if (!reportContainer) return;
 
-    const currentSession = state.currentSession;
+                const sessionSelect = document.getElementById('sessionSelect');
+                const sessionName = sessionSelect ? sessionSelect.value : '';
 
-    // Groups
-    reportContainer.innerHTML = '';
-    const groups = {};
-    const unassignedGroup = '未分組';
+                const reportTitle = document.querySelector('#tab-group-report h2');
+                if (reportTitle) {
+                    reportTitle.innerText = `${sessionName ? '[' + sessionName + '] ' : ''}組別統計報表`;
+                }
 
-    state.people.forEach(p => {
-        const g = p.group || unassignedGroup;
-        if (!groups[g]) groups[g] = [];
-        groups[g].push(p);
-    });
+                const totalCountEl = document.getElementById('groupTotalPeopleCount');
+                const actualCountEl = document.getElementById('groupActualPeopleCount');
+                const totalDutyCountEl = document.getElementById('groupTotalDutyCount');
 
-    // Sort keys to make output stable
-    const sortedKeys = Object.keys(groups).sort((a, b) => compareCustomOrder(a, b, GROUP_ORDER));
+                // Filter Logic
+                let visiblePeople = state.people || [];
+                if (state.reportVisibleGroups) {
+                    // Must handle '未分組' correctly if stored in state.reportVisibleGroups
+                    // Typically P.group is undefined or empty string, mapping to '未分組'
+                    visiblePeople = visiblePeople.filter(p => {
+                        const g = p.group || '未分組';
+                        return state.reportVisibleGroups.has(g);
+                    });
+                }
 
-    if (sortedKeys.length === 0) {
-        reportContainer.innerHTML = '<div class="empty-state">暫無人員資料</div>';
-        return;
-    }
+                if (totalCountEl) totalCountEl.innerText = visiblePeople.length;
 
-    // 1. Generate Summary Table
-    const tableContainer = document.createElement('div');
-    tableContainer.className = 'report-table-container';
+                // Calculate Global Actual Count for Group Report based on filtered list
+                let totalDutyCount = 0;
+                visiblePeople.forEach(p => {
+                    if (p.assignments && p.assignments[state.currentSession]) {
+                        totalDutyCount++;
+                    }
+                });
+                if (actualCountEl) actualCountEl.innerText = visiblePeople.length - totalDutyCount;
+                if (totalDutyCountEl) totalDutyCountEl.innerText = totalDutyCount;
 
-    const table = document.createElement('table');
-    table.className = 'report-table';
+                const currentSession = state.currentSession;
 
-    // Collect all duty IDs present (or all duties from state)
-    // using state.duties ensures consistent column order
-    const dutyColumns = state.duties;
+                // Groups
+                reportContainer.innerHTML = '';
+                const groups = {};
+                const unassignedGroup = '未分組';
 
-    // Header
-    const thead = document.createElement('thead');
-    let headerHtml = '<tr><th style="text-align:left;">組別</th><th>應到</th><th>實到</th>';
-    dutyColumns.forEach(d => {
-        headerHtml += `<th>${d.name}</th>`;
-    });
-    headerHtml += '</tr>';
-    thead.innerHTML = headerHtml;
-    table.appendChild(thead);
+                visiblePeople.forEach(p => {
+                    const g = p.group || unassignedGroup;
+                    if (!groups[g]) groups[g] = [];
+                    groups[g].push(p);
+                });
 
-    // Body
-    const tbody = document.createElement('tbody');
-    for (const groupName of sortedKeys) {
-        const people = groups[groupName];
-        const gDutyCounts = {};
+                // Sort keys to make output stable
+                const sortedKeys = Object.keys(groups).sort((a, b) => compareCustomOrder(a, b, GROUP_ORDER));
 
-        let groupDutyCount = 0;
-        people.forEach(p => {
-            const dId = p.assignments ? p.assignments[currentSession] : null;
-            if (dId) {
-                gDutyCounts[dId] = (gDutyCounts[dId] || 0) + 1;
-                groupDutyCount++;
-            }
-        });
+                if (sortedKeys.length === 0) {
+                    reportContainer.innerHTML = '<div class="empty-state">暫無人員資料</div>';
+                    return;
+                }
 
-        const tr = document.createElement('tr');
-        const shouldAttend = people.length;
-        const actualAttend = shouldAttend - groupDutyCount;
-        let rowHtml = `<td class="group-name">${groupName}</td><td><strong>${shouldAttend}</strong></td><td class="has-count">${actualAttend}</td>`;
+                // 1. Generate Summary Table
+                const tableContainer = document.createElement('div');
+                tableContainer.className = 'report-table-container';
 
-        dutyColumns.forEach(d => {
-            const count = gDutyCounts[d.id] || 0;
-            const classStr = count > 0 ? 'has-count' : 'zero-count';
-            const displayCount = count > 0 ? count : '-';
-            rowHtml += `<td class="${classStr}">${displayCount}</td>`;
-        });
+                const table = document.createElement('table');
+                table.className = 'report-table';
 
-        tr.innerHTML = rowHtml;
-        tbody.appendChild(tr);
-    }
-    table.appendChild(tbody);
-    tableContainer.appendChild(table);
-    reportContainer.appendChild(tableContainer);
+                // Collect all duty IDs present (or all duties from state)
+                // using state.duties ensures consistent column order
+                const dutyColumns = state.duties;
 
-    // 2. Generate Detail Cards (Original Logic)
-    for (const groupName of sortedKeys) {
-        const people = groups[groupName];
-        const gDutyStats = {};
-        people.forEach(p => {
-            const dId = p.assignments ? p.assignments[currentSession] : null;
-            const d = getDutyName(dId);
-            gDutyStats[d] = (gDutyStats[d] || 0) + 1;
-        });
-        const statsStr = Object.entries(gDutyStats).map(([k, v]) => `${k}:${v}`).join(' | ');
+                // Header
+                const thead = document.createElement('thead');
+                let headerHtml = '<tr><th style="text-align:left;">組別</th><th>應到</th><th>實到</th>';
+                dutyColumns.forEach(d => {
+                    headerHtml += `<th>${d.name}</th>`;
+                });
+                headerHtml += '</tr>';
+                thead.innerHTML = headerHtml;
+                table.appendChild(thead);
 
-        const card = document.createElement('details');
-        card.className = 'unit-card'; // Reuse unit-card style
-        card.open = true;
-        let html = `
+                // Body
+                const tbody = document.createElement('tbody');
+                for (const groupName of sortedKeys) {
+                    const people = groups[groupName];
+                    const gDutyCounts = {};
+
+                    let groupDutyCount = 0;
+                    people.forEach(p => {
+                        const dId = p.assignments ? p.assignments[currentSession] : null;
+                        if (dId) {
+                            gDutyCounts[dId] = (gDutyCounts[dId] || 0) + 1;
+                            groupDutyCount++;
+                        }
+                    });
+
+                    const tr = document.createElement('tr');
+                    const shouldAttend = people.length;
+                    const actualAttend = shouldAttend - groupDutyCount;
+                    let rowHtml = `<td class="group-name">${groupName}</td><td><strong>${shouldAttend}</strong></td><td class="has-count">${actualAttend}</td>`;
+
+                    dutyColumns.forEach(d => {
+                        const count = gDutyCounts[d.id] || 0;
+                        const classStr = count > 0 ? 'has-count' : 'zero-count';
+                        const displayCount = count > 0 ? count : '-';
+                        rowHtml += `<td class="${classStr}">${displayCount}</td>`;
+                    });
+
+                    tr.innerHTML = rowHtml;
+                    tbody.appendChild(tr);
+                }
+                table.appendChild(tbody);
+                tableContainer.appendChild(table);
+                reportContainer.appendChild(tableContainer);
+
+                // 2. Generate Detail Cards (Original Logic)
+                for (const groupName of sortedKeys) {
+                    const people = groups[groupName];
+                    const gDutyStats = {};
+                    people.forEach(p => {
+                        const dId = p.assignments ? p.assignments[currentSession] : null;
+                        const d = getDutyName(dId);
+                        gDutyStats[d] = (gDutyStats[d] || 0) + 1;
+                    });
+                    const statsStr = Object.entries(gDutyStats).map(([k, v]) => `${k}:${v}`).join(' | ');
+
+                    const card = document.createElement('details');
+                    card.className = 'unit-card'; // Reuse unit-card style
+                    card.open = true;
+                    let html = `
         <summary class="unit-header"><span>${groupName}</span><span>${people.length} 人</span></summary>
         <div class="unit-stats" style="padding: 0 10px 10px;">${statsStr}</div>
     `;
-        people.forEach(p => {
-            const dId = p.assignments ? p.assignments[currentSession] : null;
-            const dName = getDutyName(dId);
-            const statusClass = dId ? 'active-duty' : 'unassigned';
-            html += `<div class="unit-person-row"><span>${p.name} <span style="font-size:0.8em; color:#666;">(${p.unit || '-'})</span></span><span class="status-tag ${statusClass}">${dName}</span></div>`;
-        });
-        card.innerHTML = html;
-        reportContainer.appendChild(card);
-    }
-}
+                    people.forEach(p => {
+                        const dId = p.assignments ? p.assignments[currentSession] : null;
+                        const dName = getDutyName(dId);
+                        const statusClass = dId ? 'active-duty' : 'unassigned';
+                        html += `<div class="unit-person-row"><span>${p.name} <span style="font-size:0.8em; color:#666;">(${p.unit || '-'})</span></span><span class="status-tag ${statusClass}">${dName}</span></div>`;
+                    });
+                    card.innerHTML = html;
+                    reportContainer.appendChild(card);
+                }
+            }
 
 
-function generateCopyText(mode) {
-    const currentSession = state.currentSession;
-    const groups = {};
-    const unassignedLabel = '未分配';
+            function generateCopyText(mode) {
+                const currentSession = state.currentSession;
+                const groups = {};
+                const unassignedLabel = '未分配';
 
-    // Global Stats Variables
-    let globalShouldAttend = 0;
-    let globalDutyCount = 0;
-    const globalDutyMap = {}; // name -> array of person names
+                // Global Stats Variables
+                groups[key].push(p);
 
-    // Filter people if in Unit Mode and filter is active
-    let processPeople = state.people;
-    if (mode === 'unit' && state.reportVisibleUnits) {
-        processPeople = processPeople.filter(p => state.reportVisibleUnits.has(p.unit || '預設建置班'));
-    }
-
-    // Grouping
-    processPeople.forEach(p => {
-        let key = '';
-        if (mode === 'unit') key = p.unit || '預設建置班';
-        else key = p.group || '未分組';
-
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(p);
-
-        // Global Calc
-        globalShouldAttend++;
-        const dId = p.assignments ? p.assignments[currentSession] : null;
-        if (dId) {
-            globalDutyCount++;
-            const dName = getDutyName(dId);
-            if (!globalDutyMap[dName]) globalDutyMap[dName] = [];
-            globalDutyMap[dName].push(p.name);
-        }
-    });
+                // Global Calc
+                globalShouldAttend++;
+                const dId = p.assignments ? p.assignments[currentSession] : null;
+                if (dId) {
+                    globalDutyCount++;
+                    const dName = getDutyName(dId);
+                    if (!globalDutyMap[dName]) globalDutyMap[dName] = [];
+                    globalDutyMap[dName].push(p.name);
+                }
+            });
 
     const sortedKeys = Object.keys(groups).sort((a, b) =>
         compareCustomOrder(a, b, mode === 'unit' ? UNIT_ORDER : GROUP_ORDER)
@@ -937,6 +931,76 @@ function updateReportFilterState() {
         } else {
             summaryCount.innerText = `(顯示 ${checked.length} 個)`;
             state.reportVisibleUnits = new Set(checked);
+        }
+    }
+}
+
+updateReportFilterState();
+        }
+
+function initReportGroupFilter() {
+    const container = document.getElementById('groupCheckboxes');
+    const selectAllBtn = document.getElementById('selectAllGroupsBtn');
+    const clearBtn = document.getElementById('clearAllGroupsBtn');
+    const summaryCount = document.getElementById('groupFilterCount'); // Update ID if different
+
+    if (!container) return;
+
+    container.innerHTML = '';
+    GROUP_ORDER.forEach(group => {
+        const wrapper = document.createElement('label');
+        wrapper.className = 'checkbox-label';
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = group;
+        cb.checked = true; // Default All Checked
+        cb.addEventListener('change', () => {
+            updateReportGroupFilterState();
+            renderGroupReport();
+        });
+
+        wrapper.appendChild(cb);
+        wrapper.appendChild(document.createTextNode(group));
+        container.appendChild(wrapper);
+    });
+
+    state.reportVisibleGroups = null;
+
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', () => {
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+            updateReportGroupFilterState();
+            renderGroupReport();
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            updateReportGroupFilterState();
+            renderGroupReport();
+        });
+    }
+
+    updateReportGroupFilterState();
+}
+
+function updateReportGroupFilterState() {
+    const container = document.getElementById('groupCheckboxes');
+    if (!container) return;
+
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    const checked = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+
+    const summaryCount = document.getElementById('groupFilterCount');
+    if (summaryCount) {
+        if (checked.length === checkboxes.length) {
+            summaryCount.innerText = '(顯示全部)';
+            state.reportVisibleGroups = null;
+        } else {
+            summaryCount.innerText = `(顯示 ${checked.length} 個)`;
+            state.reportVisibleGroups = new Set(checked);
         }
     }
 }
