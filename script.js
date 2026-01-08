@@ -805,23 +805,6 @@ function generateCopyText(mode) {
         output += `實到：${actualAttend}\n`;
         output += `----------------\n`;
     });
-
-    // Append Global Summary
-    output += `統計總數\n`;
-    output += `應到：${globalShouldAttend}\n`;
-    output += `實到：${globalShouldAttend - globalDutyCount}\n`;
-    output += `公差\n`;
-
-    Object.keys(globalDutyMap).forEach(dName => {
-        const names = globalDutyMap[dName];
-        output += `${dName}${names.length}：${names.join(' ')}\n`;
-    });
-
-    return output;
-}
-
-function getDutyName(id) {
-    if (!id) return '無';
     const d = state.duties.find(x => x.id === id);
     return d ? d.name : '無';
 }
