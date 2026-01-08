@@ -856,9 +856,88 @@ function generateCopyText(mode) {
     });
 
     return output;
-    // Check if distinct from last render to avoid flickering/resetting selection? 
-    // For simplicity, re-populate if filtering changes, or just populate once.
-    // Let's populate every time but keep selection if possible.
+}
+
+function getDutyName(id) {
+    if (!id) return '無';
+    const d = state.duties.find(x => x.id === id);
+    return d ? d.name : '無';
+}
+
+// ================= Report Filter Logic =================
+function initReportUnitFilter() {
+    const container = document.getElementById('unitCheckboxes');
+    const selectAllBtn = document.getElementById('selectAllUnitsBtn');
+    const clearBtn = document.getElementById('clearAllUnitsBtn');
+    const summaryCount = document.getElementById('reportFilterCount');
+
+    if (!container) return;
+
+    // Use UNIT_ORDER for checkbox order
+    container.innerHTML = '';
+    UNIT_ORDER.forEach(unit => {
+        const wrapper = document.createElement('label');
+        wrapper.className = 'checkbox-label';
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = unit;
+        cb.checked = true; // Default All Checked
+        cb.addEventListener('change', () => {
+            updateReportFilterState();
+            renderReport();
+        });
+
+        wrapper.appendChild(cb);
+        wrapper.appendChild(document.createTextNode(unit));
+        container.appendChild(wrapper);
+    });
+
+    // Default State: All visible (null or set full)
+    state.reportVisibleUnits = null;
+
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', () => {
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+            updateReportFilterState();
+            renderReport();
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            updateReportFilterState();
+            renderReport();
+        });
+    }
+
+    updateReportFilterState();
+}
+
+function updateReportFilterState() {
+    const container = document.getElementById('unitCheckboxes');
+    if (!container) return;
+
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    const checked = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+
+    const summaryCount = document.getElementById('reportFilterCount');
+    if (summaryCount) {
+        if (checked.length === checkboxes.length) {
+            summaryCount.innerText = '(顯示全部)';
+            state.reportVisibleUnits = null; // null means all
+        } else {
+            summaryCount.innerText = `(顯示 ${checked.length} 個)`;
+            state.reportVisibleUnits = new Set(checked);
+        }
+    }
+}
+
+function updateExportUnitSelect() {
+    const select = document.getElementById('exportUnitSelect');
+    if (!select) return;
+
     const currentVal = select.value;
     select.innerHTML = '<option value="">選擇建置班...</option>';
 
