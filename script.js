@@ -1,38 +1,22 @@
 
 // 全域資料存儲
+let state = {
+    people: [],
+    duties: [],
+    currentSession: '早點名', // 預設時段
+    reportVisibleUnits: null, // For Unit Report Filter, null = all
+    reportVisibleGroups: null // For Group Report Filter, null = all
+};
+
 // --- Smart Import Logic ---
 
 let currentImportActions = [];
 
 function initSmartImport() {
-    const modal = document.getElementById('smartImportModal');
-    const openBtn = document.getElementById('openSmartImportBtn');
-    const closeBtn = modal ? modal.querySelector('.close-modal') : null;
+    // 移除 Modal 相關邏輯，改為直接綁定按鈕
     const analyzeBtn = document.getElementById('analyzeImportBtn');
     const backBtn = document.getElementById('backToImportStep1Btn');
     const confirmBtn = document.getElementById('confirmImportBtn');
-
-    if (openBtn && modal) {
-        openBtn.addEventListener('click', () => {
-            modal.style.display = 'block';
-            document.getElementById('importStep1').classList.remove('hidden');
-            document.getElementById('importStep2').classList.add('hidden');
-            document.getElementById('smartImportText').value = '';
-            currentImportActions = [];
-        });
-    }
-
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-    }
-
-    window.addEventListener('click', (event) => {
-        if (event.target == modal) {
-            modal.style.display = 'none';
-        }
-    });
 
     if (analyzeBtn) {
         analyzeBtn.addEventListener('click', () => {
@@ -54,91 +38,21 @@ function initSmartImport() {
     if (confirmBtn) {
         confirmBtn.addEventListener('click', () => {
             applyImport(currentImportActions);
-            modal.style.display = 'none';
+            // Confirm/Reset UI
             alert(`成功匯入 ${currentImportActions.length} 筆資料！`);
-            render();
-            state.people.forEach(p => updatePersonCardUI(p)); // Refresh UI
+
+            // Go back to Step 1 or stay? 
+            // Resetting to Step 1 seems cleaner for next use
+            document.getElementById('smartImportText').value = '';
+            document.getElementById('importStep1').classList.remove('hidden');
+            document.getElementById('importStep2').classList.add('hidden');
+
+            render(); // Refresh Main UI
+            state.people.forEach(p => updatePersonCardUI(p));
             saveToLocal();
             if (useFirebase) saveToFirebase();
         });
     }
-}
-
-function parseImportText(text) {
-    const actions = [];
-    const lines = text.split('\n');
-    let currentSession = null;
-
-    // Mapping User Session Names to System Session Keys
-    // Based on user sample & implementation plan
-    const sessionMap = {
-        '早點名': '早點名',
-        '早上上餐廳': '早上餐廳',
-        '0740集合': '早上教學區', // Assuming 0740 is Morning Class
-        '1320集合': '下午教學區', // Assuming 1320 is Afternoon Class
-        '晚自習': '晚自習',
-        '晚點名': '晚點名'
-        // Add more mappings if needed based on Observation
-    };
-
-    lines.forEach(line => {
-        line = line.trim();
-        if (!line) return;
-
-        // 1. Detect Session Header
-        // Check if line contains any session keyword
-        let detectedKey = Object.keys(sessionMap).find(key => line.includes(key));
-        if (detectedKey) {
-            currentSession = sessionMap[detectedKey];
-            return; // Skip header line
-        }
-
-        if (!currentSession) return; // Skip lines before first session
-
-        // 2. Parse Duty Line: "DutyName Count Names" 
-        // Example: "業務3郭秉威、楊皓翔、施承志" OR "慢行1 謝易城"
-        // Regex: (DutyName)(Count)(Names)
-        // Adjust regex to be flexible with spaces
-        // ^([^\d\s]+)\s*(\d+)\s*(.*)$
-
-        const match = line.match(/^([^\d\s]+)\s*(\d+)\s*(.*)$/);
-
-        if (match) {
-            const dutyName = match[1].trim();
-            // const count = match[2]; // not strictly needed validation
-            const namesStr = match[3];
-
-            // Split names
-            // Delimiters: 、, ,, space, ，
-            const names = namesStr.split(/[、, ，\s]+/).map(n => n.trim()).filter(n => n);
-
-            names.forEach(name => {
-                // Find person by name
-                const person = state.people.find(p => p.name === name);
-
-                // Find duty ID (or create fake one for preview?)
-                // Strategy: Search existing duties. If not found, flag as NEW.
-                let duty = state.duties.find(d => d.name === dutyName);
-                let dutyId = duty ? duty.id : null;
-                let status = 'OK';
-
-                if (!person) status = 'UNKNOWN_PERSON';
-                else if (!duty) status = 'NEW_DUTY';
-
-                if (person) { // Only add action if person exists
-                    actions.push({
-                        session: currentSession,
-                        dutyName: dutyName,
-                        dutyId: dutyId,
-                        personName: name,
-                        personId: person.id,
-                        status: status
-                    });
-                }
-            });
-        }
-    });
-    return actions;
 }
 
 function renderImportPreview(actions) {
@@ -192,6 +106,123 @@ function applyImport(actions) {
     });
 }
 
+
+
+
+
+// 智慧解析函數
+function parseImportText(text) {
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+    const actions = [];
+    let currentSession = '早點名'; // Default
+
+    // Session Mapping
+    // Session Mapping
+    const SESSION_MAP = {
+        '早點名': '早點名',
+        '早上集合': '早點名',
+
+        '早上上餐廳': '早上餐廳',
+        '用餐': '早上餐廳',
+        '早上餐廳': '早上餐廳',
+
+        '0740': '早上教學區',
+        '0740集合': '早上教學區',
+        '上午操課': '早上教學區',
+        '操課': '早上教學區',
+
+        '中午用餐': '中午餐廳',
+        '中午餐廳': '中午餐廳',
+        '午休': '中午餐廳', // Map lunch break to Noon Restaurant as fallback
+
+        '1320': '下午教學區',
+        '1320集合': '下午教學區',
+        '下午操課': '下午教學區',
+        '下午運動': '下午教學區', // Assuming Sport is part of afternoon block
+        '運動': '下午教學區',
+
+        '晚餐': '晚上餐廳',
+        '晚上餐廳': '晚上餐廳',
+
+        '晚上集合': '晚自習',
+        '晚自習': '晚自習',
+
+        '晚點名': '晚點名',
+        '就寢': '晚點名', // Fallback
+
+        '軍訓1': '軍訓1',
+        '軍訓2': '軍訓2'
+    };
+
+    const SKIP_KEYWORDS = [
+        '應到', '實到', '事故', '備註', '說明', '人員', '合計', '總計',
+        '外掃', '公差', '請假', '休假', '隔離', '建置', '全連'
+    ];
+
+    lines.forEach(line => {
+        // 1. Detect Session
+        let foundSession = false;
+        for (const key in SESSION_MAP) {
+            if (line.includes(key) && line.length < 15) {
+                currentSession = SESSION_MAP[key];
+                foundSession = true;
+                return;
+            }
+        }
+        if (foundSession) return;
+
+        // 2. Skip Metadata/Stats lines
+        if (line.match(/^(應到|實到|全連|合計|建置|班級)/)) return;
+        if (line.includes('應到') && line.includes('實到')) return;
+
+
+        // 3. Parse Duty Line
+        let dutyName = null;
+        let namesPart = null;
+
+        // Strategy A: Regex with Explicit Number (Allows "員" or "人" suffix)
+        // Groups: 1=DutyName, 2=Count, 3=NamesPart
+        const matchWithCount = line.match(/^([^\d\s:：]+)\s*(\d+)(?:員|人)?[:：]?\s*(.*)$/);
+
+        // Strategy B: Regex without Number
+        const matchNoCount = line.match(/^([^\d\s:：]+)[:：]?\s+(.*)$/);
+
+        if (matchWithCount) {
+            dutyName = matchWithCount[1].trim();
+            namesPart = matchWithCount[3].trim();
+        } else if (matchNoCount) {
+            dutyName = matchNoCount[1].trim();
+            namesPart = matchNoCount[2].trim();
+        }
+
+        if (dutyName && namesPart) {
+            if (!namesPart) return;
+
+            const names = namesPart.split(/[、,，\s]+/).filter(n => n);
+
+            names.forEach(name => {
+                if (name.length < 2 && !state.people.some(p => p.name === name)) return;
+
+                const person = state.people.find(p => p.name === name);
+                const status = person ? 'OK' : 'UNKNOWN_PERSON';
+
+                const dutyExists = state.duties.some(d => d.name === dutyName);
+                const statusDuty = dutyExists ? (status === 'OK' ? 'OK' : 'UNKNOWN_PERSON') : 'NEW_DUTY';
+
+                actions.push({
+                    session: currentSession,
+                    dutyName: dutyName,
+                    personName: name,
+                    personId: person ? person.id : null,
+                    dutyId: null,
+                    status: statusDuty === 'NEW_DUTY' && status === 'UNKNOWN_PERSON' ? 'UNKNOWN_PERSON' : statusDuty
+                });
+            });
+        }
+    });
+
+    return actions;
+}
 
 // Custom Sort Orders
 const UNIT_ORDER = [
@@ -512,6 +543,39 @@ async function movePerson(personId, targetDutyId) {
             }
         }
     }
+}
+
+// 5.5 清除所有公差分配 (保留人員與公差項目)
+async function resetAssignments() {
+    if (!confirm('確定要清除所有公差分配嗎？\n此動作將把所有人員重置為「無公差」狀態，但保留人員與公差名稱設定。')) return;
+
+    if (useFirebase) {
+        // Firebase Batch Update
+        const batch = db.batch();
+        state.people.forEach(p => {
+            // 僅更新 assignments 欄位
+            // 由於要清空所有時段，直接設為空物件
+            const ref = db.collection("people").doc(p.id);
+            batch.update(ref, { assignments: {} });
+            p.assignments = {}; // Local update
+        });
+
+        try {
+            await batch.commit();
+            alert('已清除所有分配');
+        } catch (e) {
+            console.error("Reset Assignments failed", e);
+            alert('清除失敗，請稍後再試');
+        }
+    } else {
+        // Local Mode
+        state.people.forEach(p => {
+            p.assignments = {};
+        });
+        saveToLocal();
+        alert('已清除所有分配');
+    }
+    render();
 }
 
 // 6. 重置
@@ -1255,6 +1319,173 @@ function updateExportUnitSelect() {
 
 
 
+
+
+function getDutyName(id) {
+    if (!id) return '無';
+    const d = state.duties.find(x => x.id === id);
+    return d ? d.name : '無';
+}
+
+// ================= Report Filter Logic =================
+function initReportUnitFilter() {
+    const container = document.getElementById('unitCheckboxes');
+    const selectAllBtn = document.getElementById('selectAllUnitsBtn');
+    const clearBtn = document.getElementById('clearAllUnitsBtn');
+    const summaryCount = document.getElementById('reportFilterCount');
+
+    if (!container) return;
+
+    // Use UNIT_ORDER for checkbox order
+    container.innerHTML = '';
+    UNIT_ORDER.forEach(unit => {
+        const wrapper = document.createElement('label');
+        wrapper.className = 'checkbox-label';
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = unit;
+        cb.checked = true; // Default All Checked
+        cb.addEventListener('change', () => {
+            updateReportFilterState();
+            renderReport();
+        });
+
+        wrapper.appendChild(cb);
+        wrapper.appendChild(document.createTextNode(unit));
+        container.appendChild(wrapper);
+    });
+
+    // Default State: All visible (null or set full)
+    state.reportVisibleUnits = null;
+
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', () => {
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+            updateReportFilterState();
+            renderReport();
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            updateReportFilterState();
+            renderReport();
+        });
+    }
+
+    updateReportFilterState();
+}
+
+function updateReportFilterState() {
+    const container = document.getElementById('unitCheckboxes');
+    if (!container) return;
+
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    const checked = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+
+    const summaryCount = document.getElementById('reportFilterCount');
+    if (summaryCount) {
+        if (checked.length === checkboxes.length) {
+            summaryCount.innerText = '(顯示全部)';
+            state.reportVisibleUnits = null; // null means all
+        } else {
+            summaryCount.innerText = `(顯示 ${checked.length} 個)`;
+            state.reportVisibleUnits = new Set(checked);
+        }
+    }
+}
+
+updateReportFilterState();
+
+
+function initReportGroupFilter() {
+    const container = document.getElementById('groupCheckboxes');
+    const selectAllBtn = document.getElementById('selectAllGroupsBtn');
+    const clearBtn = document.getElementById('clearAllGroupsBtn');
+    const summaryCount = document.getElementById('groupFilterCount'); // Update ID if different
+
+    if (!container) return;
+
+    container.innerHTML = '';
+    GROUP_ORDER.forEach(group => {
+        const wrapper = document.createElement('label');
+        wrapper.className = 'checkbox-label';
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = group;
+        cb.checked = true; // Default All Checked
+        cb.addEventListener('change', () => {
+            updateReportGroupFilterState();
+            renderGroupReport();
+        });
+
+        wrapper.appendChild(cb);
+        wrapper.appendChild(document.createTextNode(group));
+        container.appendChild(wrapper);
+    });
+
+    state.reportVisibleGroups = null;
+
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', () => {
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+            updateReportGroupFilterState();
+            renderGroupReport();
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            updateReportGroupFilterState();
+            renderGroupReport();
+        });
+    }
+
+    updateReportGroupFilterState();
+}
+
+function updateReportGroupFilterState() {
+    const container = document.getElementById('groupCheckboxes');
+    if (!container) return;
+
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    const checked = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+
+    const summaryCount = document.getElementById('groupFilterCount');
+    if (summaryCount) {
+        if (checked.length === checkboxes.length) {
+            summaryCount.innerText = '(顯示全部)';
+            state.reportVisibleGroups = null;
+        } else {
+            summaryCount.innerText = `(顯示 ${checked.length} 個)`;
+            state.reportVisibleGroups = new Set(checked);
+        }
+    }
+}
+
+function updateExportUnitSelect() {
+    const select = document.getElementById('exportUnitSelect');
+    if (!select) return;
+
+    const currentVal = select.value;
+    select.innerHTML = '<option value="">選擇建置班...</option>';
+
+    const units = [...new Set(state.people.map(p => p.unit || '預設建置班'))].sort((a, b) => compareCustomOrder(a, b, UNIT_ORDER));
+    units.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u;
+        opt.innerText = u;
+        if (u === currentVal) opt.selected = true;
+        select.appendChild(opt);
+    });
+}
+
+
+
 function generateUnitAllSessionReport(unitName) {
     if (!unitName) return '請先選擇建置班';
 
@@ -1267,7 +1498,6 @@ function generateUnitAllSessionReport(unitName) {
 
     let output = `[${unitName}] 全時段公差彙整\n\n`;
     output += `${unitName}\n\n`;
-
     allSessions.forEach(sess => {
         output += `${sess}\n`;
         output += `應到${shouldAttend}\n`;
@@ -1343,7 +1573,7 @@ function setupEventListeners() {
             if (nameEl.value) {
                 addPerson(nameEl.value, unitEl.value, groupEl ? groupEl.value : '');
                 nameEl.value = '';
-                // unitEl.value = ''; 
+                // unitEl.value = '';
                 // groupEl.value = '';
             }
         });
@@ -1364,6 +1594,9 @@ function setupEventListeners() {
             dEl.value = '';
         }
     });
+
+    const resetAssignmentsBtn = document.getElementById('resetAssignmentsBtn');
+    if (resetAssignmentsBtn) resetAssignmentsBtn.addEventListener('click', resetAssignments);
 
     const reset = document.getElementById('resetDataBtn');
     if (reset) reset.addEventListener('click', resetData);
@@ -1430,4 +1663,3 @@ function setupEventListeners() {
         });
     }
 }
-
