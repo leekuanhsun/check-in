@@ -3,7 +3,8 @@
 let state = {
     people: [],
     duties: [],
-    currentSession: '早點名' // 預設時段
+    currentSession: '早點名', // 預設時段
+    reportVisibleUnits: null // For Unit Report Filter, null = all
 };
 
 // Custom Sort Orders
@@ -40,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
         initSystem();
         initTabs();
+        initReportUnitFilter(); // Initialize Report Filter
         setupEventListeners();
 
         // 初始化時段選擇器狀態
