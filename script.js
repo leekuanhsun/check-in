@@ -610,7 +610,11 @@ function renderReport() {
     }
 
     try {
-        for (const [unitName, people] of Object.entries(units)) {
+        // Sort Units by Custom Order
+        const sortedUnits = Object.keys(units).sort((a, b) => compareCustomOrder(a, b, UNIT_ORDER));
+
+        for (const unitName of sortedUnits) {
+            const people = units[unitName];
             const uDutyStats = {};
             people.forEach(p => {
                 const dId = p.assignments ? p.assignments[currentSession] : null;
@@ -804,7 +808,9 @@ function generateCopyText(mode) {
         }
     });
 
-    const sortedKeys = Object.keys(groups).sort();
+    const sortedKeys = Object.keys(groups).sort((a, b) =>
+        compareCustomOrder(a, b, mode === 'unit' ? UNIT_ORDER : GROUP_ORDER)
+    );
     let output = '';
 
     // Add Session Title
