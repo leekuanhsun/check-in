@@ -781,8 +781,14 @@ function generateCopyText(mode) {
     let globalDutyCount = 0;
     const globalDutyMap = {}; // name -> array of person names
 
+    // Filter people if in Unit Mode and filter is active
+    let processPeople = state.people;
+    if (mode === 'unit' && state.reportVisibleUnits) {
+        processPeople = processPeople.filter(p => state.reportVisibleUnits.has(p.unit || '預設建置班'));
+    }
+
     // Grouping
-    state.people.forEach(p => {
+    processPeople.forEach(p => {
         let key = '';
         if (mode === 'unit') key = p.unit || '預設建置班';
         else key = p.group || '未分組';
