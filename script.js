@@ -860,7 +860,6 @@ function updateExportUnitSelect() {
 }
 
 
-}
 
 function generateUnitAllSessionReport(unitName) {
     if (!unitName) return '請先選擇建置班';
