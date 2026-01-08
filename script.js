@@ -5,6 +5,32 @@ let state = {
     duties: [],
     currentSession: '早點名' // 預設時段
 };
+
+// Custom Sort Orders
+const UNIT_ORDER = [
+    '一班', '二班', '三班', '四班', '五班', '六班',
+    '七班', '八班', '九班', '十班', '十一班', '十二班',
+    '中隊部', '參謀區隊部'
+];
+
+const GROUP_ORDER = [
+    '115一般', '115結構', '115發修', '115航設',
+    '116一般', '116結構', '116發修', '116航設',
+    '專軍'
+];
+
+function getCustomSortValue(val, orderArray) {
+    const index = orderArray.indexOf(val);
+    if (index !== -1) return index;
+    // If not in list, put at the end, sorted alphabetically
+    return orderArray.length + val.charCodeAt(0);
+}
+
+function compareCustomOrder(a, b, orderArray) {
+    const valA = getCustomSortValue(a, orderArray);
+    const valB = getCustomSortValue(b, orderArray);
+    return valA - valB;
+}
 let db = null; // Firestore instance
 let useFirebase = false; // 模式旗標
 let selectedPersonId = null; // 手機版點擊選擇狀態
