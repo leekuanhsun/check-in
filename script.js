@@ -846,7 +846,6 @@ function updateExportUnitSelect() {
     });
 }
 
-}
 
 function initTabs() {
     const tabs = document.querySelectorAll('.nav-tab');
