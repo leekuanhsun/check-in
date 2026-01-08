@@ -1,12 +1,197 @@
 
 // 全域資料存儲
-let state = {
-    people: [],
-    duties: [],
-    currentSession: '早點名', // 預設時段
-    reportVisibleUnits: null, // For Unit Report Filter, null = all
-    reportVisibleGroups: null // For Group Report Filter, null = all
-};
+// --- Smart Import Logic ---
+
+let currentImportActions = [];
+
+function initSmartImport() {
+    const modal = document.getElementById('smartImportModal');
+    const openBtn = document.getElementById('openSmartImportBtn');
+    const closeBtn = modal ? modal.querySelector('.close-modal') : null;
+    const analyzeBtn = document.getElementById('analyzeImportBtn');
+    const backBtn = document.getElementById('backToImportStep1Btn');
+    const confirmBtn = document.getElementById('confirmImportBtn');
+
+    if (openBtn && modal) {
+        openBtn.addEventListener('click', () => {
+            modal.style.display = 'block';
+            document.getElementById('importStep1').classList.remove('hidden');
+            document.getElementById('importStep2').classList.add('hidden');
+            document.getElementById('smartImportText').value = '';
+            currentImportActions = [];
+        });
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    }
+
+    window.addEventListener('click', (event) => {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    if (analyzeBtn) {
+        analyzeBtn.addEventListener('click', () => {
+            const text = document.getElementById('smartImportText').value;
+            currentImportActions = parseImportText(text);
+            renderImportPreview(currentImportActions);
+            document.getElementById('importStep1').classList.add('hidden');
+            document.getElementById('importStep2').classList.remove('hidden');
+        });
+    }
+
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            document.getElementById('importStep1').classList.remove('hidden');
+            document.getElementById('importStep2').classList.add('hidden');
+        });
+    }
+
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', () => {
+            applyImport(currentImportActions);
+            modal.style.display = 'none';
+            alert(`成功匯入 ${currentImportActions.length} 筆資料！`);
+            render();
+            state.people.forEach(p => updatePersonCardUI(p)); // Refresh UI
+            saveToLocal();
+            if (useFirebase) saveToFirebase();
+        });
+    }
+}
+
+function parseImportText(text) {
+    const actions = [];
+    const lines = text.split('\n');
+    let currentSession = null;
+
+    // Mapping User Session Names to System Session Keys
+    // Based on user sample & implementation plan
+    const sessionMap = {
+        '早點名': '早點名',
+        '早上上餐廳': '早上餐廳',
+        '0740集合': '早上教學區', // Assuming 0740 is Morning Class
+        '1320集合': '下午教學區', // Assuming 1320 is Afternoon Class
+        '晚自習': '晚自習',
+        '晚點名': '晚點名'
+        // Add more mappings if needed based on Observation
+    };
+
+    lines.forEach(line => {
+        line = line.trim();
+        if (!line) return;
+
+        // 1. Detect Session Header
+        // Check if line contains any session keyword
+        let detectedKey = Object.keys(sessionMap).find(key => line.includes(key));
+        if (detectedKey) {
+            currentSession = sessionMap[detectedKey];
+            return; // Skip header line
+        }
+
+        if (!currentSession) return; // Skip lines before first session
+
+        // 2. Parse Duty Line: "DutyName Count Names" 
+        // Example: "業務3郭秉威、楊皓翔、施承志" OR "慢行1 謝易城"
+        // Regex: (DutyName)(Count)(Names)
+        // Adjust regex to be flexible with spaces
+        // ^([^\d\s]+)\s*(\d+)\s*(.*)$
+
+        const match = line.match(/^([^\d\s]+)\s*(\d+)\s*(.*)$/);
+
+        if (match) {
+            const dutyName = match[1].trim();
+            // const count = match[2]; // not strictly needed validation
+            const namesStr = match[3];
+
+            // Split names
+            // Delimiters: 、, ,, space, ，
+            const names = namesStr.split(/[、, ，\s]+/).map(n => n.trim()).filter(n => n);
+
+            names.forEach(name => {
+                // Find person by name
+                const person = state.people.find(p => p.name === name);
+
+                // Find duty ID (or create fake one for preview?)
+                // Strategy: Search existing duties. If not found, flag as NEW.
+                let duty = state.duties.find(d => d.name === dutyName);
+                let dutyId = duty ? duty.id : null;
+                let status = 'OK';
+
+                if (!person) status = 'UNKNOWN_PERSON';
+                else if (!duty) status = 'NEW_DUTY';
+
+                if (person) { // Only add action if person exists
+                    actions.push({
+                        session: currentSession,
+                        dutyName: dutyName,
+                        dutyId: dutyId,
+                        personName: name,
+                        personId: person.id,
+                        status: status
+                    });
+                }
+            });
+        }
+    });
+    return actions;
+}
+
+function renderImportPreview(actions) {
+    const tbody = document.querySelector('#importPreviewTable tbody');
+    const summary = document.getElementById('importSummaryText');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    actions.forEach(action => {
+        const tr = document.createElement('tr');
+
+        // Status Styling
+        let statusHtml = '<span class="status-tag active-duty">OK</span>';
+        if (action.status === 'NEW_DUTY') statusHtml = '<span class="status-tag" style="background:orange;">新公差(將自動建立)</span>';
+        if (action.status === 'UNKNOWN_PERSON') statusHtml = '<span class="status-tag" style="background:red;">無此人</span>';
+
+        tr.innerHTML = `
+            <td>${action.session}</td>
+            <td>${action.dutyName}</td>
+            <td>${action.personName}</td>
+            <td>${statusHtml}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    if (summary) summary.innerText = `共解析出 ${actions.length} 筆資料`;
+}
+
+function applyImport(actions) {
+    actions.forEach(action => {
+        if (action.status === 'UNKNOWN_PERSON') return;
+
+        // Handle New Duty Creation
+        if (action.status === 'NEW_DUTY' || !action.dutyId) {
+            // Check if we already created it in this loop (to avoid duplicates)
+            let existing = state.duties.find(d => d.name === action.dutyName);
+            if (existing) {
+                action.dutyId = existing.id;
+            } else {
+                const newId = addDuty(action.dutyName); // This function (assumed global) adds to state.duties
+                action.dutyId = newId;
+            }
+        }
+
+        // Assign
+        const person = state.people.find(p => p.id === action.personId);
+        if (person) {
+            if (!person.assignments) person.assignments = {};
+            person.assignments[action.session] = action.dutyId;
+        }
+    });
+}
+
 
 // Custom Sort Orders
 const UNIT_ORDER = [
