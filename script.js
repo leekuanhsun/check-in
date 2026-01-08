@@ -530,20 +530,27 @@ function renderReport() {
     if (totalCountEl) totalCountEl.innerText = state.people.length;
 
     // Fix: Define totalPeople
-    const totalPeople = state.people.length;
+    const totalPeople = state.people ? state.people.length : 0;
+    const currentSession = state.currentSession || '早點名'; // Fallback
 
-    const currentSession = state.currentSession;
     let dutiesCount = 0;
     const dutyStats = {};
 
-    state.people.forEach(p => {
-        const dId = p.assignments ? p.assignments[currentSession] : null;
-        if (dId) {
-            dutiesCount++;
-            const dName = getDutyName(dId);
-            dutyStats[dName] = (dutyStats[dName] || 0) + 1;
+    try {
+        if (state.people) {
+            state.people.forEach(p => {
+                const dId = p.assignments ? p.assignments[currentSession] : null;
+                if (dId) {
+                    dutiesCount++;
+                    const dName = getDutyName(dId);
+                    dutyStats[dName] = (dutyStats[dName] || 0) + 1;
+                }
+            });
         }
-    });
+    } catch (e) {
+        console.error("Error calculating duties:", e);
+    }
+
     if (totalDutyEl) totalDutyEl.innerText = dutiesCount;
 
     // Global Stats Bar
@@ -568,36 +575,42 @@ function renderReport() {
     // Units
     reportContainer.innerHTML = '';
     const units = {};
-    state.people.forEach(p => {
-        const u = p.unit || '預設建置班';
-        if (!units[u]) units[u] = [];
-        units[u].push(p);
-    });
-
-    for (const [unitName, people] of Object.entries(units)) {
-        const uDutyStats = {};
-        people.forEach(p => {
-            const dId = p.assignments ? p.assignments[currentSession] : null;
-            const d = getDutyName(dId);
-            uDutyStats[d] = (uDutyStats[d] || 0) + 1;
+    if (state.people) {
+        state.people.forEach(p => {
+            const u = p.unit || '預設建置班';
+            if (!units[u]) units[u] = [];
+            units[u].push(p);
         });
-        const statsStr = Object.entries(uDutyStats).map(([k, v]) => `${k}:${v}`).join(' | ');
+    }
 
-        const card = document.createElement('div');
-        card.className = 'unit-card';
-        // card.open = true; // No longer needed for div
-        let html = `
-        <div class="unit-header"><span>${unitName}</span><span>${people.length} 人</span></div>
-        <div class="unit-stats" style="padding: 0 0 10px;">${statsStr}</div>
-    `;
-        people.forEach(p => {
-            const dId = p.assignments ? p.assignments[currentSession] : null;
-            const dName = getDutyName(dId);
-            const statusClass = dId ? 'active-duty' : 'unassigned';
-            html += `<div class="unit-person-row"><span>${p.name}</span><span class="status-tag ${statusClass}">${dName}</span></div>`;
-        });
-        card.innerHTML = html;
-        reportContainer.appendChild(card);
+    try {
+        for (const [unitName, people] of Object.entries(units)) {
+            const uDutyStats = {};
+            people.forEach(p => {
+                const dId = p.assignments ? p.assignments[currentSession] : null;
+                const d = getDutyName(dId);
+                uDutyStats[d] = (uDutyStats[d] || 0) + 1;
+            });
+            const statsStr = Object.entries(uDutyStats).map(([k, v]) => `${k}:${v}`).join(' | ');
+
+            const card = document.createElement('div');
+            card.className = 'unit-card';
+            let html = `
+            <div class="unit-header"><span>${unitName}</span><span>${people.length} 人</span></div>
+            <div class="unit-stats" style="padding: 0 0 10px;">${statsStr}</div>
+        `;
+            people.forEach(p => {
+                const dId = p.assignments ? p.assignments[currentSession] : null;
+                const dName = getDutyName(dId);
+                const statusClass = dId ? 'active-duty' : 'unassigned';
+                html += `<div class="unit-person-row"><span>${p.name}</span><span class="status-tag ${statusClass}">${dName}</span></div>`;
+            });
+            card.innerHTML = html;
+            reportContainer.appendChild(card);
+        }
+    } catch (e) {
+        console.error("Error rendering unit cards:", e);
+        reportContainer.innerHTML += `<div style="color:red">Rendering Error: ${e.message}</div>`;
     }
 }
 
