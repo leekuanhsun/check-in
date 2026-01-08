@@ -847,6 +847,7 @@ box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     font-weight: bold;
     color: var(--primary-color);
 }
+
 /* Compact Duty List Grid */
 #settingsDutyList {
     display: grid;
@@ -864,25 +865,37 @@ box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     border-radius: 6px;
     padding: 8px 12px;
     background-color: #fff;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 #settingsDutyList .settings-item span:nth-child(2) {
-    display: none; /* Hide empty span */
+    display: none;
+    /* Hide empty span */
 }
 
-#settingsDutyList .settings-item span:first-child {
+#settingsDutyList .settings-item button,
+#settingsPersonList .settings-item button {
+    /* Added Person List selector */
+    padding: 2px 6px;
+    /* Reduced from 4px 8px */
+    margin-left: 6px;
+    font-size: 0.8em;
+    /* Reduced from 0.85em */
+    flex-shrink: 0;
+    line-height: 1.2;
+    /* Tighten line height */
+}
+
+#settingsDutyList .settings-item span:first-child,
+#settingsPersonList .settings-item span:first-child {
     font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-#settingsDutyList .settings-item button {
-    padding: 4px 8px;
-    margin-left: 8px;
-    font-size: 0.85em;
-    flex-shrink: 0;
+    flex: 1;
+    /* Allow it to take available space */
+    min-width: 0;
+    /* Crucial for ellipsis in flex */
 }
 
 
@@ -925,10 +938,9 @@ box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .advanced-export-controls select,
     .advanced-export-controls button {
         width: 100%;
     }
 }
-
