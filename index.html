@@ -218,6 +218,30 @@
                     <h2>組別統計報表</h2>
                     <button id="copyGroupReportBtn" class="btn btn-success">複製報表文字</button>
                 </div>
+
+                <!-- 篩選組別 -->
+                <details class="accordion-filter" id="reportGroupFilter"
+                    style="margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">
+                    <summary
+                        style="padding: 10px; font-weight: bold; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between;">
+                        <span>🔍 顯示組別設定 <span id="groupFilterCount"
+                                style="font-weight:normal; color:#666; font-size:0.9em;">(顯示全部)</span></span>
+                        <span class="toggle-icon">▼</span>
+                    </summary>
+                    <div class="filter-content" style="padding: 10px; border-top: 1px solid #eee;">
+                        <div class="filter-actions" style="margin-bottom: 10px; display: flex; gap: 10px;">
+                            <button id="selectAllGroupsBtn" class="btn btn-sm"
+                                style="padding: 4px 10px; font-size: 0.9em;">全選</button>
+                            <button id="clearAllGroupsBtn" class="btn btn-sm btn-outline"
+                                style="padding: 4px 10px; font-size: 0.9em; background:#f8f9fa; border:1px solid #ddd;">清空</button>
+                        </div>
+                        <div id="groupCheckboxes" class="checkbox-grid"
+                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px;">
+                            <!-- Checkboxes will be injected here -->
+                        </div>
+                    </div>
+                </details>
+
                 <!-- 統計摘要 -->
                 <div class="report-summary">
                     <div class="summary-card total">

@@ -4,7 +4,8 @@ let state = {
     people: [],
     duties: [],
     currentSession: '早點名', // 預設時段
-    reportVisibleUnits: null // For Unit Report Filter, null = all
+    reportVisibleUnits: null, // For Unit Report Filter, null = all
+    reportVisibleGroups: null // For Group Report Filter, null = all
 };
 
 // Custom Sort Orders
