@@ -229,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initTabs();
         initReportUnitFilter(); // Initialize Report Filter
         initReportGroupFilter(); // Initialize Group Report Filter
+        initSmartImport(); // Initialize Smart Import Modal
         setupEventListeners();
 
         // 初始化時段選擇器狀態
