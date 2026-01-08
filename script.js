@@ -860,6 +860,57 @@ function updateExportUnitSelect() {
 }
 
 
+}
+
+function generateUnitAllSessionReport(unitName) {
+    if (!unitName) return '請先選擇建置班';
+
+    const sessionSelect = document.getElementById('sessionSelect');
+    const allSessions = Array.from(sessionSelect.options).map(o => o.value);
+
+    // Filter people in this unit
+    const unitPeople = state.people.filter(p => (p.unit || '預設建置班') === unitName);
+    const shouldAttend = unitPeople.length;
+
+    let output = `[${unitName}] 全時段公差彙整\n\n`;
+    output += `${unitName}\n\n`;
+
+    allSessions.forEach(sess => {
+        output += `${sess}\n`;
+        output += `應到${shouldAttend}\n`;
+
+        // Calculate duties for this session
+        const dutyMap = {}; // DutyName -> [PersonName]
+        let totalDutyCount = 0;
+
+        unitPeople.forEach(p => {
+            const dId = p.assignments ? p.assignments[sess] : null;
+            if (dId) {
+                const dName = getDutyName(dId);
+                if (!dutyMap[dName]) dutyMap[dName] = [];
+                dutyMap[dName].push(p.name);
+                totalDutyCount++;
+            }
+        });
+
+        // Print Duty Lines (Sorted by system duty order)
+        if (state.duties) {
+            state.duties.forEach(d => {
+                const dName = d.name;
+                if (dutyMap[dName]) {
+                    const names = dutyMap[dName];
+                    output += `${dName}${names.length} ${names.join(' ')}\n`;
+                }
+            });
+        }
+
+        output += `實到：${shouldAttend - totalDutyCount}\n`;
+        output += `_________________\n\n`;
+    });
+
+    return output;
+}
+
 function initTabs() {
     const tabs = document.querySelectorAll('.nav-tab');
     tabs.forEach(tab => {
