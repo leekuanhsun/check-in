@@ -593,6 +593,10 @@ function renderReport() {
     if (state.people) {
         state.people.forEach(p => {
             const u = p.unit || '預設建置班';
+            // Filter Logic Here
+            if (state.reportVisibleUnits && !state.reportVisibleUnits.has(u)) {
+                return; // Skip if not in visible set
+            }
             if (!units[u]) units[u] = [];
             units[u].push(p);
         });
@@ -852,18 +856,6 @@ function generateCopyText(mode) {
     });
 
     return output;
-}
-
-function getDutyName(id) {
-    if (!id) return '無';
-    const d = state.duties.find(x => x.id === id);
-    return d ? d.name : '無';
-}
-
-function updateExportUnitSelect() {
-    const select = document.getElementById('exportUnitSelect');
-    if (!select) return;
-
     // Check if distinct from last render to avoid flickering/resetting selection? 
     // For simplicity, re-populate if filtering changes, or just populate once.
     // Let's populate every time but keep selection if possible.
