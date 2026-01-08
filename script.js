@@ -682,7 +682,7 @@ function renderGroupReport() {
     });
 
     // Sort keys to make output stable
-    const sortedKeys = Object.keys(groups).sort();
+    const sortedKeys = Object.keys(groups).sort((a, b) => compareCustomOrder(a, b, GROUP_ORDER));
 
     if (sortedKeys.length === 0) {
         reportContainer.innerHTML = '<div class="empty-state">暫無人員資料</div>';
@@ -875,7 +875,7 @@ function updateExportUnitSelect() {
     const currentVal = select.value;
     select.innerHTML = '<option value="">選擇建置班...</option>';
 
-    const units = [...new Set(state.people.map(p => p.unit || '預設建置班'))].sort();
+    const units = [...new Set(state.people.map(p => p.unit || '預設建置班'))].sort((a, b) => compareCustomOrder(a, b, UNIT_ORDER));
     units.forEach(u => {
         const opt = document.createElement('option');
         opt.value = u;
