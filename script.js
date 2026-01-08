@@ -362,51 +362,38 @@ function renderRollCall() {
     if (!container) return;
 
     // 更新篩選器選單
-    if (unitFilter) {
-        // ... (Unit filter population logic remains the same, but let's optimize to not clear every time if possible, or just keep it simple)
-        // Ideally we should separate option population from render loop to avoid re-rendering options constantly, 
-        // but for now let's keep the pattern but add group logic. 
-        // Actually, re-populating on every render might be annoying if selection is lost, 
-        // but renderRollCall is called on filter change. 
-        // Let's protect the selection.
+    const populateOptions = (selectEl, options, sortOrder) => {
+        const currentVal = selectEl.value;
+        // distinct values and sort
+        const sortedOpts = [...options].sort((a, b) => compareCustomOrder(a, b, sortOrder));
 
-        const populateOptions = (selectEl, options, defaultLabel) => {
-            const currentVal = selectEl.value;
-            // distinct values
-            const existingOpts = Array.from(selectEl.options).map(o => o.value);
-            options.forEach(opt => {
-                if (!existingOpts.includes(opt)) {
-                    const el = document.createElement('option');
-                    el.value = opt;
-                    el.innerText = opt;
-                    selectEl.appendChild(el);
-                }
-            });
-            // Restore selection if it still exists (it should)
-            selectEl.value = currentVal;
-        };
+        // Re-render options to ensure order (This might reset selection if not careful, but we restore it)
+        // To ensure order, we must clear and append. But first option is usually "All"
+        // The existing code was appending only new ones, which means order depends on discovered order. This is bad for filtering.
+        // Let's rewrite to clear and rebuild (except first option)
 
+        while (selectEl.options.length > 1) {
+            selectEl.remove(1);
+        }
+
+        sortedOpts.forEach(opt => {
+            const el = document.createElement('option');
+            el.value = opt;
+            el.innerText = opt;
+            selectEl.appendChild(el);
+        });
+
+        selectEl.value = currentVal;
+    };
+
+    if (unitFilter && state.people) {
         const allUnits = new Set(state.people.map(p => p.unit || '預設建置班'));
-        populateOptions(unitFilter, allUnits, '所有建置班');
+        populateOptions(unitFilter, allUnits, UNIT_ORDER);
     }
 
-    if (groupFilter) {
-        const populateOptions = (selectEl, options, defaultLabel) => {
-            const currentVal = selectEl.value;
-            const existingOpts = Array.from(selectEl.options).map(o => o.value);
-            options.forEach(opt => {
-                if (!existingOpts.includes(opt)) {
-                    const el = document.createElement('option');
-                    el.value = opt;
-                    el.innerText = opt;
-                    selectEl.appendChild(el);
-                }
-            });
-            selectEl.value = currentVal;
-        };
-
+    if (groupFilter && state.people) {
         const allGroups = new Set(state.people.map(p => p.group || '未分組'));
-        populateOptions(groupFilter, allGroups, '所有組別');
+        populateOptions(groupFilter, allGroups, GROUP_ORDER);
     }
 
     const unitVal = unitFilter ? unitFilter.value : 'all';
