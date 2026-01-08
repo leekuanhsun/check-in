@@ -846,65 +846,29 @@ function updateExportUnitSelect() {
     });
 }
 
-function generateUnitAllSessionReport(unitName) {
-    if (!unitName) return '請先選擇建置班';
-
-    const sessionSelect = document.getElementById('sessionSelect');
-    const allSessions = Array.from(sessionSelect.options).map(o => o.value);
-
-    let output = `[${unitName}] 全時段公差彙整\n\n`;
-
-    // Filter people in this unit
-    const unitPeople = state.people.filter(p => (p.unit || '預設建置班') === unitName);
-
-    allSessions.forEach(sess => {
-        const dutyLines = [];
-        unitPeople.forEach(p => {
-            const dId = p.assignments ? p.assignments[sess] : null;
-            if (dId) {
-                const dName = getDutyName(dId);
-                dutyLines.push(`- ${p.name} (${dName})`);
-            }
+tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => {
+            c.classList.remove('active');
+            c.style.display = 'none';
         });
 
-        if (dutyLines.length > 0) {
-            output += `${sess}：\n`;
-            output += dutyLines.join('\n') + '\n\n';
+        tab.classList.add('active');
+        const tabId = tab.dataset.tab;
+        const content = document.getElementById(`tab-${tabId}`);
+        if (content) {
+            content.classList.add('active');
+            if (tabId === 'rollcall') {
+                content.style.display = 'flex';
+            } else {
+                content.style.display = 'block';
+            }
         }
+        if (tabId === 'report') renderReport();
+        if (tabId === 'group-report') renderGroupReport();
     });
-
-    if (output.trim() === `[${unitName}] 全時段公差彙整`) {
-        output += "無任何公差分配";
-    }
-
-    return output;
-}
-
-function initTabs() {
-    const tabs = document.querySelectorAll('.nav-tab');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => {
-                c.classList.remove('active');
-                c.style.display = 'none';
-            });
-
-            tab.classList.add('active');
-            const tabId = tab.dataset.tab;
-            const content = document.getElementById(`tab-${tabId}`);
-            if (content) {
-                content.classList.add('active');
-                if (tabId === 'rollcall') {
-                    content.style.display = 'flex';
-                } else {
-                    content.style.display = 'block';
-                }
-            }
-            if (tabId === 'report') renderReport();
-            if (tabId === 'group-report') renderGroupReport();
-        });
-    });
+});
 }
 
 function setupEventListeners() {
