@@ -544,24 +544,29 @@ function renderReport() {
 
     if (totalCountEl) totalCountEl.innerText = state.people.length;
 
-    // Fix: Define totalPeople
-    const totalPeople = state.people ? state.people.length : 0;
+    // Fix: Define totalPeople based on filter
+    let visiblePeople = state.people || [];
+    if (state.reportVisibleUnits) {
+        visiblePeople = visiblePeople.filter(p => state.reportVisibleUnits.has(p.unit || '預設建置班'));
+    }
+    const totalPeople = visiblePeople.length;
+
+    if (totalCountEl) totalCountEl.innerText = totalPeople;
+
     const currentSession = state.currentSession || '早點名'; // Fallback
 
     let dutiesCount = 0;
     const dutyStats = {};
 
     try {
-        if (state.people) {
-            state.people.forEach(p => {
-                const dId = p.assignments ? p.assignments[currentSession] : null;
-                if (dId) {
-                    dutiesCount++;
-                    const dName = getDutyName(dId);
-                    dutyStats[dName] = (dutyStats[dName] || 0) + 1;
-                }
-            });
-        }
+        visiblePeople.forEach(p => {
+            const dId = p.assignments ? p.assignments[currentSession] : null;
+            if (dId) {
+                dutiesCount++;
+                const dName = getDutyName(dId);
+                dutyStats[dName] = (dutyStats[dName] || 0) + 1;
+            }
+        });
     } catch (e) {
         console.error("Error calculating duties:", e);
     }
@@ -576,6 +581,7 @@ function renderReport() {
             globalStatsContainer.innerHTML = '<span style="color:#888;">無公差人員</span>';
         } else {
             Object.entries(dutyStats).forEach(([key, val]) => {
+                // Determine color based on duty count? No specific requirement.
                 const item = document.createElement('div');
                 item.className = 'duty-stat-item';
                 item.innerHTML = `<strong>${key}:</strong><span>${val}</span>`;
@@ -590,17 +596,11 @@ function renderReport() {
     // Units
     reportContainer.innerHTML = '';
     const units = {};
-    if (state.people) {
-        state.people.forEach(p => {
-            const u = p.unit || '預設建置班';
-            // Filter Logic Here
-            if (state.reportVisibleUnits && !state.reportVisibleUnits.has(u)) {
-                return; // Skip if not in visible set
-            }
-            if (!units[u]) units[u] = [];
-            units[u].push(p);
-        });
-    }
+    visiblePeople.forEach(p => {
+        const u = p.unit || '預設建置班';
+        if (!units[u]) units[u] = [];
+        units[u].push(p);
+    });
 
     try {
         // Sort Units by Custom Order
