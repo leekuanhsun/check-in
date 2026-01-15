@@ -36,8 +36,18 @@ function initSmartImport() {
     }
 
     if (confirmBtn) {
-        confirmBtn.addEventListener('click', () => {
-            applyImport(currentImportActions);
+        confirmBtn.addEventListener('click', async () => {
+            await applyImportV2(currentImportActions);
+
+            // Auto-switch session if found in actions
+            if (currentImportActions.length > 0) {
+                // Use the session of the first action as the view target
+                const targetSession = currentImportActions[0].session;
+                state.currentSession = targetSession;
+                const sessionSelect = document.getElementById('sessionSelect');
+                if (sessionSelect) sessionSelect.value = targetSession;
+            }
+
             // Confirm/Reset UI
             alert(`成功匯入 ${currentImportActions.length} 筆資料！`);
 
@@ -47,10 +57,9 @@ function initSmartImport() {
             document.getElementById('importStep1').classList.remove('hidden');
             document.getElementById('importStep2').classList.add('hidden');
 
-            render(); // Refresh Main UI
-            state.people.forEach(p => updatePersonCardUI(p));
             saveToLocal();
-            if (useFirebase) saveToFirebase();
+            // Firebase sync is now handled in applyImport
+            render(); // Refresh Main UI
         });
     }
 }
@@ -81,9 +90,9 @@ function renderImportPreview(actions) {
     if (summary) summary.innerText = `共解析出 ${actions.length} 筆資料`;
 }
 
-function applyImport(actions) {
-    actions.forEach(action => {
-        if (action.status === 'UNKNOWN_PERSON') return;
+async function applyImport(actions) {
+    for (const action of actions) {
+        if (action.status === 'UNKNOWN_PERSON') continue;
 
         // Handle New Duty Creation
         if (action.status === 'NEW_DUTY' || !action.dutyId) {
@@ -92,18 +101,29 @@ function applyImport(actions) {
             if (existing) {
                 action.dutyId = existing.id;
             } else {
-                const newId = addDuty(action.dutyName); // This function (assumed global) adds to state.duties
-                action.dutyId = newId;
+                // addDuty is async, so we await it. 
+                // However, addDuty pushes to state.duties immediately in local mode, 
+                // but for Firebase it might take a moment.
+                // We need to modify addDuty to return the new ID or object.
+                // For now, let's assume local mode or quick firestore response, 
+                // but best to fetch the latest duty ref.
+                await addDuty(action.dutyName);
+
+                // Re-find it
+                existing = state.duties.find(d => d.name === action.dutyName);
+                if (existing) action.dutyId = existing.id;
             }
         }
 
         // Assign
-        const person = state.people.find(p => p.id === action.personId);
-        if (person) {
-            if (!person.assignments) person.assignments = {};
-            person.assignments[action.session] = action.dutyId;
+        if (action.dutyId) {
+            const person = state.people.find(p => p.id === action.personId);
+            if (person) {
+                if (!person.assignments) person.assignments = {};
+                person.assignments[action.session] = action.dutyId;
+            }
         }
-    });
+    }
 }
 
 
@@ -446,23 +466,43 @@ async function handleBatchAdd() {
 }
 
 // 2. 新增公差
+// 2. 新增公差
 async function addDuty(name) {
     if (!name.trim()) return;
+    const cleanName = name.trim();
+
+    // Check for duplicate in local state
+    const existing = state.duties.find(d => d.name === cleanName);
+    if (existing) {
+        // Already exists, return its ID (or just return)
+        return existing.id;
+    }
+
     if (useFirebase) {
         try {
-            await db.collection("duties").add({
-                name: name.trim(),
+            // Optimistic Update
+            // We need a temp ID or actual ID if we await.
+            // .add() returns a Ref which has .id
+            const docRef = await db.collection("duties").add({
+                name: cleanName,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
+
+            // Push to local state immediately so UI works before snapshot
+            const newDuty = { id: docRef.id, name: cleanName };
+            state.duties.push(newDuty);
+
+            return docRef.id;
         } catch (e) { console.error(e); }
     } else {
         const newDuty = {
             id: 'duty_' + Date.now(),
-            name: name.trim()
+            name: cleanName
         };
         state.duties.push(newDuty);
         saveToLocal();
         render();
+        return newDuty.id;
     }
 }
 
@@ -481,7 +521,8 @@ async function deletePerson(id) {
 
 // 4. 刪除公差
 async function deleteDuty(id) {
-    if (!confirm('確定要刪除此公差類別嗎？')) return;
+    // Confirm removed as requested
+    // if (!confirm('確定要刪除此公差類別嗎？')) return;
 
     if (useFirebase) {
         try {
@@ -677,8 +718,15 @@ function renderRollCall() {
     if (dutiesContainer) {
         dutiesContainer.innerHTML = '';
         state.duties.forEach(duty => {
-            // 統計該時段分配到此公差的人數
-            const count = state.people.filter(p => p.assignments && p.assignments[currentSession] === duty.id).length;
+            // Updated: Apply filters to Duty Columns as well
+            const assigned = state.people.filter(p => {
+                const isAssigned = p.assignments && p.assignments[currentSession] === duty.id;
+                const matchUnit = unitVal === 'all' || (p.unit || '預設建置班') === unitVal;
+                const matchGroup = groupVal === 'all' || (p.group || '未分組') === groupVal;
+                return isAssigned && matchUnit && matchGroup;
+            });
+
+            const count = assigned.length;
             const col = document.createElement('div');
             col.className = 'duty-column';
             col.innerHTML = `
@@ -686,7 +734,6 @@ function renderRollCall() {
             <div class="duty-content" id="${duty.id}"></div>
         `;
             const content = col.querySelector('.duty-content');
-            const assigned = state.people.filter(p => p.assignments && p.assignments[currentSession] === duty.id);
             if (assigned.length === 0) content.innerHTML = '<div class="empty-state" style="font-size:0.8em; margin-top:20px;">無人分配</div>';
             else assigned.forEach(p => content.appendChild(createPersonCard(p)));
             dutiesContainer.appendChild(col);
@@ -746,13 +793,33 @@ function createPersonCard(person) {
 
 function renderSettings() {
     const peopleList = document.getElementById('settingsPeopleList');
+    const searchInput = document.getElementById('settingSearchInput');
+    const filterText = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
     if (peopleList) {
         peopleList.innerHTML = '';
-        state.people.forEach(p => {
+
+        // Filter People
+        const filteredPeople = state.people.filter(p => {
+            if (!filterText) return true;
+            return (p.name && p.name.includes(filterText)) ||
+                (p.unit && p.unit.includes(filterText)) ||
+                (p.group && p.group.includes(filterText));
+        });
+
+        filteredPeople.forEach(p => {
             const item = document.createElement('div');
             item.className = 'settings-item';
-            // 為了避免作用域問題，deletePerson 必須是 Global 的
-            item.innerHTML = `<span>${p.name}</span><span>${p.unit || ''}</span><span>${p.group || ''}</span><button class="btn btn-danger" onclick="deletePerson('${p.id}')">刪除</button>`;
+            // Added Edit Button
+            item.innerHTML = `
+                <span>${p.name}</span>
+                <span>${p.unit || ''}</span>
+                <span>${p.group || ''}</span>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn" style="background-color: #17a2b8; color: white;" onclick="editPerson('${p.id}')">修改</button>
+                    <button class="btn btn-danger" onclick="deletePerson('${p.id}')">刪除</button>
+                </div>
+            `;
             peopleList.appendChild(item);
         });
     }
@@ -765,6 +832,52 @@ function renderSettings() {
             item.innerHTML = `<span>${d.name}</span><span></span><button class="btn btn-danger" onclick="deleteDuty('${d.id}')">刪除</button>`;
             dutyList.appendChild(item);
         });
+    }
+}
+
+// 3.1 修改人員
+async function editPerson(id) {
+    const person = state.people.find(p => p.id === id);
+    if (!person) return;
+
+    // TODO: Improve UX later, currently using simple prompts to avoid full Modal implementation
+    const newName = prompt("修改姓名:", person.name);
+    if (newName === null) return; // Cancelled
+
+    const newUnit = prompt("修改建置班:", person.unit || "");
+    if (newUnit === null) return;
+
+    const newGroup = prompt("修改組別:", person.group || "");
+    if (newGroup === null) return;
+
+    await updatePerson(id, newName.trim(), newUnit.trim(), newGroup.trim());
+}
+
+async function updatePerson(id, name, unit, group) {
+    if (!name) { alert("姓名不能為空"); return; }
+
+    // Optimistic Update
+    const person = state.people.find(p => p.id === id);
+    if (person) {
+        person.name = name;
+        person.unit = unit;
+        person.group = group;
+        render(); // Refresh UI including Settings List
+    }
+
+    if (useFirebase) {
+        try {
+            await db.collection("people").doc(id).update({
+                name: name,
+                unit: unit,
+                group: group
+            });
+        } catch (e) {
+            console.error("Update failed", e);
+            alert("更新失敗: " + e.message);
+        }
+    } else {
+        saveToLocal();
     }
 }
 
@@ -1595,6 +1708,13 @@ function setupEventListeners() {
         }
     });
 
+    const settingSearchInput = document.getElementById('settingSearchInput');
+    if (settingSearchInput) {
+        settingSearchInput.addEventListener('input', () => {
+            renderSettings();
+        });
+    }
+
     const resetAssignmentsBtn = document.getElementById('resetAssignmentsBtn');
     if (resetAssignmentsBtn) resetAssignmentsBtn.addEventListener('click', resetAssignments);
 
@@ -1662,4 +1782,63 @@ function setupEventListeners() {
             render(); // Re-render everything (RollCall + Report + Settings)
         });
     }
+}
+
+// Revised applyImport with Firebase Sync Support
+async function applyImportV2(actions) {
+    if (!actions || actions.length === 0) return false;
+
+    // Prepare Firebase Batch if needed
+    let batch = null;
+    if (useFirebase && db) {
+        batch = db.batch();
+    }
+
+    for (const action of actions) {
+        if (action.status === 'UNKNOWN_PERSON') continue;
+
+        // Handle New Duty Creation
+        if (action.status === 'NEW_DUTY' || !action.dutyId) {
+            // Check if we already created it in this loop (to avoid duplicates)
+            let existing = state.duties.find(d => d.name === action.dutyName);
+            if (existing) {
+                action.dutyId = existing.id;
+            } else {
+                // await creation
+                await addDuty(action.dutyName);
+                existing = state.duties.find(d => d.name === action.dutyName);
+                if (existing) action.dutyId = existing.id;
+            }
+        }
+
+        // Assign
+        if (action.dutyId) {
+            const person = state.people.find(p => p.id === action.personId);
+            if (person) {
+                if (!person.assignments) person.assignments = {};
+                person.assignments[action.session] = action.dutyId;
+
+                // Add to batch if firebase
+                if (batch) {
+                    const ref = db.collection("people").doc(person.id);
+                    // Use dot notation to update specific session assignment
+                    const updateKey = `assignments.${action.session}`;
+                    batch.update(ref, { [updateKey]: action.dutyId });
+                }
+            }
+        }
+    }
+
+    // Commit Batch
+    if (batch) {
+        try {
+            await batch.commit();
+            console.log("Import synced to Firestore via V2");
+        } catch (e) {
+            console.error("Batch commit failed", e);
+            alert("雲端同步失敗: " + e.message);
+        }
+    }
+
+    return true;
 }
