@@ -12,6 +12,7 @@ from fetcher import fetch_html
 from logging_config import setup_logging
 from models import StockRecord
 from parser import parse_page
+from tradingview import apply_quote, fetch_quotes, resolve_symbols
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -47,6 +48,30 @@ class MoneyDJConceptScraper:
             if i < len(targets) - 1:
                 time.sleep(random.uniform(self.min_delay, self.max_delay))
         return all_records
+
+    def run_batch_with_tradingview_quotes(self, targets: List[Dict[str, str]]) -> List[StockRecord]:
+        """先用 MoneyDJ 取得分類/成分股，再用 TradingView 覆蓋報價欄位。
+
+        解析不到 TradingView symbol 或查無報價的股票，保留 MoneyDJ 原本解析出的
+        價格欄位（若有）作為備援，不會整筆捨棄。
+        """
+        records = self.run_batch(targets)
+
+        stock_ids = sorted({r.stock_id for r in records if r.stock_id})
+        symbol_map = resolve_symbols(stock_ids)
+        quotes = fetch_quotes(list(symbol_map.values()))
+        logger.info(
+            "resolved %d/%d symbols, got quotes for %d",
+            len(symbol_map), len(stock_ids), len(quotes),
+        )
+
+        for record in records:
+            symbol = symbol_map.get(record.stock_id)
+            quote = quotes.get(symbol) if symbol else None
+            updated = apply_quote(asdict(record), quote)
+            for key, value in updated.items():
+                setattr(record, key, value)
+        return records
 
     def save_json(self, records: List[StockRecord], path: str) -> None:
         with open(path, "w", encoding="utf-8") as f:

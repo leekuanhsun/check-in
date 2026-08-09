@@ -18,6 +18,14 @@ def main() -> None:
     parser.add_argument("--output", default="moneydj_concept_stocks.json", help="輸出 JSON 路徑")
     parser.add_argument("--inspect", help="只印出指定 URL 的表格結構，不執行完整爬取")
     parser.add_argument("--top", type=int, default=10, help="顯示當日漲幅排行前 N 名")
+    parser.add_argument(
+        "--quotes-source",
+        choices=["moneydj", "tradingview"],
+        default="moneydj",
+        help="價格資料來源：moneydj（預設，直接用頁面上的欄位）或 "
+        "tradingview（MoneyDJ 只取分類/成分股，報價改用 TradingView 覆蓋，"
+        "屬未公開端點，使用前請先看 README 的注意事項）",
+    )
     args = parser.parse_args()
 
     scraper = MoneyDJConceptScraper()
@@ -30,7 +38,10 @@ def main() -> None:
         parser.error("--targets 或 --inspect 至少需要指定一個")
 
     targets = _load_targets(args.targets)
-    records = scraper.run_batch(targets)
+    if args.quotes_source == "tradingview":
+        records = scraper.run_batch_with_tradingview_quotes(targets)
+    else:
+        records = scraper.run_batch(targets)
     scraper.save_json(records, args.output)
 
     top_gainers = rank_today_gainers(records, top_n=args.top)
