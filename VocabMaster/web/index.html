@@ -658,6 +658,31 @@ button{font-family:inherit;}
   justify-content:center;
 }
 
+/* ---------- Danger zone ---------- */
+.danger-section{
+  padding:18px 18px 32px;
+}
+.danger-title{
+  font-family:var(--font-mono);
+  font-size:.7rem;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+  margin-bottom:10px;
+}
+.danger-note{
+  font-size:.78rem;
+  color:var(--bad);
+  line-height:1.6;
+  margin-bottom:12px;
+}
+.ctrl-btn.danger{
+  justify-content:center;
+  color:var(--bad);
+  border-color:var(--bad);
+  background:var(--bad-tint);
+}
+
 /* ---------- Toast ---------- */
 .toast{
   position:fixed;
@@ -729,11 +754,18 @@ button{font-family:inherit;}
   const LS_QUIZ = 'vocabweb.quiz';
   let learned = new Set();
   let quizResults = {};
+  let confirmingClear = false;
   try { learned = new Set(JSON.parse(localStorage.getItem(LS_LEARNED) || '[]')); } catch (e) {}
   try { quizResults = JSON.parse(localStorage.getItem(LS_QUIZ) || '{}'); } catch (e) {}
 
   function saveLearned() { try { localStorage.setItem(LS_LEARNED, JSON.stringify([...learned])); } catch (e) {} }
   function saveQuiz() { try { localStorage.setItem(LS_QUIZ, JSON.stringify(quizResults)); } catch (e) {} }
+  function clearAllProgress() {
+    learned = new Set();
+    quizResults = {};
+    saveLearned();
+    saveQuiz();
+  }
 
   function isLearned(id) { return learned.has(id); }
   function toggleLearned(id) {
@@ -939,6 +971,19 @@ button{font-family:inherit;}
         </div>
         <input type="file" id="import-input" accept="application/json" style="display:none;">
       </div>
+      <div class="danger-section">
+        ${confirmingClear ? `
+          <div class="danger-title">清除進度</div>
+          <div class="danger-note">確定要清除這個瀏覽器上的所有學習進度嗎？已熟記的單字和測驗成績都會被移除，此動作無法復原。若還沒備份，建議先按「匯出備份」。</div>
+          <div class="backup-row">
+            <button class="ctrl-btn grow" data-action="clear-cancel">取消</button>
+            <button class="ctrl-btn grow danger" data-action="clear-confirm">確定清除</button>
+          </div>
+        ` : `
+          <div class="danger-title">清除進度</div>
+          <button class="ctrl-btn danger" data-action="clear-ask">${ICONS.cross} 清除全部進度</button>
+        `}
+      </div>
     </div>`;
   }
 
@@ -1126,6 +1171,14 @@ button{font-family:inherit;}
       case 'speak': speak(el.dataset.text); break;
       case 'export-progress': exportProgress(); break;
       case 'import-progress': { const inp = document.getElementById('import-input'); if (inp) inp.click(); break; }
+      case 'clear-ask': confirmingClear = true; render(); break;
+      case 'clear-cancel': confirmingClear = false; render(); break;
+      case 'clear-confirm':
+        clearAllProgress();
+        confirmingClear = false;
+        render();
+        showToast('已清除全部進度');
+        break;
       case 'flip': s.flipped = !s.flipped; render(); break;
       case 'toggle-learned': {
         const words = groupWords(s.band, s.group);
