@@ -740,10 +740,6 @@ button{font-family:inherit;}
     if (learned.has(id)) learned.delete(id); else learned.add(id);
     saveLearned();
   }
-  function markGroupLearned(bandId, groupIndex) {
-    groupWords(bandId, groupIndex).forEach(w => learned.add(w.id));
-    saveLearned();
-  }
   function learnedCountForBand(bandId) {
     return (byBand[bandId] || []).filter(w => learned.has(w.id)).length;
   }
@@ -1159,6 +1155,7 @@ button{font-family:inherit;}
         const correct = idx === q.correctIndex;
         const correctText = q.kind === 'w2m' ? meaningText(q.word) : q.word.word;
         s.answers.push({ word: q.word, correct, correctText });
+        if (correct && !learned.has(q.word.id)) { learned.add(q.word.id); saveLearned(); }
         speak(q.word.word);
         render();
         break;
@@ -1169,7 +1166,6 @@ button{font-family:inherit;}
           s.finished = true;
           const score = s.answers.filter(a => a.correct).length;
           recordQuiz(s.band, s.group, score);
-          if (score === s.questions.length) markGroupLearned(s.band, s.group);
           render();
         }
         break;
