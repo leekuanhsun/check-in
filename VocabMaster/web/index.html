@@ -630,6 +630,58 @@ button{font-family:inherit;}
   font-size:.85rem;
 }
 
+/* ---------- Backup (export / import) ---------- */
+.backup-section{
+  padding:20px 18px 32px;
+  border-top:1px solid var(--line-soft);
+  margin-top:8px;
+}
+.backup-title{
+  font-family:var(--font-mono);
+  font-size:.7rem;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+}
+.backup-note{
+  font-size:.78rem;
+  color:var(--ink-faint);
+  line-height:1.6;
+  margin:6px 0 12px;
+}
+.backup-row{
+  display:flex;
+  gap:10px;
+}
+.backup-row .ctrl-btn{
+  padding:12px 10px;
+  justify-content:center;
+}
+
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:28px;
+  transform:translateX(-50%) translateY(12px);
+  background:var(--ink);
+  color:var(--card);
+  padding:10px 18px;
+  border-radius:999px;
+  font-size:.82rem;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease, transform .2s ease;
+  z-index:50;
+  max-width:80vw;
+  text-align:center;
+  box-shadow:0 8px 24px -8px var(--shadow);
+}
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
 @media (prefers-reduced-motion: reduce){
   *{transition:none !important;}
 }
@@ -742,6 +794,8 @@ button{font-family:inherit;}
     quiz: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2 1.8-2 3.3"/><circle cx="12" cy="16.3" r=".4" fill="currentColor"/></svg>',
     chevL: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
     chevR: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>',
+    download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>',
+    upload: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V9"/><path d="M7 13l5-5 5 5"/><path d="M5 20h14"/></svg>',
   };
 
   function ringSvg(pct, colorVar) {
@@ -752,6 +806,79 @@ button{font-family:inherit;}
 
   function esc(str) {
     return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+  }
+
+  let toastTimer = null;
+  function showToast(msg) {
+    let el = document.getElementById('toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'toast';
+      el.className = 'toast';
+      document.querySelector('.stage').appendChild(el);
+    }
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  // ---------- backup: export / import ----------
+  function exportProgress() {
+    const payload = {
+      app: 'vocabweb',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      learned: [...learned],
+      quiz: quizResults,
+    };
+    const json = JSON.stringify(payload, null, 2);
+    const filename = 'vocab-progress-' + new Date().toISOString().slice(0, 10) + '.json';
+    if (window.claude && window.claude.downloads) {
+      window.claude.downloads.save({ filename, data: json })
+        .then(() => showToast('已匯出備份'))
+        .catch(err => {
+          if (err && err.code === 'declined') return;
+          showToast('匯出失敗，請再試一次');
+        });
+    } else {
+      try {
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+        showToast('已匯出備份');
+      } catch (e) {
+        showToast('匯出失敗，請再試一次');
+      }
+    }
+  }
+
+  function importProgressFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const payload = JSON.parse(reader.result);
+        const importedLearned = Array.isArray(payload.learned) ? payload.learned : [];
+        const importedQuiz = payload.quiz && typeof payload.quiz === 'object' ? payload.quiz : {};
+        importedLearned.forEach(id => learned.add(id));
+        Object.keys(importedQuiz).forEach(k => {
+          const prev = quizResults[k] || { best: 0, attempts: 0 };
+          const inc = importedQuiz[k] || { best: 0, attempts: 0 };
+          quizResults[k] = { best: Math.max(prev.best, inc.best || 0), attempts: prev.attempts + (inc.attempts || 0) };
+        });
+        saveLearned();
+        saveQuiz();
+        showToast('已匯入備份');
+        render();
+      } catch (e) {
+        showToast('這個檔案無法匯入');
+      }
+    };
+    reader.onerror = () => showToast('讀取檔案失敗');
+    reader.readAsText(file);
   }
 
   // ---------- render ----------
@@ -803,6 +930,15 @@ button{font-family:inherit;}
         <div class="home-desc">依 400 / 600 / 800 / 990 分級距分組，每組 10 字，可學習、朗讀、測驗。</div>
       </div>
       <div class="band-list">${rows}</div>
+      <div class="backup-section">
+        <div class="backup-title">備份進度</div>
+        <div class="backup-note">此裝置的進度存在瀏覽器裡，換裝置或清除瀏覽資料會消失。建議不定期「匯出備份」存成檔案，需要時再「匯入備份」還原。</div>
+        <div class="backup-row">
+          <button class="ctrl-btn grow" data-action="export-progress">${ICONS.download} 匯出備份</button>
+          <button class="ctrl-btn grow" data-action="import-progress">${ICONS.upload} 匯入備份</button>
+        </div>
+        <input type="file" id="import-input" accept="application/json" style="display:none;">
+      </div>
     </div>`;
   }
 
@@ -971,6 +1107,13 @@ button{font-family:inherit;}
     app.querySelectorAll('[data-action]').forEach(el => {
       el.addEventListener('click', () => handleAction(el.getAttribute('data-action'), el, s));
     });
+    const importInput = document.getElementById('import-input');
+    if (importInput) {
+      importInput.addEventListener('change', () => {
+        if (importInput.files && importInput.files[0]) importProgressFromFile(importInput.files[0]);
+        importInput.value = '';
+      });
+    }
   }
 
   function handleAction(action, el, s) {
@@ -981,6 +1124,8 @@ button{font-family:inherit;}
       case 'open-study': push({ screen: 'study', band: s.band, group: s.group, index: 0, flipped: false }); break;
       case 'open-quiz': push({ screen: 'quiz', band: s.band, group: s.group }); break;
       case 'speak': speak(el.dataset.text); break;
+      case 'export-progress': exportProgress(); break;
+      case 'import-progress': { const inp = document.getElementById('import-input'); if (inp) inp.click(); break; }
       case 'flip': s.flipped = !s.flipped; render(); break;
       case 'toggle-learned': {
         const words = groupWords(s.band, s.group);
@@ -1010,6 +1155,7 @@ button{font-family:inherit;}
         const correct = idx === q.correctIndex;
         const correctText = q.kind === 'w2m' ? meaningText(q.word) : q.word.word;
         s.answers.push({ word: q.word, correct, correctText });
+        speak(q.word.word);
         render();
         break;
       }
