@@ -949,7 +949,7 @@ button{font-family:inherit;}
       const page = pageForGroup(bandId, g);
       const c = learnedCountForPage(page);
       const qr = getQuizResult(bandId, g);
-      const done = c === WORDS_PER_GROUP;
+      const done = c === WORDS_PER_GROUP || (qr && qr.best === WORDS_PER_GROUP);
       cells.push(`<button class="group-cell ${done ? 'is-done' : ''}" data-action="open-group" data-group="${g}">
         <div class="group-num">${g}</div>
         <div class="group-score">${qr ? qr.best + '/10' : c + '/10'}</div>
