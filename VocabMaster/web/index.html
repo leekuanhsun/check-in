@@ -740,6 +740,10 @@ button{font-family:inherit;}
     if (learned.has(id)) learned.delete(id); else learned.add(id);
     saveLearned();
   }
+  function markGroupLearned(bandId, groupIndex) {
+    groupWords(bandId, groupIndex).forEach(w => learned.add(w.id));
+    saveLearned();
+  }
   function learnedCountForBand(bandId) {
     return (byBand[bandId] || []).filter(w => learned.has(w.id)).length;
   }
@@ -1163,7 +1167,9 @@ button{font-family:inherit;}
         if (s.qIndex < s.questions.length - 1) { s.qIndex++; s.selected = null; render(); }
         else {
           s.finished = true;
-          recordQuiz(s.band, s.group, s.answers.filter(a => a.correct).length);
+          const score = s.answers.filter(a => a.correct).length;
+          recordQuiz(s.band, s.group, score);
+          if (score === s.questions.length) markGroupLearned(s.band, s.group);
           render();
         }
         break;
