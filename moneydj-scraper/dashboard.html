@@ -1,0 +1,1487 @@
+<title>MoneyDJ 概念股資料儀表板</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page:         #edefee;
+    --surface:      #fcfcfa;
+    --surface-2:    #f5f6f3;
+    --ink:          #16211f;
+    --ink-2:        #4b5956;
+    --muted:        #82918d;
+    --line:         #dce0dd;
+    --line-strong:  #c3cbc7;
+    --accent:       #1f6e5c;
+    --accent-strong:#14503f;
+    --accent-soft:  #e3efea;
+    --gold:         #a9823f;
+    --gold-soft:    #f3ead6;
+    --rise:         #c23b3b;
+    --rise-soft:    #f7e4e1;
+    --fall:         #1b7a4a;
+    --fall-soft:    #e3f0e7;
+    --shadow: 0 1px 2px rgba(22,33,31,0.06), 0 8px 24px -12px rgba(22,33,31,0.18);
+
+    --font-display: "Iowan Old Style", "Songti TC", "Noto Serif TC", "PingFang TC", Georgia, serif;
+    --font-body: "Helvetica Neue", "PingFang TC", "Microsoft JhengHei", system-ui, -apple-system, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page:         #0d110f;
+      --surface:      #131917;
+      --surface-2:    #182019;
+      --ink:          #edeae0;
+      --ink-2:        #b7c2be;
+      --muted:        #7c8985;
+      --line:         #2a322f;
+      --line-strong:  #384039;
+      --accent:       #4fb89a;
+      --accent-strong:#7ed4b9;
+      --accent-soft:  #17332b;
+      --gold:         #d4b378;
+      --gold-soft:    #2b2418;
+      --rise:         #e66767;
+      --rise-soft:    #33201e;
+      --fall:         #199e70;
+      --fall-soft:    #16302a;
+      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px -12px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page:         #0d110f;
+    --surface:      #131917;
+    --surface-2:    #182019;
+    --ink:          #edeae0;
+    --ink-2:        #b7c2be;
+    --muted:        #7c8985;
+    --line:         #2a322f;
+    --line-strong:  #384039;
+    --accent:       #4fb89a;
+    --accent-strong:#7ed4b9;
+    --accent-soft:  #17332b;
+    --gold:         #d4b378;
+    --gold-soft:    #2b2418;
+    --rise:         #e66767;
+    --rise-soft:    #33201e;
+    --fall:         #199e70;
+    --fall-soft:    #16302a;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px -12px rgba(0,0,0,0.6);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 20px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ---------- Header ---------- */
+  header.top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px 24px;
+    border-bottom: 2px solid var(--line-strong);
+    padding-bottom: 16px;
+  }
+  .brand-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 6px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: 0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .top-meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-2);
+    text-align: right;
+  }
+  .top-meta .updated { color: var(--muted); }
+
+  /* ---------- Source banner ---------- */
+  .banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    border: 1px solid var(--gold);
+    background: var(--gold-soft);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .banner.is-real {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .banner .icon { font-size: 16px; line-height: 1.4; flex-shrink: 0; }
+  .banner strong { font-weight: 600; }
+  .banner .sub { color: var(--ink-2); margin-top: 2px; }
+  .banner .actions { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+  button {
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    font-weight: 600;
+    border-radius: 7px;
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink);
+    padding: 7px 13px;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease, color .15s ease;
+  }
+  button:hover { border-color: var(--accent); color: var(--accent-strong); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--surface);
+  }
+  button.primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); color: var(--surface); }
+  button.ghost { background: transparent; }
+
+  /* ---------- KPI strip ---------- */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+  }
+  .kpi .label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 6px;
+  }
+  .kpi .value {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .kpi.rise .value { color: var(--rise); }
+  .kpi.fall .value { color: var(--fall); }
+
+  /* ---------- Layout: sidebar + table ---------- */
+  .board {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .board { grid-template-columns: 1fr; }
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .panel .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-2);
+  }
+  .panel-head h2 {
+    font-family: var(--font-display);
+    font-size: 14.5px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .leaderboard { display: flex; flex-direction: column; gap: 16px; }
+  .lb-list { list-style: none; margin: 0; padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+  .lb-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 8px;
+    border-radius: 7px;
+  }
+  .lb-list li:hover { background: var(--surface-2); }
+  .lb-rank {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    width: 14px;
+    flex-shrink: 0;
+  }
+  .lb-name { flex: 1; min-width: 0; }
+  .lb-name .n { font-weight: 600; font-size: 13px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lb-name .c { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+  .lb-pct {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .lb-pct.rise { color: var(--rise); }
+  .lb-pct.fall { color: var(--fall); }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; min-width: 200px; }
+  .chip {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink-2);
+    border-radius: 999px;
+    padding: 5px 12px;
+    cursor: pointer;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent-strong); }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+  .search {
+    font-family: var(--font-body);
+    font-size: 13px;
+    border: 1px solid var(--line-strong);
+    border-radius: 7px;
+    padding: 7px 10px;
+    background: var(--surface);
+    color: var(--ink);
+    width: 180px;
+  }
+  .search:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  /* ---------- Table ---------- */
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 720px; }
+  thead th {
+    position: sticky; top: 0;
+    background: var(--surface-2);
+    text-align: left;
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  thead th:hover { color: var(--accent-strong); }
+  thead th .arrow { display: inline-block; width: 10px; opacity: 0.6; }
+  thead th[data-align="num"], td[data-align="num"] { text-align: right; }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--surface-2); }
+  td.name-cell .code { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); }
+  td.name-cell .name { font-weight: 600; }
+  td.name-cell .role { color: var(--muted); font-size: 11.5px; }
+  .cat-tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    white-space: nowrap;
+  }
+  td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .delta { display: inline-flex; align-items: center; gap: 3px; font-weight: 600; }
+  .delta.rise { color: var(--rise); }
+  .delta.fall { color: var(--fall); }
+  .delta.flat { color: var(--muted); }
+
+  .pctcell { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 96px; }
+  .pctbar { position: relative; width: 84px; height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+  .pctbar::before {
+    content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--line-strong);
+  }
+  .pctbar .fill { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
+  .pctbar .fill.rise { background: var(--rise); left: 50%; }
+  .pctbar .fill.fall { background: var(--fall); right: 50%; }
+
+  .empty-state { padding: 40px 16px; text-align: center; color: var(--muted); }
+
+  tbody tr.is-clickable { cursor: pointer; }
+  td.detail-cell { text-align: right; }
+  .row-detail-btn {
+    font-family: var(--font-body);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    padding: 4px 2px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .row-detail-btn:hover { color: var(--accent-strong); }
+
+  /* ---------- Detail modal ---------- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 14, 13, 0.55);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 4vh 16px;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .modal-overlay[hidden] { display: none; }
+  .modal-dialog {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 880px;
+    display: flex;
+    flex-direction: column;
+    max-height: 92vh;
+  }
+  .modal-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .modal-head .title-block .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .modal-head .title-block h3 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    margin: 2px 0 4px;
+  }
+  .modal-head .price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .modal-head .price-row .price { font-size: 20px; font-weight: 700; }
+  .modal-close {
+    border: none;
+    background: var(--surface-2);
+    border-radius: 8px;
+    width: 32px; height: 32px;
+    font-size: 16px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .modal-body { padding: 18px 22px 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+
+  .modal-section-title {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .chart-legend { display: flex; gap: 12px; font-size: 11px; color: var(--ink-2); font-weight: 400; }
+  .chart-legend span { display: inline-flex; align-items: center; gap: 4px; }
+  .chart-legend .swatch { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+  .chart-legend .swatch.rise { background: var(--rise); }
+  .chart-legend .swatch.fall { background: var(--fall); }
+
+  .chart-wrap {
+    position: relative;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface-2);
+    padding: 10px 6px 4px;
+  }
+  .chart-wrap canvas { display: block; width: 100%; }
+  .chart-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 8px 10px;
+    font-size: 11.5px;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.6;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity .1s ease;
+    z-index: 2;
+  }
+  .chart-tooltip.visible { opacity: 1; }
+  .chart-tooltip .d { font-family: var(--font-body); color: var(--muted); font-size: 10.5px; margin-bottom: 2px; }
+  .chart-empty { padding: 32px 16px; text-align: center; color: var(--muted); font-size: 13px; }
+
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .detail-grid { grid-template-columns: 1fr; } }
+
+  .mini-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+  table.mini { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 320px; }
+  table.mini th {
+    text-align: right;
+    font-size: 10.5px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 7px 10px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  table.mini th:first-child, table.mini td:first-child { text-align: left; }
+  table.mini td {
+    text-align: right;
+    padding: 6px 10px;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  table.mini tr:last-child td { border-bottom: none; }
+  table.mini td.rise { color: var(--rise); }
+  table.mini td.fall { color: var(--fall); }
+
+  .fundamentals-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .fund-tile {
+    flex: 1; min-width: 110px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: var(--surface-2);
+  }
+  .fund-tile .label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 4px; }
+  .fund-tile .value { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 600; margin: 0; }
+
+  .insight-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .insight-list li {
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    border-left: 3px solid var(--accent);
+  }
+  .insight-list li.disclaimer {
+    background: transparent;
+    border-left-color: var(--line-strong);
+    color: var(--muted);
+    font-size: 11.5px;
+    font-style: italic;
+    padding: 4px 12px;
+  }
+
+  footer.note {
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+    line-height: 1.7;
+  }
+  footer.note code {
+    font-family: var(--font-mono);
+    background: var(--surface-2);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <p class="brand-eyebrow">MoneyDJ 概念股 · 供應鏈資料擷取</p>
+      <h1>概念股資料儀表板</h1>
+    </div>
+    <div class="top-meta">
+      <div>資料來源：<span id="source-url-label">moneydj.com</span></div>
+      <div class="updated">擷取時間：<span id="scraped-at-label">—</span></div>
+    </div>
+  </header>
+
+  <div class="banner" id="data-banner">
+    <span class="icon">⚠️</span>
+    <div style="flex:1;">
+      <div><strong>目前顯示範例資料，非即時報價。</strong></div>
+      <div class="sub">此執行環境的網路政策目前無法連線到 moneydj.com（代理回傳 403），所以先用格式相同的範例資料展示儀表板功能。等你在可連外的環境跑完 <code>main.py</code> 產生 <code>moneydj_concept_stocks.json</code> 後，可以直接上傳取代。</div>
+      <div class="actions">
+        <button class="primary" id="upload-btn" type="button">上傳股票資料</button>
+        <button class="ghost" id="upload-detail-btn" type="button">上傳個股明細（K線/法人/資券）</button>
+        <button class="ghost" id="reset-btn" type="button" hidden>還原為範例資料</button>
+        <input type="file" id="file-input" accept="application/json,.json" class="visually-hidden" />
+        <input type="file" id="detail-file-input" accept="application/json,.json" class="visually-hidden" />
+      </div>
+    </div>
+  </div>
+
+  <section class="kpis">
+    <div class="kpi">
+      <p class="label">總筆數</p>
+      <p class="value" id="kpi-total">—</p>
+    </div>
+    <div class="kpi rise">
+      <p class="label">上漲檔數</p>
+      <p class="value" id="kpi-rise">—</p>
+    </div>
+    <div class="kpi fall">
+      <p class="label">下跌檔數</p>
+      <p class="value" id="kpi-fall">—</p>
+    </div>
+    <div class="kpi">
+      <p class="label">分類數</p>
+      <p class="value" id="kpi-cats">—</p>
+    </div>
+  </section>
+
+  <div class="board">
+    <aside class="panel leaderboard">
+      <div class="panel-head"><h2>漲幅 Top 5</h2></div>
+      <ul class="lb-list" id="lb-gainers"></ul>
+      <div class="panel-head" style="border-top:1px solid var(--line);"><h2>跌幅 Top 5</h2></div>
+      <ul class="lb-list" id="lb-losers"></ul>
+    </aside>
+
+    <section class="panel">
+      <div class="toolbar">
+        <div class="chips" id="category-chips"></div>
+        <input class="search" id="search-input" type="search" placeholder="搜尋代碼或名稱…" />
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th data-key="stock_id">代碼／名稱<span class="arrow"></span></th>
+              <th data-key="category">分類<span class="arrow"></span></th>
+              <th data-key="close_price" data-align="num">收盤價<span class="arrow"></span></th>
+              <th data-key="change" data-align="num">漲跌<span class="arrow"></span></th>
+              <th data-key="change_pct" data-align="num">漲跌幅<span class="arrow"></span></th>
+              <th data-key="volume" data-align="num">成交量<span class="arrow"></span></th>
+              <th aria-label="個股明細"></th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="empty-state" hidden>沒有符合條件的股票。</div>
+    </section>
+  </div>
+
+  <footer class="note">
+    僅提供資料擷取與「當日漲跌幅排序」，不涉及任何股價預測。漲跌顏色依台股慣例：紅漲、綠跌。
+    資料結構對應 <code>moneydj-scraper</code> 專案的 <code>StockRecord</code>（<code>stock_id / stock_name / role / close_price / change / change_pct / volume / category / source_url / scraped_at</code>）。
+  </footer>
+
+</div>
+
+<div class="modal-overlay" id="detail-overlay" hidden>
+  <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+    <div class="modal-head">
+      <div class="title-block">
+        <div class="code" id="detail-code">—</div>
+        <h3 id="detail-title">—</h3>
+        <div class="price-row">
+          <span class="price" id="detail-price">—</span>
+          <span class="delta" id="detail-change">—</span>
+        </div>
+      </div>
+      <button class="modal-close" id="detail-close" type="button" aria-label="關閉">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <section>
+        <p class="modal-section-title">
+          K 線 · 成交量
+          <span class="chart-legend">
+            <span><span class="swatch rise"></span>上漲</span>
+            <span><span class="swatch fall"></span>下跌</span>
+          </span>
+        </p>
+        <div class="chart-wrap" id="chart-wrap">
+          <canvas id="candle-canvas"></canvas>
+          <div class="chart-tooltip" id="chart-tooltip"></div>
+        </div>
+      </section>
+
+      <section class="detail-grid">
+        <div>
+          <p class="modal-section-title">三大法人買賣超（張）</p>
+          <div class="mini-table-wrap">
+            <table class="mini">
+              <thead><tr><th>日期</th><th>外資</th><th>投信</th><th>自營商</th></tr></thead>
+              <tbody id="institutional-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <p class="modal-section-title">融資融券（張）</p>
+          <div class="mini-table-wrap">
+            <table class="mini">
+              <thead><tr><th>日期</th><th>融資餘額</th><th>融券餘額</th></tr></thead>
+              <tbody id="margin-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <p class="modal-section-title">基本資訊</p>
+        <div class="fundamentals-row" id="fundamentals-row"></div>
+      </section>
+
+      <section>
+        <p class="modal-section-title">重點整理觀點</p>
+        <ul class="insight-list" id="insight-list"></ul>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script id="sample-data" type="application/json">
+[
+  {"stock_id":"2330","stock_name":"台積電","role":"晶圓代工","close_price":"119.98","change":"-1.87","change_pct":"-1.56%","volume":"7,232","category":"AI 伺服器供應鏈","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"2317","stock_name":"鴻海","role":"系統組裝","close_price":"502.17","change":"-0.30","change_pct":"-0.06%","volume":"8,702","category":"AI 伺服器供應鏈","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"2382","stock_name":"廣達","role":"伺服器組裝","close_price":"229.23","change":"-4.29","change_pct":"-1.87%","volume":"26,229","category":"AI 伺服器供應鏈","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"3231","stock_name":"緯創","role":"伺服器組裝","close_price":"752.53","change":"-14.30","change_pct":"-1.90%","volume":"10,979","category":"AI 伺服器供應鏈","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"2356","stock_name":"英業達","role":"伺服器組裝","close_price":"332.28","change":"+13.13","change_pct":"+3.95%","volume":"12,304","category":"AI 伺服器供應鏈","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"6669","stock_name":"緯穎","role":"雲端伺服器","close_price":"517.94","change":"-14.86","change_pct":"-2.87%","volume":"28,258","category":"AI 伺服器供應鏈","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"2308","stock_name":"台達電","role":"電源供應器","close_price":"232.64","change":"-13.00","change_pct":"-5.59%","volume":"14,677","category":"AI 伺服器供應鏈","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"1519","stock_name":"華城","role":"電力設備","close_price":"235.96","change":"-7.88","change_pct":"-3.34%","volume":"35,146","category":"電動車供應鏈","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"6213","stock_name":"聯茂","role":"PCB 材料","close_price":"372.43","change":"-6.67","change_pct":"-1.79%","volume":"16,477","category":"電動車供應鏈","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"2360","stock_name":"致茂","role":"測試設備","close_price":"535.21","change":"-19.80","change_pct":"-3.70%","volume":"5,516","category":"電動車供應鏈","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"1503","stock_name":"士電","role":"重電設備","close_price":"853.87","change":"+17.85","change_pct":"+2.09%","volume":"6,266","category":"電動車供應鏈","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"3037","stock_name":"欣興","role":"PCB","close_price":"925.58","change":"+47.57","change_pct":"+5.14%","volume":"5,393","category":"電動車供應鏈","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"8155","stock_name":"訊芯-KY","role":"被動元件","close_price":"978.67","change":"-6.36","change_pct":"-0.65%","volume":"43,841","category":"電動車供應鏈","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"3711","stock_name":"日月光投控","role":"封測大廠","close_price":"836.09","change":"-36.29","change_pct":"-4.34%","volume":"35,650","category":"半導體封測","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"6239","stock_name":"力成","role":"記憶體封測","close_price":"622.64","change":"-20.17","change_pct":"-3.24%","volume":"32,841","category":"半導體封測","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"2449","stock_name":"京元電子","role":"IC 測試","close_price":"655.58","change":"-27.01","change_pct":"-4.12%","volume":"3,415","category":"半導體封測","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"6147","stock_name":"頎邦","role":"驅動 IC 封測","close_price":"632.85","change":"-33.41","change_pct":"-5.28%","volume":"30,146","category":"半導體封測","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"},
+  {"stock_id":"3374","stock_name":"精材","role":"晶圓級封裝","close_price":"93.63","change":"+2.16","change_pct":"+2.31%","volume":"37,405","category":"半導體封測","source_url":"https://www.moneydj.com/z/zc/zca/zca_0.djhtm","scraped_at":"2026-08-09T13:30:00"}
+]
+</script>
+
+<script id="sample-detail" type="application/json">
+{"2330":{"ohlc":[{"date":"2026-06-15","open":110.45,"high":111.68,"low":109.56,"close":111.56,"volume":7060000},{"date":"2026-06-16","open":108.47,"high":111.14,"low":108.02,"close":109.33,"volume":20817000},{"date":"2026-06-17","open":110.25,"high":111.54,"low":108.27,"close":110.03,"volume":982000},{"date":"2026-06-18","open":111.34,"high":112.56,"low":110.31,"close":111.92,"volume":35196000},{"date":"2026-06-19","open":110.25,"high":111.99,"low":108.31,"close":109.7,"volume":1108000},{"date":"2026-06-22","open":111.0,"high":112.97,"low":110.97,"close":111.35,"volume":3683000},{"date":"2026-06-23","open":111.02,"high":112.91,"low":108.9,"close":110.86,"volume":28757000},{"date":"2026-06-24","open":109.41,"high":111.47,"low":107.51,"close":109.04,"volume":20321000},{"date":"2026-06-25","open":110.25,"high":111.81,"low":108.04,"close":110.05,"volume":21410000},{"date":"2026-06-26","open":110.17,"high":111.06,"low":108.75,"close":110.71,"volume":7143000},{"date":"2026-06-29","open":110.12,"high":110.69,"low":109.1,"close":110.26,"volume":7593000},{"date":"2026-06-30","open":108.92,"high":109.8,"low":107.46,"close":109.5,"volume":38239000},{"date":"2026-07-01","open":110.74,"high":112.59,"low":110.69,"close":110.94,"volume":16844000},{"date":"2026-07-02","open":111.55,"high":113.08,"low":109.5,"close":112.02,"volume":29473000},{"date":"2026-07-03","open":112.36,"high":112.97,"low":110.38,"close":111.52,"volume":18791000},{"date":"2026-07-06","open":109.28,"high":110.91,"low":109.02,"close":109.92,"volume":29011000},{"date":"2026-07-07","open":108.99,"high":111.53,"low":107.06,"close":109.75,"volume":43747000},{"date":"2026-07-08","open":108.63,"high":110.64,"low":107.46,"close":108.74,"volume":31697000},{"date":"2026-07-09","open":109.2,"high":111.84,"low":108.71,"close":109.94,"volume":9744000},{"date":"2026-07-10","open":107.76,"high":109.77,"low":106.07,"close":108.7,"volume":1053000},{"date":"2026-07-13","open":107.56,"high":109.55,"low":106.07,"close":108.4,"volume":9313000},{"date":"2026-07-14","open":107.3,"high":108.41,"low":106.55,"close":107.9,"volume":31715000},{"date":"2026-07-15","open":107.95,"high":108.99,"low":105.87,"close":108.38,"volume":9393000},{"date":"2026-07-16","open":108.52,"high":108.55,"low":107.72,"close":108.33,"volume":30326000},{"date":"2026-07-17","open":106.46,"high":107.81,"low":106.24,"close":107.47,"volume":25556000},{"date":"2026-07-20","open":106.7,"high":108.47,"low":106.22,"close":106.99,"volume":7323000},{"date":"2026-07-21","open":106.74,"high":108.47,"low":106.18,"close":106.94,"volume":42105000},{"date":"2026-07-22","open":105.66,"high":105.97,"low":104.35,"close":105.31,"volume":10709000},{"date":"2026-07-23","open":105.19,"high":105.48,"low":104.83,"close":105.28,"volume":38476000},{"date":"2026-07-24","open":105.98,"high":107.4,"low":103.93,"close":105.47,"volume":13131000},{"date":"2026-07-27","open":106.02,"high":107.77,"low":104.7,"close":106.94,"volume":22681000},{"date":"2026-07-28","open":107.65,"high":108.76,"low":106.71,"close":107.35,"volume":31220000},{"date":"2026-07-29","open":105.83,"high":108.12,"low":105.43,"close":106.1,"volume":11456000},{"date":"2026-07-30","open":107.28,"high":108.36,"low":106.93,"close":107.91,"volume":22491000},{"date":"2026-07-31","open":107.09,"high":107.54,"low":105.8,"close":107.09,"volume":34659000},{"date":"2026-08-03","open":108.84,"high":109.62,"low":107.52,"close":108.28,"volume":27572000},{"date":"2026-08-04","open":109.22,"high":111.87,"low":107.67,"close":109.76,"volume":27090000},{"date":"2026-08-05","open":109.7,"high":111.69,"low":107.44,"close":109.06,"volume":10945000},{"date":"2026-08-06","open":110.16,"high":113.29,"low":109.49,"close":111.2,"volume":31453000},{"date":"2026-08-07","open":120.34,"high":121.81,"low":119.49,"close":119.98,"volume":42428000}],"institutional":[{"date":"2026-07-27","foreign":19,"trust":285,"dealer":-255},{"date":"2026-07-28","foreign":1004,"trust":297,"dealer":483},{"date":"2026-07-29","foreign":-114,"trust":310,"dealer":-148},{"date":"2026-07-30","foreign":-2416,"trust":-89,"dealer":423},{"date":"2026-07-31","foreign":-2449,"trust":83,"dealer":38},{"date":"2026-08-03","foreign":1340,"trust":-357,"dealer":-472},{"date":"2026-08-04","foreign":449,"trust":-507,"dealer":14},{"date":"2026-08-05","foreign":844,"trust":242,"dealer":26},{"date":"2026-08-06","foreign":-14,"trust":665,"dealer":173},{"date":"2026-08-07","foreign":-1981,"trust":-242,"dealer":-334}],"margin":[{"date":"2026-07-27","margin_balance":53022,"margin_change":95,"short_balance":2713,"short_change":243},{"date":"2026-07-28","margin_balance":52454,"margin_change":-568,"short_balance":2931,"short_change":218},{"date":"2026-07-29","margin_balance":53685,"margin_change":1231,"short_balance":3199,"short_change":268},{"date":"2026-07-30","margin_balance":53548,"margin_change":-137,"short_balance":3182,"short_change":-17},{"date":"2026-07-31","margin_balance":52777,"margin_change":-771,"short_balance":3214,"short_change":32},{"date":"2026-08-03","margin_balance":52485,"margin_change":-292,"short_balance":3063,"short_change":-151},{"date":"2026-08-04","margin_balance":52711,"margin_change":226,"short_balance":3356,"short_change":293},{"date":"2026-08-05","margin_balance":52799,"margin_change":88,"short_balance":3130,"short_change":-226},{"date":"2026-08-06","margin_balance":52751,"margin_change":-48,"short_balance":2904,"short_change":-226},{"date":"2026-08-07","margin_balance":52415,"margin_change":-336,"short_balance":2688,"short_change":-216}],"fundamentals":{"pe_ratio":25.43,"dividend_yield":6.49,"pb_ratio":7.02},"insights":["近 5 個交易日股價上漲 12.04%","近 20 個交易日股價上漲 10.38%","收盤價位於 5 日均價（111.66）之上","外資近 10 個交易日累計賣超 3,318 張","投信近 10 個交易日累計買超 687 張","融資餘額較 10 個交易日前減少 607 張","融券餘額較 10 個交易日前減少 25 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"2317":{"ohlc":[{"date":"2026-06-15","open":430.92,"high":440.23,"low":427.21,"close":433.82,"volume":28244000},{"date":"2026-06-16","open":440.51,"high":447.88,"low":435.45,"close":442.23,"volume":34573000},{"date":"2026-06-17","open":437.02,"high":445.63,"low":429.24,"close":436.44,"volume":7939000},{"date":"2026-06-18","open":442.59,"high":444.23,"low":432.74,"close":440.31,"volume":42775000},{"date":"2026-06-19","open":436.71,"high":444.0,"low":427.53,"close":434.22,"volume":6484000},{"date":"2026-06-22","open":438.77,"high":442.99,"low":433.32,"close":435.2,"volume":42745000},{"date":"2026-06-23","open":437.2,"high":442.85,"low":429.76,"close":433.33,"volume":15563000},{"date":"2026-06-24","open":435.54,"high":440.75,"low":431.88,"close":432.12,"volume":37258000},{"date":"2026-06-25","open":431.01,"high":436.88,"low":423.76,"close":433.23,"volume":42840000},{"date":"2026-06-26","open":423.33,"high":429.31,"low":418.57,"close":427.35,"volume":30555000},{"date":"2026-06-29","open":417.19,"high":420.11,"low":412.3,"close":419.75,"volume":33593000},{"date":"2026-06-30","open":410.61,"high":413.19,"low":409.82,"close":411.91,"volume":8540000},{"date":"2026-07-01","open":405.17,"high":411.53,"low":403.94,"close":407.59,"volume":5617000},{"date":"2026-07-02","open":408.72,"high":414.39,"low":405.59,"close":409.86,"volume":23861000},{"date":"2026-07-03","open":414.83,"high":423.96,"low":411.74,"close":417.94,"volume":15754000},{"date":"2026-07-06","open":419.32,"high":429.62,"low":415.36,"close":423.44,"volume":25994000},{"date":"2026-07-07","open":420.24,"high":420.78,"low":413.89,"close":417.4,"volume":35271000},{"date":"2026-07-08","open":415.7,"high":418.48,"low":412.74,"close":415.45,"volume":16231000},{"date":"2026-07-09","open":420.61,"high":421.53,"low":416.49,"close":419.6,"volume":7742000},{"date":"2026-07-10","open":412.15,"high":415.0,"low":411.92,"close":414.35,"volume":24550000},{"date":"2026-07-13","open":423.35,"high":429.01,"low":415.82,"close":420.26,"volume":27576000},{"date":"2026-07-14","open":424.01,"high":425.37,"low":419.43,"close":424.49,"volume":30541000},{"date":"2026-07-15","open":427.82,"high":432.7,"low":420.08,"close":427.34,"volume":12265000},{"date":"2026-07-16","open":429.02,"high":431.87,"low":424.42,"close":425.37,"volume":28838000},{"date":"2026-07-17","open":429.51,"high":437.04,"low":427.22,"close":430.67,"volume":8076000},{"date":"2026-07-20","open":433.48,"high":441.98,"low":424.79,"close":431.24,"volume":27620000},{"date":"2026-07-21","open":435.13,"high":441.03,"low":427.89,"close":433.95,"volume":10634000},{"date":"2026-07-22","open":446.55,"high":449.7,"low":436.7,"close":442.23,"volume":41811000},{"date":"2026-07-23","open":441.6,"high":452.83,"low":433.88,"close":444.48,"volume":40771000},{"date":"2026-07-24","open":441.12,"high":447.41,"low":433.24,"close":440.9,"volume":2773000},{"date":"2026-07-27","open":445.37,"high":451.85,"low":444.33,"close":449.0,"volume":7434000},{"date":"2026-07-28","open":441.72,"high":445.64,"low":436.64,"close":444.99,"volume":9461000},{"date":"2026-07-29","open":451.88,"high":457.47,"low":442.47,"close":449.13,"volume":9399000},{"date":"2026-07-30","open":438.17,"high":443.87,"low":430.09,"close":441.33,"volume":24402000},{"date":"2026-07-31","open":444.46,"high":447.92,"low":432.88,"close":441.24,"volume":23517000},{"date":"2026-08-03","open":446.23,"high":451.11,"low":438.12,"close":444.02,"volume":19460000},{"date":"2026-08-04","open":451.79,"high":452.05,"low":443.95,"close":449.06,"volume":42282000},{"date":"2026-08-05","open":452.54,"high":456.47,"low":447.14,"close":453.55,"volume":14623000},{"date":"2026-08-06","open":453.2,"high":457.81,"low":449.29,"close":452.79,"volume":35510000},{"date":"2026-08-07","open":502.21,"high":504.39,"low":500.43,"close":502.17,"volume":25578000}],"institutional":[{"date":"2026-07-27","foreign":238,"trust":-500,"dealer":-196},{"date":"2026-07-28","foreign":-2349,"trust":-334,"dealer":72},{"date":"2026-07-29","foreign":879,"trust":241,"dealer":-239},{"date":"2026-07-30","foreign":-1886,"trust":503,"dealer":81},{"date":"2026-07-31","foreign":-864,"trust":-496,"dealer":-131},{"date":"2026-08-03","foreign":-1374,"trust":-650,"dealer":33},{"date":"2026-08-04","foreign":-1199,"trust":254,"dealer":-42},{"date":"2026-08-05","foreign":1592,"trust":32,"dealer":-42},{"date":"2026-08-06","foreign":2395,"trust":346,"dealer":-326},{"date":"2026-08-07","foreign":557,"trust":675,"dealer":-378}],"margin":[{"date":"2026-07-27","margin_balance":56834,"margin_change":-1330,"short_balance":6422,"short_change":-249},{"date":"2026-07-28","margin_balance":58171,"margin_change":1337,"short_balance":6686,"short_change":264},{"date":"2026-07-29","margin_balance":59373,"margin_change":1202,"short_balance":6834,"short_change":148},{"date":"2026-07-30","margin_balance":60668,"margin_change":1295,"short_balance":7043,"short_change":209},{"date":"2026-07-31","margin_balance":61894,"margin_change":1226,"short_balance":7023,"short_change":-20},{"date":"2026-08-03","margin_balance":62504,"margin_change":610,"short_balance":7212,"short_change":189},{"date":"2026-08-04","margin_balance":62923,"margin_change":419,"short_balance":7468,"short_change":256},{"date":"2026-08-05","margin_balance":63155,"margin_change":232,"short_balance":7310,"short_change":-158},{"date":"2026-08-06","margin_balance":62282,"margin_change":-873,"short_balance":7279,"short_change":-31},{"date":"2026-08-07","margin_balance":61417,"margin_change":-865,"short_balance":7160,"short_change":-119}],"fundamentals":{"pe_ratio":17.81,"dividend_yield":4.31,"pb_ratio":4.78},"insights":["近 5 個交易日股價上漲 13.81%","近 20 個交易日股價上漲 21.19%","收盤價位於 5 日均價（460.32）之上","外資近 10 個交易日累計賣超 2,011 張","投信近 10 個交易日累計買超 71 張","融資餘額較 10 個交易日前增加 4,583 張","融券餘額較 10 個交易日前增加 738 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"2382":{"ohlc":[{"date":"2026-06-15","open":234.5,"high":236.14,"low":232.78,"close":235.82,"volume":11471000},{"date":"2026-06-16","open":233.35,"high":239.63,"low":230.17,"close":234.94,"volume":23631000},{"date":"2026-06-17","open":236.51,"high":236.99,"low":234.55,"close":236.13,"volume":14858000},{"date":"2026-06-18","open":237.14,"high":241.45,"low":233.99,"close":239.0,"volume":11189000},{"date":"2026-06-19","open":242.12,"high":246.3,"low":238.65,"close":243.26,"volume":12422000},{"date":"2026-06-22","open":244.68,"high":246.59,"low":242.39,"close":242.53,"volume":34083000},{"date":"2026-06-23","open":238.39,"high":239.85,"low":234.32,"close":238.64,"volume":6717000},{"date":"2026-06-24","open":242.96,"high":247.6,"low":237.65,"close":242.35,"volume":8634000},{"date":"2026-06-25","open":243.59,"high":244.73,"low":240.13,"close":244.09,"volume":2986000},{"date":"2026-06-26","open":244.02,"high":245.37,"low":242.07,"close":242.75,"volume":26073000},{"date":"2026-06-29","open":245.78,"high":246.98,"low":244.79,"close":244.86,"volume":21921000},{"date":"2026-06-30","open":241.3,"high":243.5,"low":237.49,"close":240.04,"volume":9328000},{"date":"2026-07-01","open":239.19,"high":240.74,"low":238.4,"close":239.4,"volume":4300000},{"date":"2026-07-02","open":238.99,"high":242.49,"low":236.24,"close":241.28,"volume":23238000},{"date":"2026-07-03","open":246.59,"high":251.45,"low":244.37,"close":245.73,"volume":23539000},{"date":"2026-07-06","open":242.34,"high":248.02,"low":237.62,"close":244.67,"volume":43354000},{"date":"2026-07-07","open":240.65,"high":244.78,"low":239.6,"close":240.18,"volume":17647000},{"date":"2026-07-08","open":237.38,"high":242.67,"low":235.32,"close":238.39,"volume":28431000},{"date":"2026-07-09","open":240.32,"high":242.12,"low":238.23,"close":240.76,"volume":20764000},{"date":"2026-07-10","open":239.79,"high":243.94,"low":239.11,"close":241.99,"volume":3831000},{"date":"2026-07-13","open":240.61,"high":245.38,"low":240.25,"close":240.3,"volume":33492000},{"date":"2026-07-14","open":241.09,"high":245.48,"low":237.37,"close":241.46,"volume":15089000},{"date":"2026-07-15","open":243.39,"high":246.66,"low":241.0,"close":242.83,"volume":37718000},{"date":"2026-07-16","open":244.27,"high":246.17,"low":241.31,"close":242.65,"volume":43662000},{"date":"2026-07-17","open":238.09,"high":242.49,"low":237.33,"close":239.82,"volume":16141000},{"date":"2026-07-20","open":240.77,"high":241.71,"low":240.18,"close":241.34,"volume":2576000},{"date":"2026-07-21","open":237.78,"high":239.26,"low":237.58,"close":238.17,"volume":33557000},{"date":"2026-07-22","open":234.89,"high":239.2,"low":233.86,"close":236.4,"volume":8203000},{"date":"2026-07-23","open":231.77,"high":235.44,"low":231.09,"close":233.87,"volume":43207000},{"date":"2026-07-24","open":235.45,"high":237.2,"low":230.87,"close":236.09,"volume":28317000},{"date":"2026-07-27","open":237.63,"high":241.05,"low":235.55,"close":236.32,"volume":30225000},{"date":"2026-07-28","open":233.8,"high":235.91,"low":231.45,"close":232.41,"volume":1485000},{"date":"2026-07-29","open":229.07,"high":233.14,"low":227.48,"close":230.26,"volume":14350000},{"date":"2026-07-30","open":230.99,"high":234.26,"low":228.02,"close":229.02,"volume":15337000},{"date":"2026-07-31","open":230.34,"high":233.41,"low":229.36,"close":232.11,"volume":22597000},{"date":"2026-08-03","open":231.51,"high":232.73,"low":227.07,"close":229.98,"volume":4069000},{"date":"2026-08-04","open":227.41,"high":228.76,"low":223.35,"close":228.11,"volume":20604000},{"date":"2026-08-05","open":230.48,"high":232.2,"low":226.16,"close":229.34,"volume":22549000},{"date":"2026-08-06","open":233.81,"high":236.05,"low":227.98,"close":232.19,"volume":41483000},{"date":"2026-08-07","open":231.41,"high":234.35,"low":228.22,"close":229.23,"volume":35591000}],"institutional":[{"date":"2026-07-27","foreign":-2288,"trust":463,"dealer":350},{"date":"2026-07-28","foreign":1451,"trust":371,"dealer":-428},{"date":"2026-07-29","foreign":-1384,"trust":-733,"dealer":-340},{"date":"2026-07-30","foreign":-644,"trust":-67,"dealer":390},{"date":"2026-07-31","foreign":952,"trust":-609,"dealer":29},{"date":"2026-08-03","foreign":-2265,"trust":-658,"dealer":-247},{"date":"2026-08-04","foreign":2444,"trust":595,"dealer":138},{"date":"2026-08-05","foreign":-1225,"trust":-511,"dealer":322},{"date":"2026-08-06","foreign":-1383,"trust":-137,"dealer":-466},{"date":"2026-08-07","foreign":-475,"trust":498,"dealer":-130}],"margin":[{"date":"2026-07-27","margin_balance":47880,"margin_change":-1250,"short_balance":7527,"short_change":142},{"date":"2026-07-28","margin_balance":49060,"margin_change":1180,"short_balance":7565,"short_change":38},{"date":"2026-07-29","margin_balance":48651,"margin_change":-409,"short_balance":7764,"short_change":199},{"date":"2026-07-30","margin_balance":49505,"margin_change":854,"short_balance":7905,"short_change":141},{"date":"2026-07-31","margin_balance":50455,"margin_change":950,"short_balance":7892,"short_change":-13},{"date":"2026-08-03","margin_balance":51922,"margin_change":1467,"short_balance":8178,"short_change":286},{"date":"2026-08-04","margin_balance":51470,"margin_change":-452,"short_balance":8438,"short_change":260},{"date":"2026-08-05","margin_balance":51736,"margin_change":266,"short_balance":8210,"short_change":-228},{"date":"2026-08-06","margin_balance":50594,"margin_change":-1142,"short_balance":8272,"short_change":62},{"date":"2026-08-07","margin_balance":50643,"margin_change":49,"short_balance":8377,"short_change":105}],"fundamentals":{"pe_ratio":28.16,"dividend_yield":0.9,"pb_ratio":5.99},"insights":["近 5 個交易日股價下跌 1.24%","近 20 個交易日股價下跌 5.27%","收盤價位於 5 日均價（229.77）之下","外資近 10 個交易日累計賣超 4,817 張","投信近 10 個交易日累計賣超 788 張","融資餘額較 10 個交易日前增加 2,763 張","融券餘額較 10 個交易日前增加 850 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"3231":{"ohlc":[{"date":"2026-06-15","open":744.97,"high":757.85,"low":731.33,"close":751.45,"volume":10763000},{"date":"2026-06-16","open":754.83,"high":773.34,"low":750.59,"close":761.19,"volume":12767000},{"date":"2026-06-17","open":768.49,"high":770.27,"low":759.67,"close":762.21,"volume":5775000},{"date":"2026-06-18","open":758.2,"high":769.35,"low":744.09,"close":763.98,"volume":38471000},{"date":"2026-06-19","open":762.04,"high":775.52,"low":749.06,"close":762.8,"volume":7704000},{"date":"2026-06-22","open":749.69,"high":765.96,"low":737.39,"close":754.82,"volume":26330000},{"date":"2026-06-23","open":745.4,"high":749.68,"low":730.29,"close":741.66,"volume":10357000},{"date":"2026-06-24","open":757.6,"high":761.73,"low":740.21,"close":751.44,"volume":41846000},{"date":"2026-06-25","open":751.61,"high":765.01,"low":749.75,"close":755.98,"volume":10614000},{"date":"2026-06-26","open":766.75,"high":772.42,"low":759.32,"close":766.29,"volume":25909000},{"date":"2026-06-29","open":758.15,"high":767.09,"low":748.02,"close":753.48,"volume":7124000},{"date":"2026-06-30","open":752.16,"high":766.85,"low":745.4,"close":759.3,"volume":28208000},{"date":"2026-07-01","open":765.65,"high":772.78,"low":761.2,"close":763.47,"volume":34924000},{"date":"2026-07-02","open":764.01,"high":773.79,"low":752.22,"close":757.22,"volume":11121000},{"date":"2026-07-03","open":741.33,"high":749.83,"low":737.65,"close":747.2,"volume":37999000},{"date":"2026-07-06","open":747.44,"high":761.36,"low":743.97,"close":744.12,"volume":16584000},{"date":"2026-07-07","open":760.73,"high":761.51,"low":743.63,"close":756.72,"volume":28636000},{"date":"2026-07-08","open":749.93,"high":760.84,"low":736.7,"close":754.7,"volume":40731000},{"date":"2026-07-09","open":743.36,"high":762.26,"low":742.68,"close":750.54,"volume":6709000},{"date":"2026-07-10","open":745.77,"high":755.92,"low":732.24,"close":749.24,"volume":41567000},{"date":"2026-07-13","open":729.1,"high":735.9,"low":719.79,"close":735.1,"volume":5889000},{"date":"2026-07-14","open":737.06,"high":749.98,"low":727.88,"close":739.39,"volume":13665000},{"date":"2026-07-15","open":757.7,"high":759.69,"low":750.78,"close":752.88,"volume":16744000},{"date":"2026-07-16","open":763.68,"high":775.21,"low":754.68,"close":764.06,"volume":4636000},{"date":"2026-07-17","open":761.95,"high":773.39,"low":761.5,"close":765.84,"volume":9327000},{"date":"2026-07-20","open":762.79,"high":774.97,"low":747.45,"close":759.03,"volume":33241000},{"date":"2026-07-21","open":757.91,"high":769.78,"low":756.05,"close":757.32,"volume":40254000},{"date":"2026-07-22","open":757.21,"high":772.54,"low":744.44,"close":757.63,"volume":17525000},{"date":"2026-07-23","open":746.5,"high":753.6,"low":735.96,"close":744.27,"volume":30997000},{"date":"2026-07-24","open":744.21,"high":750.69,"low":734.57,"close":737.11,"volume":8478000},{"date":"2026-07-27","open":751.22,"high":751.84,"low":731.11,"close":745.02,"volume":12050000},{"date":"2026-07-28","open":749.85,"high":761.49,"low":747.02,"close":757.21,"volume":27021000},{"date":"2026-07-29","open":753.13,"high":757.02,"low":735.91,"close":750.85,"volume":40145000},{"date":"2026-07-30","open":747.71,"high":764.49,"low":746.47,"close":752.15,"volume":24184000},{"date":"2026-07-31","open":747.83,"high":762.97,"low":740.19,"close":748.45,"volume":41702000},{"date":"2026-08-03","open":762.93,"high":775.81,"low":753.87,"close":759.49,"volume":19006000},{"date":"2026-08-04","open":767.05,"high":781.94,"low":759.79,"close":772.91,"volume":35207000},{"date":"2026-08-05","open":767.34,"high":775.33,"low":765.38,"close":771.05,"volume":2903000},{"date":"2026-08-06","open":780.37,"high":794.4,"low":768.35,"close":778.88,"volume":36833000},{"date":"2026-08-07","open":753.96,"high":755.87,"low":745.58,"close":752.53,"volume":5345000}],"institutional":[{"date":"2026-07-27","foreign":-395,"trust":271,"dealer":435},{"date":"2026-07-28","foreign":642,"trust":-29,"dealer":-285},{"date":"2026-07-29","foreign":-2589,"trust":754,"dealer":-47},{"date":"2026-07-30","foreign":1814,"trust":739,"dealer":-224},{"date":"2026-07-31","foreign":-1217,"trust":28,"dealer":-406},{"date":"2026-08-03","foreign":2297,"trust":-582,"dealer":-348},{"date":"2026-08-04","foreign":-1688,"trust":197,"dealer":-95},{"date":"2026-08-05","foreign":-831,"trust":-757,"dealer":323},{"date":"2026-08-06","foreign":-838,"trust":-757,"dealer":-157},{"date":"2026-08-07","foreign":-716,"trust":593,"dealer":-490}],"margin":[{"date":"2026-07-27","margin_balance":29304,"margin_change":-202,"short_balance":7412,"short_change":132},{"date":"2026-07-28","margin_balance":30289,"margin_change":985,"short_balance":7142,"short_change":-270},{"date":"2026-07-29","margin_balance":31308,"margin_change":1019,"short_balance":6864,"short_change":-278},{"date":"2026-07-30","margin_balance":31919,"margin_change":611,"short_balance":7135,"short_change":271},{"date":"2026-07-31","margin_balance":30523,"margin_change":-1396,"short_balance":6918,"short_change":-217},{"date":"2026-08-03","margin_balance":31087,"margin_change":564,"short_balance":6622,"short_change":-296},{"date":"2026-08-04","margin_balance":29697,"margin_change":-1390,"short_balance":6437,"short_change":-185},{"date":"2026-08-05","margin_balance":30525,"margin_change":828,"short_balance":6336,"short_change":-101},{"date":"2026-08-06","margin_balance":31306,"margin_change":781,"short_balance":6540,"short_change":204},{"date":"2026-08-07","margin_balance":30957,"margin_change":-349,"short_balance":6420,"short_change":-120}],"fundamentals":{"pe_ratio":29.02,"dividend_yield":3.0,"pb_ratio":4.58},"insights":["近 5 個交易日股價上漲 0.55%","近 20 個交易日股價上漲 0.44%","收盤價位於 5 日均價（766.97）之下","外資近 10 個交易日累計賣超 3,521 張","投信近 10 個交易日累計買超 457 張","融資餘額較 10 個交易日前增加 1,653 張","融券餘額較 10 個交易日前減少 992 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"2356":{"ohlc":[{"date":"2026-06-15","open":290.72,"high":293.02,"low":286.01,"close":290.17,"volume":12805000},{"date":"2026-06-16","open":293.17,"high":299.4,"low":288.68,"close":293.68,"volume":16008000},{"date":"2026-06-17","open":289.54,"high":291.71,"low":286.77,"close":291.42,"volume":41110000},{"date":"2026-06-18","open":291.68,"high":293.75,"low":285.34,"close":290.5,"volume":19208000},{"date":"2026-06-19","open":292.66,"high":296.62,"low":289.94,"close":290.41,"volume":26712000},{"date":"2026-06-22","open":286.76,"high":288.74,"low":284.15,"close":288.56,"volume":9618000},{"date":"2026-06-23","open":293.32,"high":295.38,"low":290.75,"close":291.06,"volume":5081000},{"date":"2026-06-24","open":289.47,"high":289.6,"low":283.3,"close":287.34,"volume":11305000},{"date":"2026-06-25","open":289.28,"high":289.45,"low":285.43,"close":286.95,"volume":24747000},{"date":"2026-06-26","open":293.11,"high":298.7,"low":290.88,"close":291.62,"volume":30747000},{"date":"2026-06-29","open":293.76,"high":300.6,"low":288.86,"close":294.97,"volume":9075000},{"date":"2026-06-30","open":289.7,"high":290.86,"low":286.14,"close":290.05,"volume":20204000},{"date":"2026-07-01","open":294.9,"high":297.72,"low":290.32,"close":294.68,"volume":25494000},{"date":"2026-07-02","open":295.97,"high":297.5,"low":294.2,"close":295.1,"volume":37629000},{"date":"2026-07-03","open":301.55,"high":304.0,"low":296.38,"close":300.54,"volume":43051000},{"date":"2026-07-06","open":300.66,"high":302.78,"low":298.7,"close":299.62,"volume":2658000},{"date":"2026-07-07","open":298.7,"high":304.33,"low":298.04,"close":298.95,"volume":38970000},{"date":"2026-07-08","open":303.58,"high":306.29,"low":301.35,"close":304.21,"volume":38934000},{"date":"2026-07-09","open":301.27,"high":303.57,"low":297.88,"close":301.02,"volume":34136000},{"date":"2026-07-10","open":305.25,"high":308.1,"low":301.38,"close":304.78,"volume":30799000},{"date":"2026-07-13","open":298.77,"high":304.91,"low":294.19,"close":301.17,"volume":33629000},{"date":"2026-07-14","open":305.29,"high":305.81,"low":298.69,"close":303.81,"volume":19621000},{"date":"2026-07-15","open":303.09,"high":308.14,"low":301.5,"close":301.84,"volume":12207000},{"date":"2026-07-16","open":307.93,"high":311.21,"low":302.03,"close":306.2,"volume":3031000},{"date":"2026-07-17","open":303.01,"high":308.2,"low":300.94,"close":302.09,"volume":29217000},{"date":"2026-07-20","open":303.57,"high":308.72,"low":301.18,"close":303.54,"volume":34873000},{"date":"2026-07-21","open":306.88,"high":314.06,"low":304.22,"close":309.48,"volume":43338000},{"date":"2026-07-22","open":311.99,"high":317.9,"low":307.32,"close":312.17,"volume":38546000},{"date":"2026-07-23","open":312.22,"high":315.35,"low":308.74,"close":312.81,"volume":22189000},{"date":"2026-07-24","open":307.81,"high":312.82,"low":307.22,"close":309.09,"volume":24742000},{"date":"2026-07-27","open":314.26,"high":319.23,"low":309.51,"close":314.13,"volume":8336000},{"date":"2026-07-28","open":316.68,"high":322.7,"low":309.56,"close":315.17,"volume":2630000},{"date":"2026-07-29","open":319.24,"high":321.67,"low":313.04,"close":319.76,"volume":43218000},{"date":"2026-07-30","open":326.16,"high":327.75,"low":322.33,"close":325.78,"volume":17371000},{"date":"2026-07-31","open":327.36,"high":328.61,"low":326.07,"close":328.37,"volume":24682000},{"date":"2026-08-03","open":328.09,"high":332.13,"low":325.21,"close":326.17,"volume":20733000},{"date":"2026-08-04","open":330.28,"high":336.97,"low":329.13,"close":331.77,"volume":12633000},{"date":"2026-08-05","open":335.23,"high":341.62,"low":329.44,"close":335.6,"volume":19250000},{"date":"2026-08-06","open":336.88,"high":345.77,"low":333.38,"close":340.28,"volume":32748000},{"date":"2026-08-07","open":333.7,"high":334.51,"low":331.11,"close":332.28,"volume":19757000}],"institutional":[{"date":"2026-07-27","foreign":-671,"trust":62,"dealer":-360},{"date":"2026-07-28","foreign":140,"trust":-455,"dealer":-430},{"date":"2026-07-29","foreign":1940,"trust":348,"dealer":36},{"date":"2026-07-30","foreign":-2100,"trust":647,"dealer":325},{"date":"2026-07-31","foreign":-445,"trust":-600,"dealer":-414},{"date":"2026-08-03","foreign":-2139,"trust":459,"dealer":59},{"date":"2026-08-04","foreign":-656,"trust":713,"dealer":-424},{"date":"2026-08-05","foreign":1148,"trust":411,"dealer":-24},{"date":"2026-08-06","foreign":417,"trust":-184,"dealer":483},{"date":"2026-08-07","foreign":-345,"trust":-664,"dealer":-406}],"margin":[{"date":"2026-07-27","margin_balance":46949,"margin_change":965,"short_balance":1683,"short_change":42},{"date":"2026-07-28","margin_balance":45926,"margin_change":-1023,"short_balance":1704,"short_change":21},{"date":"2026-07-29","margin_balance":46480,"margin_change":554,"short_balance":1737,"short_change":33},{"date":"2026-07-30","margin_balance":46902,"margin_change":422,"short_balance":1642,"short_change":-95},{"date":"2026-07-31","margin_balance":46646,"margin_change":-256,"short_balance":1520,"short_change":-122},{"date":"2026-08-03","margin_balance":46943,"margin_change":297,"short_balance":1794,"short_change":274},{"date":"2026-08-04","margin_balance":47089,"margin_change":146,"short_balance":1695,"short_change":-99},{"date":"2026-08-05","margin_balance":47718,"margin_change":629,"short_balance":1981,"short_change":286},{"date":"2026-08-06","margin_balance":47025,"margin_change":-693,"short_balance":2134,"short_change":153},{"date":"2026-08-07","margin_balance":45700,"margin_change":-1325,"short_balance":2333,"short_change":199}],"fundamentals":{"pe_ratio":17.55,"dividend_yield":2.56,"pb_ratio":2.37},"insights":["近 5 個交易日股價上漲 1.19%","近 20 個交易日股價上漲 9.02%","收盤價位於 5 日均價（333.22）之下","外資近 10 個交易日累計賣超 2,711 張","投信近 10 個交易日累計買超 737 張","融資餘額較 10 個交易日前減少 1,249 張","融券餘額較 10 個交易日前增加 650 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"6669":{"ohlc":[{"date":"2026-06-15","open":470.0,"high":479.49,"low":467.05,"close":470.78,"volume":15001000},{"date":"2026-06-16","open":469.26,"high":473.36,"low":464.44,"close":468.94,"volume":33110000},{"date":"2026-06-17","open":468.3,"high":469.66,"low":462.15,"close":467.54,"volume":36658000},{"date":"2026-06-18","open":470.14,"high":471.18,"low":460.86,"close":470.1,"volume":18920000},{"date":"2026-06-19","open":467.47,"high":475.17,"low":463.41,"close":469.34,"volume":8510000},{"date":"2026-06-22","open":472.22,"high":478.54,"low":463.11,"close":474.91,"volume":32474000},{"date":"2026-06-23","open":473.76,"high":483.19,"low":470.23,"close":470.82,"volume":19293000},{"date":"2026-06-24","open":467.85,"high":468.81,"low":463.05,"close":466.5,"volume":20093000},{"date":"2026-06-25","open":461.73,"high":463.94,"low":460.63,"close":461.6,"volume":3847000},{"date":"2026-06-26","open":467.45,"high":476.38,"low":462.93,"close":463.68,"volume":36542000},{"date":"2026-06-29","open":455.33,"high":456.65,"low":450.21,"close":455.64,"volume":35696000},{"date":"2026-06-30","open":456.6,"high":457.17,"low":446.97,"close":455.89,"volume":42409000},{"date":"2026-07-01","open":457.66,"high":457.97,"low":450.77,"close":456.22,"volume":873000},{"date":"2026-07-02","open":452.65,"high":452.95,"low":448.56,"close":448.78,"volume":29202000},{"date":"2026-07-03","open":446.43,"high":452.4,"low":437.64,"close":450.38,"volume":26393000},{"date":"2026-07-06","open":448.97,"high":455.38,"low":442.09,"close":444.83,"volume":11167000},{"date":"2026-07-07","open":452.24,"high":456.86,"low":447.76,"close":448.81,"volume":20060000},{"date":"2026-07-08","open":460.45,"high":466.99,"low":456.96,"close":457.27,"volume":24092000},{"date":"2026-07-09","open":452.81,"high":456.98,"low":448.26,"close":454.37,"volume":44021000},{"date":"2026-07-10","open":458.03,"high":463.59,"low":452.36,"close":462.11,"volume":27295000},{"date":"2026-07-13","open":457.44,"high":469.93,"low":448.68,"close":461.33,"volume":28708000},{"date":"2026-07-14","open":467.8,"high":472.75,"low":459.21,"close":465.04,"volume":14237000},{"date":"2026-07-15","open":462.34,"high":466.42,"low":462.3,"close":465.51,"volume":4909000},{"date":"2026-07-16","open":464.74,"high":473.79,"low":458.42,"close":460.22,"volume":41874000},{"date":"2026-07-17","open":461.31,"high":467.74,"low":456.76,"close":464.39,"volume":11590000},{"date":"2026-07-20","open":477.34,"high":486.38,"low":466.46,"close":472.91,"volume":14092000},{"date":"2026-07-21","open":474.08,"high":481.99,"low":469.98,"close":477.24,"volume":35689000},{"date":"2026-07-22","open":483.93,"high":486.11,"low":473.61,"close":479.18,"volume":9877000},{"date":"2026-07-23","open":480.86,"high":489.48,"low":475.12,"close":484.8,"volume":26092000},{"date":"2026-07-24","open":495.26,"high":500.31,"low":487.0,"close":491.12,"volume":28315000},{"date":"2026-07-27","open":487.59,"high":487.78,"low":477.76,"close":482.76,"volume":7494000},{"date":"2026-07-28","open":481.46,"high":483.21,"low":475.43,"close":479.57,"volume":6320000},{"date":"2026-07-29","open":480.86,"high":487.56,"low":475.67,"close":484.15,"volume":902000},{"date":"2026-07-30","open":492.05,"high":500.73,"low":482.74,"close":491.33,"volume":1634000},{"date":"2026-07-31","open":484.9,"high":492.47,"low":473.91,"close":482.43,"volume":12934000},{"date":"2026-08-03","open":471.05,"high":481.49,"low":467.23,"close":473.7,"volume":35340000},{"date":"2026-08-04","open":478.84,"high":486.52,"low":471.46,"close":476.18,"volume":3421000},{"date":"2026-08-05","open":484.93,"high":494.08,"low":474.89,"close":484.32,"volume":39273000},{"date":"2026-08-06","open":487.53,"high":495.71,"low":481.93,"close":487.84,"volume":39229000},{"date":"2026-08-07","open":513.46,"high":519.63,"low":503.54,"close":517.94,"volume":42769000}],"institutional":[{"date":"2026-07-27","foreign":-1721,"trust":-506,"dealer":208},{"date":"2026-07-28","foreign":-1536,"trust":-181,"dealer":-51},{"date":"2026-07-29","foreign":312,"trust":707,"dealer":-421},{"date":"2026-07-30","foreign":-884,"trust":280,"dealer":-235},{"date":"2026-07-31","foreign":38,"trust":-654,"dealer":-48},{"date":"2026-08-03","foreign":-1316,"trust":-349,"dealer":-199},{"date":"2026-08-04","foreign":880,"trust":119,"dealer":-274},{"date":"2026-08-05","foreign":2241,"trust":37,"dealer":-204},{"date":"2026-08-06","foreign":506,"trust":-215,"dealer":-261},{"date":"2026-08-07","foreign":766,"trust":60,"dealer":-362}],"margin":[{"date":"2026-07-27","margin_balance":36460,"margin_change":678,"short_balance":4440,"short_change":202},{"date":"2026-07-28","margin_balance":36429,"margin_change":-31,"short_balance":4618,"short_change":178},{"date":"2026-07-29","margin_balance":35720,"margin_change":-709,"short_balance":4400,"short_change":-218},{"date":"2026-07-30","margin_balance":34553,"margin_change":-1167,"short_balance":4619,"short_change":219},{"date":"2026-07-31","margin_balance":33066,"margin_change":-1487,"short_balance":4914,"short_change":295},{"date":"2026-08-03","margin_balance":33710,"margin_change":644,"short_balance":5028,"short_change":114},{"date":"2026-08-04","margin_balance":33677,"margin_change":-33,"short_balance":5027,"short_change":-1},{"date":"2026-08-05","margin_balance":34779,"margin_change":1102,"short_balance":4927,"short_change":-100},{"date":"2026-08-06","margin_balance":33391,"margin_change":-1388,"short_balance":4740,"short_change":-187},{"date":"2026-08-07","margin_balance":34618,"margin_change":1227,"short_balance":4680,"short_change":-60}],"fundamentals":{"pe_ratio":24.43,"dividend_yield":4.88,"pb_ratio":8.78},"insights":["近 5 個交易日股價上漲 7.36%","近 20 個交易日股價上漲 12.08%","收盤價位於 5 日均價（488.00）之上","外資近 10 個交易日累計賣超 714 張","投信近 10 個交易日累計賣超 702 張","融資餘額較 10 個交易日前減少 1,842 張","融券餘額較 10 個交易日前增加 240 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"2308":{"ohlc":[{"date":"2026-06-15","open":262.8,"high":267.1,"low":261.39,"close":264.89,"volume":11418000},{"date":"2026-06-16","open":258.93,"high":263.72,"low":256.22,"close":259.7,"volume":39823000},{"date":"2026-06-17","open":260.2,"high":265.09,"low":257.83,"close":259.05,"volume":12546000},{"date":"2026-06-18","open":262.82,"high":264.51,"low":258.3,"close":262.58,"volume":14512000},{"date":"2026-06-19","open":257.0,"high":259.81,"low":255.35,"close":258.67,"volume":32876000},{"date":"2026-06-22","open":256.06,"high":257.88,"low":252.87,"close":255.54,"volume":4080000},{"date":"2026-06-23","open":254.44,"high":255.22,"low":249.66,"close":252.73,"volume":10345000},{"date":"2026-06-24","open":258.76,"high":263.75,"low":255.99,"close":257.14,"volume":1038000},{"date":"2026-06-25","open":260.98,"high":265.77,"low":257.59,"close":261.16,"volume":11197000},{"date":"2026-06-26","open":258.89,"high":263.62,"low":252.78,"close":256.33,"volume":25157000},{"date":"2026-06-29","open":260.79,"high":264.33,"low":257.39,"close":258.37,"volume":11102000},{"date":"2026-06-30","open":257.42,"high":259.08,"low":256.73,"close":257.73,"volume":25159000},{"date":"2026-07-01","open":257.75,"high":264.47,"low":253.54,"close":259.5,"volume":27190000},{"date":"2026-07-02","open":259.78,"high":264.94,"low":255.43,"close":261.97,"volume":29910000},{"date":"2026-07-03","open":261.04,"high":262.85,"low":259.93,"close":262.18,"volume":10714000},{"date":"2026-07-06","open":263.1,"high":265.24,"low":258.16,"close":262.41,"volume":4348000},{"date":"2026-07-07","open":266.09,"high":266.7,"low":259.5,"close":264.37,"volume":28838000},{"date":"2026-07-08","open":259.43,"high":265.98,"low":255.67,"close":261.11,"volume":25044000},{"date":"2026-07-09","open":255.14,"high":258.53,"low":252.55,"close":256.13,"volume":44569000},{"date":"2026-07-10","open":258.09,"high":265.68,"low":253.15,"close":260.55,"volume":26687000},{"date":"2026-07-13","open":254.31,"high":260.12,"low":253.12,"close":256.58,"volume":42418000},{"date":"2026-07-14","open":256.15,"high":256.67,"low":253.28,"close":253.85,"volume":13321000},{"date":"2026-07-15","open":248.01,"high":252.02,"low":246.25,"close":250.22,"volume":27117000},{"date":"2026-07-16","open":252.35,"high":253.67,"low":247.35,"close":249.87,"volume":5168000},{"date":"2026-07-17","open":251.17,"high":254.92,"low":249.39,"close":253.34,"volume":13132000},{"date":"2026-07-20","open":251.68,"high":254.5,"low":248.4,"close":251.16,"volume":24822000},{"date":"2026-07-21","open":251.95,"high":256.54,"low":248.66,"close":249.96,"volume":44013000},{"date":"2026-07-22","open":244.59,"high":250.81,"low":240.1,"close":246.3,"volume":41044000},{"date":"2026-07-23","open":246.69,"high":248.85,"low":244.9,"close":248.0,"volume":31594000},{"date":"2026-07-24","open":254.4,"high":256.63,"low":250.69,"close":252.4,"volume":20067000},{"date":"2026-07-27","open":259.55,"high":264.4,"low":257.16,"close":257.24,"volume":34560000},{"date":"2026-07-28","open":262.03,"high":267.0,"low":258.71,"close":260.93,"volume":4344000},{"date":"2026-07-29","open":267.6,"high":271.49,"low":265.53,"close":265.75,"volume":42946000},{"date":"2026-07-30","open":262.89,"high":262.92,"low":257.19,"close":260.89,"volume":28324000},{"date":"2026-07-31","open":267.41,"high":268.76,"low":261.73,"close":265.8,"volume":11658000},{"date":"2026-08-03","open":266.63,"high":271.36,"low":262.3,"close":266.72,"volume":32901000},{"date":"2026-08-04","open":271.5,"high":274.84,"low":265.25,"close":270.23,"volume":20299000},{"date":"2026-08-05","open":267.29,"high":267.96,"low":261.83,"close":265.47,"volume":8027000},{"date":"2026-08-06","open":265.01,"high":269.61,"low":259.72,"close":262.41,"volume":36051000},{"date":"2026-08-07","open":230.8,"high":235.04,"low":229.95,"close":232.64,"volume":30842000}],"institutional":[{"date":"2026-07-27","foreign":317,"trust":533,"dealer":364},{"date":"2026-07-28","foreign":1653,"trust":-3,"dealer":-446},{"date":"2026-07-29","foreign":1170,"trust":427,"dealer":-422},{"date":"2026-07-30","foreign":1920,"trust":-80,"dealer":133},{"date":"2026-07-31","foreign":-643,"trust":350,"dealer":-337},{"date":"2026-08-03","foreign":1633,"trust":-329,"dealer":-128},{"date":"2026-08-04","foreign":2671,"trust":695,"dealer":-470},{"date":"2026-08-05","foreign":-78,"trust":-78,"dealer":35},{"date":"2026-08-06","foreign":-2169,"trust":353,"dealer":38},{"date":"2026-08-07","foreign":2308,"trust":-564,"dealer":-26}],"margin":[{"date":"2026-07-27","margin_balance":27000,"margin_change":444,"short_balance":5543,"short_change":-142},{"date":"2026-07-28","margin_balance":28452,"margin_change":1452,"short_balance":5510,"short_change":-33},{"date":"2026-07-29","margin_balance":29469,"margin_change":1017,"short_balance":5722,"short_change":212},{"date":"2026-07-30","margin_balance":29084,"margin_change":-385,"short_balance":5672,"short_change":-50},{"date":"2026-07-31","margin_balance":27867,"margin_change":-1217,"short_balance":5483,"short_change":-189},{"date":"2026-08-03","margin_balance":28829,"margin_change":962,"short_balance":5202,"short_change":-281},{"date":"2026-08-04","margin_balance":30163,"margin_change":1334,"short_balance":5377,"short_change":175},{"date":"2026-08-05","margin_balance":30782,"margin_change":619,"short_balance":5370,"short_change":-7},{"date":"2026-08-06","margin_balance":32002,"margin_change":1220,"short_balance":5124,"short_change":-246},{"date":"2026-08-07","margin_balance":31444,"margin_change":-558,"short_balance":5198,"short_change":74}],"fundamentals":{"pe_ratio":19.98,"dividend_yield":2.2,"pb_ratio":7.57},"insights":["近 5 個交易日股價下跌 12.48%","近 20 個交易日股價下跌 10.71%","收盤價位於 5 日均價（259.49）之下","外資近 10 個交易日累計買超 8,782 張","投信近 10 個交易日累計買超 1,304 張","融資餘額較 10 個交易日前增加 4,444 張","融券餘額較 10 個交易日前減少 345 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"1519":{"ohlc":[{"date":"2026-06-15","open":234.05,"high":235.32,"low":229.9,"close":233.24,"volume":42011000},{"date":"2026-06-16","open":238.43,"high":242.02,"low":233.52,"close":236.46,"volume":41084000},{"date":"2026-06-17","open":232.26,"high":237.37,"low":230.83,"close":232.8,"volume":44110000},{"date":"2026-06-18","open":236.66,"high":239.43,"low":232.2,"close":237.42,"volume":31628000},{"date":"2026-06-19","open":241.97,"high":245.62,"low":238.52,"close":240.01,"volume":10258000},{"date":"2026-06-22","open":237.8,"high":238.03,"low":234.89,"close":237.98,"volume":24302000},{"date":"2026-06-23","open":237.89,"high":243.63,"low":234.46,"close":239.16,"volume":35063000},{"date":"2026-06-24","open":239.58,"high":242.63,"low":234.15,"close":238.63,"volume":35220000},{"date":"2026-06-25","open":238.28,"high":244.55,"low":233.58,"close":240.52,"volume":21899000},{"date":"2026-06-26","open":239.71,"high":242.89,"low":237.9,"close":241.01,"volume":42025000},{"date":"2026-06-29","open":241.18,"high":245.52,"low":238.11,"close":239.07,"volume":22402000},{"date":"2026-06-30","open":238.87,"high":243.71,"low":237.1,"close":240.95,"volume":44962000},{"date":"2026-07-01","open":246.83,"high":248.03,"low":240.78,"close":244.66,"volume":34743000},{"date":"2026-07-02","open":241.18,"high":247.22,"low":239.65,"close":242.71,"volume":36414000},{"date":"2026-07-03","open":239.34,"high":243.4,"low":237.73,"close":238.4,"volume":37844000},{"date":"2026-07-06","open":237.94,"high":241.55,"low":232.84,"close":237.54,"volume":28629000},{"date":"2026-07-07","open":240.17,"high":240.31,"low":236.96,"close":239.56,"volume":25179000},{"date":"2026-07-08","open":241.53,"high":247.12,"low":239.15,"close":243.7,"volume":28842000},{"date":"2026-07-09","open":239.72,"high":243.05,"low":235.39,"close":239.14,"volume":19278000},{"date":"2026-07-10","open":236.17,"high":240.15,"low":231.97,"close":237.04,"volume":24714000},{"date":"2026-07-13","open":240.1,"high":242.61,"low":236.86,"close":238.9,"volume":6278000},{"date":"2026-07-14","open":244.19,"high":248.92,"low":243.18,"close":243.33,"volume":6128000},{"date":"2026-07-15","open":240.57,"high":242.55,"low":237.17,"close":239.26,"volume":2609000},{"date":"2026-07-16","open":239.66,"high":243.58,"low":237.36,"close":239.08,"volume":25622000},{"date":"2026-07-17","open":241.15,"high":243.64,"low":239.77,"close":241.23,"volume":13072000},{"date":"2026-07-20","open":245.76,"high":246.82,"low":239.83,"close":244.45,"volume":24464000},{"date":"2026-07-21","open":245.2,"high":248.17,"low":241.58,"close":246.01,"volume":16049000},{"date":"2026-07-22","open":251.34,"high":252.64,"low":249.08,"close":249.39,"volume":6465000},{"date":"2026-07-23","open":252.75,"high":254.72,"low":247.0,"close":250.87,"volume":12534000},{"date":"2026-07-24","open":248.02,"high":249.24,"low":241.9,"close":246.63,"volume":21057000},{"date":"2026-07-27","open":241.9,"high":247.43,"low":240.11,"close":244.18,"volume":40515000},{"date":"2026-07-28","open":245.83,"high":249.34,"low":241.95,"close":245.17,"volume":1425000},{"date":"2026-07-29","open":244.27,"high":246.5,"low":240.04,"close":243.72,"volume":31395000},{"date":"2026-07-30","open":243.88,"high":246.28,"low":240.04,"close":242.61,"volume":24477000},{"date":"2026-07-31","open":244.61,"high":246.2,"low":243.76,"close":244.44,"volume":40380000},{"date":"2026-08-03","open":244.34,"high":248.41,"low":241.29,"close":244.34,"volume":13035000},{"date":"2026-08-04","open":242.94,"high":243.91,"low":240.35,"close":243.59,"volume":17682000},{"date":"2026-08-05","open":237.27,"high":242.26,"low":233.09,"close":239.07,"volume":20599000},{"date":"2026-08-06","open":238.45,"high":242.95,"low":234.12,"close":240.79,"volume":35117000},{"date":"2026-08-07","open":235.89,"high":239.4,"low":233.11,"close":235.96,"volume":40066000}],"institutional":[{"date":"2026-07-27","foreign":1686,"trust":-473,"dealer":-413},{"date":"2026-07-28","foreign":-1954,"trust":-107,"dealer":138},{"date":"2026-07-29","foreign":2477,"trust":142,"dealer":-34},{"date":"2026-07-30","foreign":-2539,"trust":426,"dealer":-201},{"date":"2026-07-31","foreign":624,"trust":-272,"dealer":-386},{"date":"2026-08-03","foreign":-2710,"trust":-293,"dealer":-71},{"date":"2026-08-04","foreign":1501,"trust":-114,"dealer":-213},{"date":"2026-08-05","foreign":194,"trust":292,"dealer":500},{"date":"2026-08-06","foreign":2395,"trust":-169,"dealer":-380},{"date":"2026-08-07","foreign":-1700,"trust":-537,"dealer":-92}],"margin":[{"date":"2026-07-27","margin_balance":32123,"margin_change":361,"short_balance":951,"short_change":-128},{"date":"2026-07-28","margin_balance":30667,"margin_change":-1456,"short_balance":890,"short_change":-61},{"date":"2026-07-29","margin_balance":29878,"margin_change":-789,"short_balance":843,"short_change":-47},{"date":"2026-07-30","margin_balance":29867,"margin_change":-11,"short_balance":883,"short_change":40},{"date":"2026-07-31","margin_balance":28697,"margin_change":-1170,"short_balance":997,"short_change":114},{"date":"2026-08-03","margin_balance":27313,"margin_change":-1384,"short_balance":1049,"short_change":52},{"date":"2026-08-04","margin_balance":27560,"margin_change":247,"short_balance":941,"short_change":-108},{"date":"2026-08-05","margin_balance":27539,"margin_change":-21,"short_balance":967,"short_change":26},{"date":"2026-08-06","margin_balance":26235,"margin_change":-1304,"short_balance":1020,"short_change":53},{"date":"2026-08-07","margin_balance":26345,"margin_change":110,"short_balance":1227,"short_change":207}],"fundamentals":{"pe_ratio":20.07,"dividend_yield":1.69,"pb_ratio":7.25},"insights":["近 5 個交易日股價下跌 3.47%","近 20 個交易日股價下跌 0.46%","收盤價位於 5 日均價（240.75）之下","外資近 10 個交易日累計賣超 26 張","投信近 10 個交易日累計賣超 1,105 張","融資餘額較 10 個交易日前減少 5,778 張","融券餘額較 10 個交易日前增加 276 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"6213":{"ohlc":[{"date":"2026-06-15","open":327.86,"high":329.77,"low":320.16,"close":324.9,"volume":5136000},{"date":"2026-06-16","open":319.37,"high":327.61,"low":315.52,"close":322.23,"volume":2154000},{"date":"2026-06-17","open":326.76,"high":330.81,"low":323.87,"close":328.56,"volume":23054000},{"date":"2026-06-18","open":327.68,"high":329.12,"low":326.19,"close":329.0,"volume":7100000},{"date":"2026-06-19","open":325.17,"high":328.8,"low":324.49,"close":325.4,"volume":39241000},{"date":"2026-06-22","open":325.85,"high":329.57,"low":318.28,"close":323.87,"volume":43178000},{"date":"2026-06-23","open":326.78,"high":333.53,"low":325.07,"close":327.47,"volume":27917000},{"date":"2026-06-24","open":337.08,"high":338.68,"low":329.81,"close":333.97,"volume":15358000},{"date":"2026-06-25","open":326.16,"high":335.61,"low":322.54,"close":329.2,"volume":44505000},{"date":"2026-06-26","open":325.63,"high":328.83,"low":324.5,"close":325.49,"volume":12087000},{"date":"2026-06-29","open":325.07,"high":330.58,"low":321.87,"close":322.67,"volume":21906000},{"date":"2026-06-30","open":320.17,"high":326.9,"low":317.71,"close":321.21,"volume":36808000},{"date":"2026-07-01","open":315.72,"high":321.06,"low":314.38,"close":316.91,"volume":10653000},{"date":"2026-07-02","open":324.15,"high":330.3,"low":316.61,"close":322.83,"volume":22475000},{"date":"2026-07-03","open":314.86,"high":318.05,"low":313.75,"close":317.91,"volume":32435000},{"date":"2026-07-06","open":313.25,"high":319.16,"low":311.1,"close":312.47,"volume":41269000},{"date":"2026-07-07","open":315.34,"high":319.12,"low":310.11,"close":313.69,"volume":35238000},{"date":"2026-07-08","open":320.3,"high":324.77,"low":313.64,"close":319.52,"volume":33353000},{"date":"2026-07-09","open":316.92,"high":322.67,"low":316.73,"close":318.25,"volume":10523000},{"date":"2026-07-10","open":325.19,"high":329.71,"low":322.54,"close":323.93,"volume":11503000},{"date":"2026-07-13","open":320.91,"high":325.17,"low":319.87,"close":322.61,"volume":22102000},{"date":"2026-07-14","open":322.32,"high":329.24,"low":321.3,"close":324.12,"volume":32892000},{"date":"2026-07-15","open":325.7,"high":329.25,"low":322.73,"close":323.49,"volume":42361000},{"date":"2026-07-16","open":324.82,"high":327.68,"low":320.41,"close":322.72,"volume":9372000},{"date":"2026-07-17","open":314.56,"high":318.88,"low":308.43,"close":316.4,"volume":37677000},{"date":"2026-07-20","open":317.96,"high":319.24,"low":314.88,"close":316.74,"volume":12204000},{"date":"2026-07-21","open":322.67,"high":323.47,"low":316.25,"close":321.83,"volume":37131000},{"date":"2026-07-22","open":314.07,"high":317.72,"low":309.29,"close":316.67,"volume":14778000},{"date":"2026-07-23","open":310.29,"high":315.77,"low":306.22,"close":311.47,"volume":1747000},{"date":"2026-07-24","open":312.28,"high":316.08,"low":310.37,"close":315.26,"volume":41014000},{"date":"2026-07-27","open":323.49,"high":325.26,"low":320.16,"close":320.47,"volume":34184000},{"date":"2026-07-28","open":316.87,"high":321.5,"low":311.02,"close":317.26,"volume":13557000},{"date":"2026-07-29","open":318.26,"high":323.27,"low":312.15,"close":319.73,"volume":4835000},{"date":"2026-07-30","open":315.02,"high":317.46,"low":308.53,"close":314.37,"volume":28873000},{"date":"2026-07-31","open":315.37,"high":321.1,"low":309.5,"close":317.26,"volume":40731000},{"date":"2026-08-03","open":312.11,"high":312.9,"low":309.02,"close":312.7,"volume":42847000},{"date":"2026-08-04","open":312.91,"high":318.56,"low":308.43,"close":312.17,"volume":29654000},{"date":"2026-08-05","open":307.52,"high":311.84,"low":303.98,"close":308.77,"volume":36627000},{"date":"2026-08-06","open":315.56,"high":319.7,"low":309.56,"close":314.76,"volume":5689000},{"date":"2026-08-07","open":375.22,"high":376.44,"low":367.45,"close":372.43,"volume":6623000}],"institutional":[{"date":"2026-07-27","foreign":-2081,"trust":-288,"dealer":-232},{"date":"2026-07-28","foreign":-5,"trust":784,"dealer":-306},{"date":"2026-07-29","foreign":-2833,"trust":652,"dealer":-369},{"date":"2026-07-30","foreign":2078,"trust":749,"dealer":-62},{"date":"2026-07-31","foreign":912,"trust":-304,"dealer":380},{"date":"2026-08-03","foreign":-1637,"trust":796,"dealer":348},{"date":"2026-08-04","foreign":1812,"trust":-244,"dealer":471},{"date":"2026-08-05","foreign":1974,"trust":511,"dealer":-73},{"date":"2026-08-06","foreign":-1321,"trust":358,"dealer":-339},{"date":"2026-08-07","foreign":-2054,"trust":286,"dealer":96}],"margin":[{"date":"2026-07-27","margin_balance":20290,"margin_change":355,"short_balance":7850,"short_change":170},{"date":"2026-07-28","margin_balance":21542,"margin_change":1252,"short_balance":8131,"short_change":281},{"date":"2026-07-29","margin_balance":20530,"margin_change":-1012,"short_balance":8051,"short_change":-80},{"date":"2026-07-30","margin_balance":21639,"margin_change":1109,"short_balance":7839,"short_change":-212},{"date":"2026-07-31","margin_balance":21432,"margin_change":-207,"short_balance":7991,"short_change":152},{"date":"2026-08-03","margin_balance":21416,"margin_change":-16,"short_balance":7986,"short_change":-5},{"date":"2026-08-04","margin_balance":21898,"margin_change":482,"short_balance":8105,"short_change":119},{"date":"2026-08-05","margin_balance":21673,"margin_change":-225,"short_balance":8299,"short_change":194},{"date":"2026-08-06","margin_balance":20422,"margin_change":-1251,"short_balance":8338,"short_change":39},{"date":"2026-08-07","margin_balance":19849,"margin_change":-573,"short_balance":8300,"short_change":-38}],"fundamentals":{"pe_ratio":12.39,"dividend_yield":1.85,"pb_ratio":6.66},"insights":["近 5 個交易日股價上漲 17.39%","近 20 個交易日股價上漲 14.97%","收盤價位於 5 日均價（324.17）之上","外資近 10 個交易日累計賣超 3,155 張","投信近 10 個交易日累計買超 3,300 張","融資餘額較 10 個交易日前減少 441 張","融券餘額較 10 個交易日前增加 450 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"2360":{"ohlc":[{"date":"2026-06-15","open":520.53,"high":527.65,"low":518.42,"close":525.47,"volume":11805000},{"date":"2026-06-16","open":533.67,"high":540.78,"low":526.54,"close":529.52,"volume":5598000},{"date":"2026-06-17","open":514.07,"high":520.46,"low":513.83,"close":519.16,"volume":20348000},{"date":"2026-06-18","open":524.38,"high":527.66,"low":518.47,"close":523.3,"volume":23172000},{"date":"2026-06-19","open":535.98,"high":538.77,"low":523.53,"close":532.45,"volume":5853000},{"date":"2026-06-22","open":542.77,"high":544.01,"low":536.22,"close":541.01,"volume":38881000},{"date":"2026-06-23","open":548.23,"high":548.74,"low":536.42,"close":545.42,"volume":2399000},{"date":"2026-06-24","open":548.93,"high":556.02,"low":545.19,"close":548.84,"volume":37013000},{"date":"2026-06-25","open":536.28,"high":548.3,"low":532.55,"close":540.72,"volume":21905000},{"date":"2026-06-26","open":537.63,"high":538.83,"low":527.04,"close":535.79,"volume":36595000},{"date":"2026-06-29","open":533.25,"high":538.73,"low":532.79,"close":536.56,"volume":19166000},{"date":"2026-06-30","open":529.72,"high":533.88,"low":522.21,"close":532.87,"volume":20830000},{"date":"2026-07-01","open":527.03,"high":535.16,"low":519.63,"close":522.36,"volume":26465000},{"date":"2026-07-02","open":515.73,"high":524.42,"low":511.17,"close":512.48,"volume":5759000},{"date":"2026-07-03","open":522.18,"high":523.53,"low":514.91,"close":522.4,"volume":11556000},{"date":"2026-07-06","open":526.15,"high":530.34,"low":521.46,"close":523.08,"volume":20750000},{"date":"2026-07-07","open":512.54,"high":523.93,"low":506.12,"close":513.83,"volume":11635000},{"date":"2026-07-08","open":521.77,"high":525.4,"low":516.4,"close":519.53,"volume":42234000},{"date":"2026-07-09","open":521.37,"high":527.42,"low":519.72,"close":525.82,"volume":6038000},{"date":"2026-07-10","open":515.81,"high":518.67,"low":506.83,"close":515.66,"volume":11493000},{"date":"2026-07-13","open":507.04,"high":511.42,"low":504.11,"close":505.85,"volume":24892000},{"date":"2026-07-14","open":502.31,"high":506.33,"low":499.36,"close":505.64,"volume":44693000},{"date":"2026-07-15","open":512.5,"high":517.21,"low":506.84,"close":508.97,"volume":23447000},{"date":"2026-07-16","open":508.85,"high":510.27,"low":507.72,"close":510.03,"volume":12807000},{"date":"2026-07-17","open":504.88,"high":511.35,"low":500.03,"close":504.77,"volume":13861000},{"date":"2026-07-20","open":507.45,"high":510.5,"low":500.98,"close":508.27,"volume":4562000},{"date":"2026-07-21","open":508.06,"high":517.46,"low":498.93,"close":510.22,"volume":17770000},{"date":"2026-07-22","open":518.32,"high":526.77,"low":505.21,"close":515.02,"volume":38753000},{"date":"2026-07-23","open":508.35,"high":515.61,"low":508.17,"close":510.81,"volume":32655000},{"date":"2026-07-24","open":512.15,"high":518.9,"low":508.91,"close":513.0,"volume":9448000},{"date":"2026-07-27","open":505.18,"high":515.84,"low":504.75,"close":507.61,"volume":38352000},{"date":"2026-07-28","open":506.03,"high":515.17,"low":496.26,"close":502.73,"volume":16389000},{"date":"2026-07-29","open":500.57,"high":510.25,"low":490.52,"close":495.97,"volume":28384000},{"date":"2026-07-30","open":496.89,"high":500.57,"low":484.5,"close":492.2,"volume":5253000},{"date":"2026-07-31","open":501.85,"high":502.89,"low":492.5,"close":498.15,"volume":6264000},{"date":"2026-08-03","open":493.58,"high":493.61,"low":490.59,"close":492.05,"volume":13736000},{"date":"2026-08-04","open":499.72,"high":508.92,"low":492.43,"close":496.01,"volume":1919000},{"date":"2026-08-05","open":493.99,"high":502.09,"low":485.91,"close":498.02,"volume":34076000},{"date":"2026-08-06","open":488.61,"high":492.48,"low":482.98,"close":491.15,"volume":24263000},{"date":"2026-08-07","open":531.48,"high":538.45,"low":523.26,"close":535.21,"volume":13682000}],"institutional":[{"date":"2026-07-27","foreign":-1209,"trust":518,"dealer":-170},{"date":"2026-07-28","foreign":2300,"trust":46,"dealer":-164},{"date":"2026-07-29","foreign":2521,"trust":269,"dealer":-103},{"date":"2026-07-30","foreign":-2671,"trust":258,"dealer":480},{"date":"2026-07-31","foreign":2634,"trust":-789,"dealer":-45},{"date":"2026-08-03","foreign":-457,"trust":498,"dealer":-310},{"date":"2026-08-04","foreign":1880,"trust":66,"dealer":391},{"date":"2026-08-05","foreign":464,"trust":377,"dealer":460},{"date":"2026-08-06","foreign":-863,"trust":593,"dealer":-276},{"date":"2026-08-07","foreign":-1756,"trust":-174,"dealer":-96}],"margin":[{"date":"2026-07-27","margin_balance":45422,"margin_change":-1133,"short_balance":4150,"short_change":281},{"date":"2026-07-28","margin_balance":45180,"margin_change":-242,"short_balance":3994,"short_change":-156},{"date":"2026-07-29","margin_balance":46154,"margin_change":974,"short_balance":3840,"short_change":-154},{"date":"2026-07-30","margin_balance":46285,"margin_change":131,"short_balance":4027,"short_change":187},{"date":"2026-07-31","margin_balance":47100,"margin_change":815,"short_balance":4155,"short_change":128},{"date":"2026-08-03","margin_balance":46136,"margin_change":-964,"short_balance":4098,"short_change":-57},{"date":"2026-08-04","margin_balance":46905,"margin_change":769,"short_balance":4378,"short_change":280},{"date":"2026-08-05","margin_balance":47878,"margin_change":973,"short_balance":4134,"short_change":-244},{"date":"2026-08-06","margin_balance":48338,"margin_change":460,"short_balance":4372,"short_change":238},{"date":"2026-08-07","margin_balance":47821,"margin_change":-517,"short_balance":4094,"short_change":-278}],"fundamentals":{"pe_ratio":14.52,"dividend_yield":5.23,"pb_ratio":6.99},"insights":["近 5 個交易日股價上漲 7.44%","近 20 個交易日股價上漲 3.79%","收盤價位於 5 日均價（502.49）之上","外資近 10 個交易日累計買超 2,843 張","投信近 10 個交易日累計買超 1,662 張","融資餘額較 10 個交易日前增加 2,399 張","融券餘額較 10 個交易日前減少 56 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"1503":{"ohlc":[{"date":"2026-06-15","open":964.83,"high":976.36,"low":954.29,"close":958.67,"volume":29017000},{"date":"2026-06-16","open":964.13,"high":986.21,"low":954.42,"close":969.08,"volume":13274000},{"date":"2026-06-17","open":956.48,"high":969.76,"low":947.67,"close":950.57,"volume":11240000},{"date":"2026-06-18","open":941.67,"high":948.69,"low":938.2,"close":945.88,"volume":21509000},{"date":"2026-06-19","open":943.2,"high":970.33,"low":941.93,"close":952.62,"volume":17372000},{"date":"2026-06-22","open":936.25,"high":950.24,"low":930.16,"close":943.13,"volume":2073000},{"date":"2026-06-23","open":920.16,"high":929.31,"low":912.47,"close":925.75,"volume":44144000},{"date":"2026-06-24","open":921.11,"high":925.19,"low":897.12,"close":914.33,"volume":25712000},{"date":"2026-06-25","open":918.04,"high":929.79,"low":908.16,"close":922.77,"volume":7212000},{"date":"2026-06-26","open":912.82,"high":932.67,"low":909.03,"close":916.53,"volume":1664000},{"date":"2026-06-29","open":907.28,"high":914.9,"low":893.28,"close":899.37,"volume":1963000},{"date":"2026-06-30","open":893.63,"high":907.13,"low":879.53,"close":893.25,"volume":11102000},{"date":"2026-07-01","open":907.41,"high":922.68,"low":890.62,"close":904.63,"volume":10062000},{"date":"2026-07-02","open":895.65,"high":902.82,"low":889.3,"close":894.14,"volume":34874000},{"date":"2026-07-03","open":902.0,"high":919.91,"low":900.15,"close":900.94,"volume":22950000},{"date":"2026-07-06","open":888.83,"high":904.05,"low":884.09,"close":885.09,"volume":35401000},{"date":"2026-07-07","open":884.49,"high":898.39,"low":882.91,"close":887.19,"volume":14380000},{"date":"2026-07-08","open":873.71,"high":884.84,"low":866.61,"close":872.61,"volume":5822000},{"date":"2026-07-09","open":866.33,"high":872.38,"low":856.94,"close":861.58,"volume":31123000},{"date":"2026-07-10","open":865.35,"high":873.28,"low":861.92,"close":870.5,"volume":1007000},{"date":"2026-07-13","open":852.69,"high":863.03,"low":839.33,"close":858.81,"volume":38357000},{"date":"2026-07-14","open":866.49,"high":868.49,"low":846.67,"close":861.69,"volume":23847000},{"date":"2026-07-15","open":876.67,"high":878.86,"low":855.98,"close":872.07,"volume":35068000},{"date":"2026-07-16","open":857.47,"high":871.48,"low":851.51,"close":859.82,"volume":30283000},{"date":"2026-07-17","open":869.15,"high":876.97,"low":862.15,"close":862.66,"volume":32517000},{"date":"2026-07-20","open":879.53,"high":884.3,"low":860.28,"close":871.32,"volume":12739000},{"date":"2026-07-21","open":863.12,"high":869.87,"low":848.61,"close":863.15,"volume":11621000},{"date":"2026-07-22","open":844.42,"high":864.2,"low":832.53,"close":851.25,"volume":7560000},{"date":"2026-07-23","open":843.01,"high":854.45,"low":830.37,"close":842.62,"volume":19634000},{"date":"2026-07-24","open":831.97,"high":838.4,"low":825.83,"close":833.39,"volume":22720000},{"date":"2026-07-27","open":824.87,"high":837.07,"low":813.66,"close":820.35,"volume":32704000},{"date":"2026-07-28","open":804.56,"high":814.66,"low":796.4,"close":806.95,"volume":6288000},{"date":"2026-07-29","open":815.32,"high":832.12,"low":806.43,"close":816.9,"volume":34760000},{"date":"2026-07-30","open":809.49,"high":822.24,"low":806.13,"close":815.13,"volume":8528000},{"date":"2026-07-31","open":801.68,"high":819.92,"low":791.09,"close":806.74,"volume":32728000},{"date":"2026-08-03","open":804.74,"high":820.47,"low":786.94,"close":801.36,"volume":21276000},{"date":"2026-08-04","open":810.44,"high":812.45,"low":800.45,"close":810.11,"volume":33249000},{"date":"2026-08-05","open":821.37,"high":827.3,"low":813.28,"close":822.1,"volume":40740000},{"date":"2026-08-06","open":819.25,"high":828.78,"low":811.79,"close":825.83,"volume":28473000},{"date":"2026-08-07","open":857.62,"high":859.5,"low":844.99,"close":853.87,"volume":39092000}],"institutional":[{"date":"2026-07-27","foreign":-580,"trust":44,"dealer":-421},{"date":"2026-07-28","foreign":-749,"trust":361,"dealer":-464},{"date":"2026-07-29","foreign":-893,"trust":-612,"dealer":163},{"date":"2026-07-30","foreign":289,"trust":-478,"dealer":-239},{"date":"2026-07-31","foreign":1244,"trust":213,"dealer":35},{"date":"2026-08-03","foreign":2223,"trust":-72,"dealer":-494},{"date":"2026-08-04","foreign":2846,"trust":-130,"dealer":271},{"date":"2026-08-05","foreign":2191,"trust":-579,"dealer":413},{"date":"2026-08-06","foreign":-1112,"trust":-25,"dealer":-447},{"date":"2026-08-07","foreign":-508,"trust":-558,"dealer":59}],"margin":[{"date":"2026-07-27","margin_balance":32146,"margin_change":1203,"short_balance":5409,"short_change":20},{"date":"2026-07-28","margin_balance":32037,"margin_change":-109,"short_balance":5224,"short_change":-185},{"date":"2026-07-29","margin_balance":31193,"margin_change":-844,"short_balance":5112,"short_change":-112},{"date":"2026-07-30","margin_balance":32588,"margin_change":1395,"short_balance":5041,"short_change":-71},{"date":"2026-07-31","margin_balance":33449,"margin_change":861,"short_balance":4934,"short_change":-107},{"date":"2026-08-03","margin_balance":33326,"margin_change":-123,"short_balance":4791,"short_change":-143},{"date":"2026-08-04","margin_balance":32189,"margin_change":-1137,"short_balance":4900,"short_change":109},{"date":"2026-08-05","margin_balance":33136,"margin_change":947,"short_balance":4812,"short_change":-88},{"date":"2026-08-06","margin_balance":33204,"margin_change":68,"short_balance":4672,"short_change":-140},{"date":"2026-08-07","margin_balance":33236,"margin_change":32,"short_balance":4689,"short_change":17}],"fundamentals":{"pe_ratio":23.53,"dividend_yield":2.76,"pb_ratio":5.47},"insights":["近 5 個交易日股價上漲 5.84%","近 20 個交易日股價下跌 1.91%","收盤價位於 5 日均價（822.65）之上","外資近 10 個交易日累計買超 4,951 張","投信近 10 個交易日累計賣超 1,836 張","融資餘額較 10 個交易日前增加 1,090 張","融券餘額較 10 個交易日前減少 720 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"3037":{"ohlc":[{"date":"2026-06-15","open":848.26,"high":852.14,"low":841.37,"close":842.02,"volume":21308000},{"date":"2026-06-16","open":852.77,"high":867.99,"low":846.4,"close":858.15,"volume":19060000},{"date":"2026-06-17","open":863.0,"high":881.4,"low":850.61,"close":867.62,"volume":10286000},{"date":"2026-06-18","open":867.37,"high":872.32,"low":863.94,"close":866.66,"volume":38167000},{"date":"2026-06-19","open":869.71,"high":882.9,"low":857.54,"close":868.24,"volume":39351000},{"date":"2026-06-22","open":864.53,"high":881.96,"low":855.91,"close":872.76,"volume":35162000},{"date":"2026-06-23","open":868.09,"high":886.62,"low":867.41,"close":872.7,"volume":26702000},{"date":"2026-06-24","open":887.14,"high":897.53,"low":881.15,"close":882.73,"volume":11209000},{"date":"2026-06-25","open":865.86,"high":874.16,"low":865.39,"close":866.56,"volume":37849000},{"date":"2026-06-26","open":853.21,"high":854.31,"low":834.46,"close":850.79,"volume":42936000},{"date":"2026-06-29","open":844.14,"high":854.79,"low":831.2,"close":840.08,"volume":10943000},{"date":"2026-06-30","open":848.15,"high":854.34,"low":837.93,"close":852.98,"volume":19422000},{"date":"2026-07-01","open":849.2,"high":868.61,"low":841.77,"close":856.99,"volume":7924000},{"date":"2026-07-02","open":875.19,"high":887.74,"low":873.64,"close":873.74,"volume":18272000},{"date":"2026-07-03","open":877.85,"high":892.5,"low":872.3,"close":878.96,"volume":19914000},{"date":"2026-07-06","open":870.45,"high":874.1,"low":854.41,"close":873.82,"volume":34212000},{"date":"2026-07-07","open":877.75,"high":886.84,"low":855.97,"close":872.11,"volume":4145000},{"date":"2026-07-08","open":867.95,"high":883.55,"low":865.38,"close":866.0,"volume":10040000},{"date":"2026-07-09","open":872.41,"high":893.88,"low":871.18,"close":877.75,"volume":28501000},{"date":"2026-07-10","open":877.18,"high":882.9,"low":876.75,"close":880.21,"volume":21607000},{"date":"2026-07-13","open":877.23,"high":881.82,"low":861.59,"close":868.72,"volume":13062000},{"date":"2026-07-14","open":847.04,"high":870.91,"low":832.43,"close":855.27,"volume":29524000},{"date":"2026-07-15","open":852.92,"high":858.29,"low":844.6,"close":850.31,"volume":31951000},{"date":"2026-07-16","open":852.2,"high":871.31,"low":842.21,"close":855.44,"volume":36270000},{"date":"2026-07-17","open":861.54,"high":872.34,"low":845.34,"close":862.36,"volume":26622000},{"date":"2026-07-20","open":842.45,"high":862.36,"low":828.58,"close":850.14,"volume":29230000},{"date":"2026-07-21","open":846.78,"high":861.43,"low":843.8,"close":846.66,"volume":29046000},{"date":"2026-07-22","open":847.25,"high":849.06,"low":839.52,"close":840.3,"volume":36373000},{"date":"2026-07-23","open":835.86,"high":857.48,"low":829.59,"close":841.73,"volume":40537000},{"date":"2026-07-24","open":833.08,"high":839.54,"low":828.01,"close":837.88,"volume":17568000},{"date":"2026-07-27","open":844.02,"high":865.48,"low":836.82,"close":851.63,"volume":37821000},{"date":"2026-07-28","open":855.31,"high":868.03,"low":844.52,"close":854.25,"volume":22726000},{"date":"2026-07-29","open":859.08,"high":876.25,"low":857.27,"close":857.4,"volume":12870000},{"date":"2026-07-30","open":845.09,"high":854.0,"low":841.17,"close":842.46,"volume":38278000},{"date":"2026-07-31","open":862.44,"high":864.43,"low":856.78,"close":857.39,"volume":22782000},{"date":"2026-08-03","open":855.44,"high":857.6,"low":849.03,"close":853.52,"volume":38019000},{"date":"2026-08-04","open":857.72,"high":865.17,"low":843.36,"close":849.36,"volume":29428000},{"date":"2026-08-05","open":864.27,"high":871.0,"low":854.33,"close":862.57,"volume":11035000},{"date":"2026-08-06","open":865.76,"high":880.01,"low":847.07,"close":858.4,"volume":9647000},{"date":"2026-08-07","open":921.54,"high":941.09,"low":907.66,"close":925.58,"volume":22624000}],"institutional":[{"date":"2026-07-27","foreign":1306,"trust":-290,"dealer":51},{"date":"2026-07-28","foreign":-1239,"trust":-671,"dealer":-431},{"date":"2026-07-29","foreign":204,"trust":111,"dealer":263},{"date":"2026-07-30","foreign":2466,"trust":95,"dealer":-472},{"date":"2026-07-31","foreign":1476,"trust":278,"dealer":-329},{"date":"2026-08-03","foreign":2229,"trust":-766,"dealer":380},{"date":"2026-08-04","foreign":1145,"trust":653,"dealer":129},{"date":"2026-08-05","foreign":810,"trust":-583,"dealer":136},{"date":"2026-08-06","foreign":-2047,"trust":-296,"dealer":322},{"date":"2026-08-07","foreign":1670,"trust":-543,"dealer":446}],"margin":[{"date":"2026-07-27","margin_balance":27923,"margin_change":122,"short_balance":7436,"short_change":292},{"date":"2026-07-28","margin_balance":26578,"margin_change":-1345,"short_balance":7180,"short_change":-256},{"date":"2026-07-29","margin_balance":25289,"margin_change":-1289,"short_balance":7455,"short_change":275},{"date":"2026-07-30","margin_balance":24569,"margin_change":-720,"short_balance":7450,"short_change":-5},{"date":"2026-07-31","margin_balance":23660,"margin_change":-909,"short_balance":7385,"short_change":-65},{"date":"2026-08-03","margin_balance":22467,"margin_change":-1193,"short_balance":7275,"short_change":-110},{"date":"2026-08-04","margin_balance":23346,"margin_change":879,"short_balance":7065,"short_change":-210},{"date":"2026-08-05","margin_balance":24380,"margin_change":1034,"short_balance":6776,"short_change":-289},{"date":"2026-08-06","margin_balance":25548,"margin_change":1168,"short_balance":6830,"short_change":54},{"date":"2026-08-07","margin_balance":26063,"margin_change":515,"short_balance":7056,"short_change":226}],"fundamentals":{"pe_ratio":14.24,"dividend_yield":2.49,"pb_ratio":1.61},"insights":["近 5 個交易日股價上漲 7.95%","近 20 個交易日股價上漲 5.15%","收盤價位於 5 日均價（869.89）之上","外資近 10 個交易日累計買超 8,020 張","投信近 10 個交易日累計賣超 2,012 張","融資餘額較 10 個交易日前減少 1,860 張","融券餘額較 10 個交易日前減少 380 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"8155":{"ohlc":[{"date":"2026-06-15","open":1138.86,"high":1151.29,"low":1129.72,"close":1136.42,"volume":39499000},{"date":"2026-06-16","open":1133.08,"high":1140.02,"low":1107.05,"close":1125.97,"volume":34108000},{"date":"2026-06-17","open":1158.18,"high":1174.49,"low":1138.66,"close":1147.42,"volume":22876000},{"date":"2026-06-18","open":1163.12,"high":1175.62,"low":1143.25,"close":1157.24,"volume":36974000},{"date":"2026-06-19","open":1155.68,"high":1171.8,"low":1138.29,"close":1151.0,"volume":29108000},{"date":"2026-06-22","open":1179.57,"high":1192.15,"low":1170.71,"close":1172.62,"volume":43351000},{"date":"2026-06-23","open":1197.26,"high":1219.09,"low":1193.6,"close":1194.65,"volume":13264000},{"date":"2026-06-24","open":1207.06,"high":1209.19,"low":1195.73,"close":1205.79,"volume":15264000},{"date":"2026-06-25","open":1198.1,"high":1223.2,"low":1187.31,"close":1207.04,"volume":9517000},{"date":"2026-06-26","open":1230.66,"high":1247.12,"low":1226.87,"close":1227.84,"volume":27183000},{"date":"2026-06-29","open":1234.98,"high":1243.66,"low":1219.54,"close":1237.09,"volume":27386000},{"date":"2026-06-30","open":1240.44,"high":1256.81,"low":1228.62,"close":1244.03,"volume":2664000},{"date":"2026-07-01","open":1224.14,"high":1235.34,"low":1205.93,"close":1226.63,"volume":24813000},{"date":"2026-07-02","open":1197.98,"high":1207.82,"low":1178.71,"close":1204.65,"volume":20961000},{"date":"2026-07-03","open":1172.39,"high":1194.41,"low":1153.19,"close":1182.02,"volume":38853000},{"date":"2026-07-06","open":1176.77,"high":1195.97,"low":1173.56,"close":1181.53,"volume":10227000},{"date":"2026-07-07","open":1169.82,"high":1173.48,"low":1154.53,"close":1162.25,"volume":23949000},{"date":"2026-07-08","open":1159.1,"high":1180.09,"low":1133.24,"close":1154.05,"volume":34896000},{"date":"2026-07-09","open":1133.13,"high":1145.9,"low":1115.79,"close":1141.02,"volume":37507000},{"date":"2026-07-10","open":1146.74,"high":1147.77,"low":1131.09,"close":1137.03,"volume":13673000},{"date":"2026-07-13","open":1164.93,"high":1180.03,"low":1144.33,"close":1155.41,"volume":23037000},{"date":"2026-07-14","open":1149.86,"high":1164.93,"low":1134.41,"close":1155.76,"volume":26424000},{"date":"2026-07-15","open":1150.98,"high":1168.38,"low":1130.36,"close":1150.99,"volume":29926000},{"date":"2026-07-16","open":1176.26,"high":1192.61,"low":1169.51,"close":1170.03,"volume":4222000},{"date":"2026-07-17","open":1185.54,"high":1208.25,"low":1179.16,"close":1188.54,"volume":43256000},{"date":"2026-07-20","open":1175.5,"high":1189.36,"low":1164.17,"close":1182.2,"volume":36908000},{"date":"2026-07-21","open":1178.39,"high":1210.52,"low":1167.32,"close":1186.84,"volume":37948000},{"date":"2026-07-22","open":1209.97,"high":1222.76,"low":1195.1,"close":1205.25,"volume":12924000},{"date":"2026-07-23","open":1189.18,"high":1203.19,"low":1178.33,"close":1183.05,"volume":28517000},{"date":"2026-07-24","open":1158.84,"high":1181.38,"low":1154.75,"close":1160.02,"volume":5460000},{"date":"2026-07-27","open":1147.22,"high":1154.57,"low":1128.35,"close":1150.88,"volume":18085000},{"date":"2026-07-28","open":1173.08,"high":1190.55,"low":1145.69,"close":1167.46,"volume":1603000},{"date":"2026-07-29","open":1173.03,"high":1199.51,"low":1165.44,"close":1179.31,"volume":8898000},{"date":"2026-07-30","open":1168.82,"high":1181.7,"low":1165.69,"close":1173.55,"volume":3399000},{"date":"2026-07-31","open":1150.43,"high":1169.9,"low":1128.71,"close":1159.33,"volume":3193000},{"date":"2026-08-03","open":1172.16,"high":1188.74,"low":1151.54,"close":1169.37,"volume":33380000},{"date":"2026-08-04","open":1162.77,"high":1168.88,"low":1136.78,"close":1156.49,"volume":15023000},{"date":"2026-08-05","open":1165.77,"high":1166.67,"low":1143.83,"close":1162.7,"volume":17695000},{"date":"2026-08-06","open":1150.83,"high":1167.94,"low":1140.82,"close":1154.75,"volume":15346000},{"date":"2026-08-07","open":983.32,"high":993.52,"low":976.55,"close":978.67,"volume":10128000}],"institutional":[{"date":"2026-07-27","foreign":-418,"trust":412,"dealer":-196},{"date":"2026-07-28","foreign":250,"trust":71,"dealer":237},{"date":"2026-07-29","foreign":-475,"trust":683,"dealer":-421},{"date":"2026-07-30","foreign":1561,"trust":-353,"dealer":417},{"date":"2026-07-31","foreign":614,"trust":-268,"dealer":-167},{"date":"2026-08-03","foreign":384,"trust":-630,"dealer":478},{"date":"2026-08-04","foreign":1575,"trust":249,"dealer":399},{"date":"2026-08-05","foreign":1754,"trust":-515,"dealer":418},{"date":"2026-08-06","foreign":2959,"trust":-354,"dealer":331},{"date":"2026-08-07","foreign":-1273,"trust":-696,"dealer":-271}],"margin":[{"date":"2026-07-27","margin_balance":6026,"margin_change":-1136,"short_balance":1409,"short_change":-26},{"date":"2026-07-28","margin_balance":5647,"margin_change":-379,"short_balance":1398,"short_change":-11},{"date":"2026-07-29","margin_balance":6278,"margin_change":631,"short_balance":1453,"short_change":55},{"date":"2026-07-30","margin_balance":6319,"margin_change":41,"short_balance":1650,"short_change":197},{"date":"2026-07-31","margin_balance":7462,"margin_change":1143,"short_balance":1443,"short_change":-207},{"date":"2026-08-03","margin_balance":6106,"margin_change":-1356,"short_balance":1736,"short_change":293},{"date":"2026-08-04","margin_balance":7077,"margin_change":971,"short_balance":1923,"short_change":187},{"date":"2026-08-05","margin_balance":6172,"margin_change":-905,"short_balance":2066,"short_change":143},{"date":"2026-08-06","margin_balance":7336,"margin_change":1164,"short_balance":2038,"short_change":-28},{"date":"2026-08-07","margin_balance":6180,"margin_change":-1156,"short_balance":2094,"short_change":56}],"fundamentals":{"pe_ratio":13.7,"dividend_yield":6.34,"pb_ratio":3.24},"insights":["近 5 個交易日股價下跌 15.58%","近 20 個交易日股價下跌 13.93%","收盤價位於 5 日均價（1124.40）之下","外資近 10 個交易日累計買超 6,931 張","投信近 10 個交易日累計賣超 1,401 張","融資餘額較 10 個交易日前增加 154 張","融券餘額較 10 個交易日前增加 685 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"3711":{"ohlc":[{"date":"2026-06-15","open":840.26,"high":858.4,"low":839.31,"close":842.73,"volume":4017000},{"date":"2026-06-16","open":845.79,"high":856.76,"low":844.46,"close":853.64,"volume":41471000},{"date":"2026-06-17","open":859.61,"high":864.76,"low":850.81,"close":863.47,"volume":20907000},{"date":"2026-06-18","open":866.65,"high":880.7,"low":849.71,"close":874.02,"volume":8028000},{"date":"2026-06-19","open":873.07,"high":890.17,"low":862.47,"close":878.23,"volume":3935000},{"date":"2026-06-22","open":871.79,"high":879.71,"low":861.58,"close":871.44,"volume":6600000},{"date":"2026-06-23","open":863.9,"high":875.09,"low":848.75,"close":868.06,"volume":18084000},{"date":"2026-06-24","open":852.79,"high":870.72,"low":838.85,"close":861.3,"volume":6394000},{"date":"2026-06-25","open":867.09,"high":888.22,"low":849.96,"close":871.88,"volume":41455000},{"date":"2026-06-26","open":873.35,"high":880.58,"low":867.36,"close":876.43,"volume":5198000},{"date":"2026-06-29","open":865.02,"high":879.72,"low":858.39,"close":868.8,"volume":24368000},{"date":"2026-06-30","open":879.57,"high":895.45,"low":869.49,"close":874.2,"volume":15702000},{"date":"2026-07-01","open":869.93,"high":877.72,"low":853.32,"close":866.95,"volume":36956000},{"date":"2026-07-02","open":877.79,"high":884.92,"low":876.79,"close":884.15,"volume":14762000},{"date":"2026-07-03","open":874.06,"high":890.74,"low":865.2,"close":877.13,"volume":24361000},{"date":"2026-07-06","open":867.53,"high":868.1,"low":859.62,"close":864.24,"volume":31773000},{"date":"2026-07-07","open":863.47,"high":875.15,"low":851.13,"close":859.02,"volume":3073000},{"date":"2026-07-08","open":842.56,"high":863.39,"low":827.45,"close":848.47,"volume":44772000},{"date":"2026-07-09","open":866.5,"high":880.82,"low":852.21,"close":862.11,"volume":40030000},{"date":"2026-07-10","open":850.14,"high":853.91,"low":839.85,"close":844.95,"volume":5941000},{"date":"2026-07-13","open":840.66,"high":853.99,"low":834.77,"close":848.29,"volume":42631000},{"date":"2026-07-14","open":848.99,"high":859.59,"low":834.88,"close":854.04,"volume":9358000},{"date":"2026-07-15","open":863.34,"high":875.09,"low":857.78,"close":869.71,"volume":20994000},{"date":"2026-07-16","open":888.09,"high":899.36,"low":877.52,"close":882.8,"volume":18826000},{"date":"2026-07-17","open":879.13,"high":890.79,"low":871.87,"close":887.16,"volume":44260000},{"date":"2026-07-20","open":889.8,"high":909.18,"low":887.43,"close":898.47,"volume":5560000},{"date":"2026-07-21","open":909.43,"high":922.43,"low":897.7,"close":913.4,"volume":35382000},{"date":"2026-07-22","open":897.1,"high":918.86,"low":894.91,"close":900.98,"volume":19065000},{"date":"2026-07-23","open":900.76,"high":913.21,"low":887.55,"close":906.11,"volume":33188000},{"date":"2026-07-24","open":904.08,"high":904.81,"low":891.4,"close":902.25,"volume":24986000},{"date":"2026-07-27","open":912.91,"high":916.05,"low":895.66,"close":915.72,"volume":1819000},{"date":"2026-07-28","open":903.97,"high":908.99,"low":885.98,"close":901.51,"volume":13608000},{"date":"2026-07-29","open":893.7,"high":902.59,"low":885.11,"close":885.36,"volume":12194000},{"date":"2026-07-30","open":866.54,"high":887.85,"low":863.83,"close":870.79,"volume":3473000},{"date":"2026-07-31","open":876.78,"high":893.77,"low":870.94,"close":875.85,"volume":25088000},{"date":"2026-08-03","open":865.33,"high":878.4,"low":859.41,"close":868.46,"volume":27650000},{"date":"2026-08-04","open":881.85,"high":887.36,"low":872.5,"close":882.65,"volume":10416000},{"date":"2026-08-05","open":875.67,"high":881.93,"low":863.0,"close":870.85,"volume":34079000},{"date":"2026-08-06","open":864.33,"high":880.11,"low":857.93,"close":868.23,"volume":38075000},{"date":"2026-08-07","open":830.45,"high":842.2,"low":817.14,"close":836.09,"volume":1522000}],"institutional":[{"date":"2026-07-27","foreign":-781,"trust":557,"dealer":196},{"date":"2026-07-28","foreign":789,"trust":282,"dealer":-95},{"date":"2026-07-29","foreign":32,"trust":-317,"dealer":-263},{"date":"2026-07-30","foreign":2146,"trust":753,"dealer":-357},{"date":"2026-07-31","foreign":-1111,"trust":-273,"dealer":477},{"date":"2026-08-03","foreign":-1092,"trust":-511,"dealer":16},{"date":"2026-08-04","foreign":2046,"trust":-655,"dealer":188},{"date":"2026-08-05","foreign":2629,"trust":231,"dealer":-396},{"date":"2026-08-06","foreign":1773,"trust":-764,"dealer":-257},{"date":"2026-08-07","foreign":2696,"trust":-658,"dealer":235}],"margin":[{"date":"2026-07-27","margin_balance":14678,"margin_change":-497,"short_balance":3406,"short_change":-91},{"date":"2026-07-28","margin_balance":15715,"margin_change":1037,"short_balance":3350,"short_change":-56},{"date":"2026-07-29","margin_balance":14253,"margin_change":-1462,"short_balance":3647,"short_change":297},{"date":"2026-07-30","margin_balance":15455,"margin_change":1202,"short_balance":3557,"short_change":-90},{"date":"2026-07-31","margin_balance":16273,"margin_change":818,"short_balance":3553,"short_change":-4},{"date":"2026-08-03","margin_balance":15930,"margin_change":-343,"short_balance":3787,"short_change":234},{"date":"2026-08-04","margin_balance":15995,"margin_change":65,"short_balance":3547,"short_change":-240},{"date":"2026-08-05","margin_balance":14935,"margin_change":-1060,"short_balance":3562,"short_change":15},{"date":"2026-08-06","margin_balance":14436,"margin_change":-499,"short_balance":3368,"short_change":-194},{"date":"2026-08-07","margin_balance":15116,"margin_change":680,"short_balance":3385,"short_change":17}],"fundamentals":{"pe_ratio":29.25,"dividend_yield":5.59,"pb_ratio":1.76},"insights":["近 5 個交易日股價下跌 4.54%","近 20 個交易日股價下跌 1.05%","收盤價位於 5 日均價（865.26）之下","外資近 10 個交易日累計買超 9,127 張","投信近 10 個交易日累計賣超 1,355 張","融資餘額較 10 個交易日前增加 438 張","融券餘額較 10 個交易日前減少 21 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"6239":{"ohlc":[{"date":"2026-06-15","open":669.86,"high":681.35,"low":657.73,"close":666.87,"volume":39981000},{"date":"2026-06-16","open":660.63,"high":661.46,"low":651.38,"close":657.8,"volume":35143000},{"date":"2026-06-17","open":662.25,"high":677.03,"low":649.21,"close":665.25,"volume":44898000},{"date":"2026-06-18","open":678.9,"high":688.48,"low":666.07,"close":677.66,"volume":26856000},{"date":"2026-06-19","open":666.2,"high":673.29,"low":657.16,"close":671.7,"volume":9498000},{"date":"2026-06-22","open":684.12,"high":687.45,"low":673.44,"close":680.85,"volume":31864000},{"date":"2026-06-23","open":697.46,"high":707.14,"low":681.71,"close":693.53,"volume":15245000},{"date":"2026-06-24","open":703.25,"high":708.08,"low":689.19,"close":705.15,"volume":19527000},{"date":"2026-06-25","open":719.63,"high":719.76,"low":704.76,"close":717.83,"volume":12336000},{"date":"2026-06-26","open":698.27,"high":716.62,"low":685.31,"close":703.95,"volume":28294000},{"date":"2026-06-29","open":684.78,"high":692.4,"low":677.93,"close":690.22,"volume":7590000},{"date":"2026-06-30","open":693.64,"high":705.53,"low":682.89,"close":687.4,"volume":42865000},{"date":"2026-07-01","open":687.18,"high":691.0,"low":678.36,"close":689.75,"volume":23957000},{"date":"2026-07-02","open":688.44,"high":698.05,"low":681.95,"close":685.34,"volume":10346000},{"date":"2026-07-03","open":675.11,"high":688.69,"low":673.6,"close":679.35,"volume":13784000},{"date":"2026-07-06","open":667.45,"high":683.25,"low":660.08,"close":673.12,"volume":33239000},{"date":"2026-07-07","open":671.79,"high":673.91,"low":656.72,"close":667.89,"volume":3860000},{"date":"2026-07-08","open":662.04,"high":663.43,"low":659.95,"close":662.36,"volume":29625000},{"date":"2026-07-09","open":664.97,"high":681.05,"low":661.4,"close":670.87,"volume":36308000},{"date":"2026-07-10","open":665.66,"high":672.54,"low":657.3,"close":668.29,"volume":23231000},{"date":"2026-07-13","open":683.13,"high":690.02,"low":669.1,"close":679.81,"volume":917000},{"date":"2026-07-14","open":664.46,"high":676.57,"low":651.46,"close":668.49,"volume":23260000},{"date":"2026-07-15","open":679.41,"high":688.99,"low":671.89,"close":678.83,"volume":23262000},{"date":"2026-07-16","open":693.21,"high":701.51,"low":689.18,"close":690.82,"volume":42732000},{"date":"2026-07-17","open":690.44,"high":700.35,"low":678.36,"close":692.31,"volume":37276000},{"date":"2026-07-20","open":699.37,"high":705.67,"low":694.42,"close":695.31,"volume":21672000},{"date":"2026-07-21","open":704.73,"high":707.0,"low":698.67,"close":702.38,"volume":32473000},{"date":"2026-07-22","open":694.26,"high":698.47,"low":677.04,"close":690.48,"volume":2771000},{"date":"2026-07-23","open":691.12,"high":693.86,"low":681.9,"close":689.06,"volume":24396000},{"date":"2026-07-24","open":698.24,"high":701.91,"low":690.57,"close":694.35,"volume":14494000},{"date":"2026-07-27","open":702.37,"high":720.28,"low":701.92,"close":707.41,"volume":41380000},{"date":"2026-07-28","open":706.8,"high":724.24,"low":697.52,"close":711.31,"volume":41938000},{"date":"2026-07-29","open":708.83,"high":729.72,"low":702.7,"close":715.43,"volume":41623000},{"date":"2026-07-30","open":698.57,"high":708.0,"low":693.63,"close":704.56,"volume":29097000},{"date":"2026-07-31","open":717.81,"high":732.06,"low":712.78,"close":716.57,"volume":3681000},{"date":"2026-08-03","open":715.13,"high":720.22,"low":704.43,"close":716.72,"volume":35686000},{"date":"2026-08-04","open":728.83,"high":741.05,"low":722.36,"close":722.88,"volume":31033000},{"date":"2026-08-05","open":731.93,"high":735.85,"low":726.08,"close":733.7,"volume":10398000},{"date":"2026-08-06","open":724.97,"high":729.38,"low":717.36,"close":720.46,"volume":13589000},{"date":"2026-08-07","open":626.82,"high":636.8,"low":613.76,"close":622.64,"volume":21012000}],"institutional":[{"date":"2026-07-27","foreign":-1144,"trust":-653,"dealer":-221},{"date":"2026-07-28","foreign":1474,"trust":-719,"dealer":35},{"date":"2026-07-29","foreign":-1618,"trust":743,"dealer":-92},{"date":"2026-07-30","foreign":-1411,"trust":254,"dealer":139},{"date":"2026-07-31","foreign":-1303,"trust":-527,"dealer":325},{"date":"2026-08-03","foreign":-2048,"trust":378,"dealer":341},{"date":"2026-08-04","foreign":-1508,"trust":83,"dealer":382},{"date":"2026-08-05","foreign":-465,"trust":513,"dealer":380},{"date":"2026-08-06","foreign":1055,"trust":-606,"dealer":279},{"date":"2026-08-07","foreign":-2835,"trust":-206,"dealer":-353}],"margin":[{"date":"2026-07-27","margin_balance":53178,"margin_change":-1478,"short_balance":6061,"short_change":88},{"date":"2026-07-28","margin_balance":54416,"margin_change":1238,"short_balance":6130,"short_change":69},{"date":"2026-07-29","margin_balance":54507,"margin_change":91,"short_balance":6105,"short_change":-25},{"date":"2026-07-30","margin_balance":53343,"margin_change":-1164,"short_balance":6261,"short_change":156},{"date":"2026-07-31","margin_balance":54050,"margin_change":707,"short_balance":6032,"short_change":-229},{"date":"2026-08-03","margin_balance":54821,"margin_change":771,"short_balance":5935,"short_change":-97},{"date":"2026-08-04","margin_balance":55486,"margin_change":665,"short_balance":5815,"short_change":-120},{"date":"2026-08-05","margin_balance":54573,"margin_change":-913,"short_balance":5735,"short_change":-80},{"date":"2026-08-06","margin_balance":53767,"margin_change":-806,"short_balance":5757,"short_change":22},{"date":"2026-08-07","margin_balance":52810,"margin_change":-957,"short_balance":5712,"short_change":-45}],"fundamentals":{"pe_ratio":18.22,"dividend_yield":3.91,"pb_ratio":4.78},"insights":["近 5 個交易日股價下跌 13.11%","近 20 個交易日股價下跌 6.83%","收盤價位於 5 日均價（703.28）之下","外資近 10 個交易日累計賣超 9,803 張","投信近 10 個交易日累計賣超 740 張","融資餘額較 10 個交易日前減少 368 張","融券餘額較 10 個交易日前減少 349 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"2449":{"ohlc":[{"date":"2026-06-15","open":702.19,"high":711.26,"low":690.95,"close":706.08,"volume":32825000},{"date":"2026-06-16","open":712.75,"high":723.25,"low":712.67,"close":717.37,"volume":15156000},{"date":"2026-06-17","open":701.78,"high":706.24,"low":693.49,"close":706.15,"volume":27143000},{"date":"2026-06-18","open":717.5,"high":717.64,"low":710.3,"close":712.41,"volume":10263000},{"date":"2026-06-19","open":726.13,"high":739.94,"low":714.06,"close":725.46,"volume":41774000},{"date":"2026-06-22","open":738.49,"high":740.14,"low":721.24,"close":733.29,"volume":21183000},{"date":"2026-06-23","open":734.85,"high":738.3,"low":721.05,"close":728.83,"volume":27128000},{"date":"2026-06-24","open":720.8,"high":723.36,"low":712.12,"close":718.72,"volume":30970000},{"date":"2026-06-25","open":722.34,"high":722.81,"low":710.04,"close":718.37,"volume":41768000},{"date":"2026-06-26","open":718.33,"high":721.44,"low":706.14,"close":721.07,"volume":7190000},{"date":"2026-06-29","open":727.79,"high":746.11,"low":721.01,"close":734.9,"volume":1929000},{"date":"2026-06-30","open":722.89,"high":732.57,"low":710.58,"close":725.18,"volume":3900000},{"date":"2026-07-01","open":739.37,"high":753.69,"low":725.33,"close":736.51,"volume":29444000},{"date":"2026-07-02","open":746.76,"high":754.93,"low":740.06,"close":743.54,"volume":22667000},{"date":"2026-07-03","open":762.66,"high":775.36,"low":757.09,"close":757.81,"volume":10948000},{"date":"2026-07-06","open":749.89,"high":752.64,"low":736.04,"close":748.85,"volume":43661000},{"date":"2026-07-07","open":753.3,"high":766.06,"low":739.78,"close":754.44,"volume":41186000},{"date":"2026-07-08","open":767.58,"high":770.4,"low":751.01,"close":765.75,"volume":32945000},{"date":"2026-07-09","open":770.0,"high":779.74,"low":769.51,"close":773.82,"volume":33770000},{"date":"2026-07-10","open":757.27,"high":764.1,"low":748.44,"close":759.07,"volume":19795000},{"date":"2026-07-13","open":768.62,"high":781.66,"low":765.6,"close":773.71,"volume":12054000},{"date":"2026-07-14","open":766.05,"high":769.13,"low":753.86,"close":759.81,"volume":21193000},{"date":"2026-07-15","open":770.85,"high":772.37,"low":764.77,"close":767.63,"volume":14680000},{"date":"2026-07-16","open":760.73,"high":772.88,"low":739.8,"close":754.64,"volume":4539000},{"date":"2026-07-17","open":751.58,"high":762.79,"low":742.52,"close":751.21,"volume":21468000},{"date":"2026-07-20","open":767.99,"high":775.8,"low":750.44,"close":762.85,"volume":19943000},{"date":"2026-07-21","open":754.74,"high":764.77,"low":750.44,"close":758.02,"volume":28611000},{"date":"2026-07-22","open":749.44,"high":749.8,"low":737.59,"close":742.88,"volume":31280000},{"date":"2026-07-23","open":747.35,"high":754.88,"low":732.95,"close":740.43,"volume":3246000},{"date":"2026-07-24","open":741.0,"high":746.28,"low":734.45,"close":743.67,"volume":17225000},{"date":"2026-07-27","open":763.14,"high":778.25,"low":756.75,"close":757.74,"volume":30082000},{"date":"2026-07-28","open":744.45,"high":762.39,"low":735.21,"close":748.37,"volume":22027000},{"date":"2026-07-29","open":735.24,"high":739.26,"low":724.46,"close":733.52,"volume":36222000},{"date":"2026-07-30","open":718.61,"high":730.36,"low":711.98,"close":722.82,"volume":2756000},{"date":"2026-07-31","open":734.21,"high":747.57,"low":724.59,"close":732.33,"volume":21094000},{"date":"2026-08-03","open":743.22,"high":751.48,"low":739.07,"close":739.6,"volume":17872000},{"date":"2026-08-04","open":746.31,"high":751.34,"low":729.87,"close":743.37,"volume":1272000},{"date":"2026-08-05","open":737.01,"high":742.35,"low":728.87,"close":740.79,"volume":31451000},{"date":"2026-08-06","open":729.46,"high":742.04,"low":718.91,"close":726.28,"volume":2084000},{"date":"2026-08-07","open":653.43,"high":659.37,"low":646.04,"close":655.58,"volume":19594000}],"institutional":[{"date":"2026-07-27","foreign":1032,"trust":440,"dealer":368},{"date":"2026-07-28","foreign":804,"trust":-362,"dealer":462},{"date":"2026-07-29","foreign":2970,"trust":432,"dealer":7},{"date":"2026-07-30","foreign":-2522,"trust":463,"dealer":-416},{"date":"2026-07-31","foreign":889,"trust":-721,"dealer":-277},{"date":"2026-08-03","foreign":1700,"trust":522,"dealer":-280},{"date":"2026-08-04","foreign":-2287,"trust":-123,"dealer":170},{"date":"2026-08-05","foreign":-789,"trust":367,"dealer":-241},{"date":"2026-08-06","foreign":-693,"trust":568,"dealer":101},{"date":"2026-08-07","foreign":-2928,"trust":151,"dealer":-170}],"margin":[{"date":"2026-07-27","margin_balance":51444,"margin_change":561,"short_balance":5843,"short_change":92},{"date":"2026-07-28","margin_balance":51558,"margin_change":114,"short_balance":6031,"short_change":188},{"date":"2026-07-29","margin_balance":50221,"margin_change":-1337,"short_balance":5989,"short_change":-42},{"date":"2026-07-30","margin_balance":50399,"margin_change":178,"short_balance":5980,"short_change":-9},{"date":"2026-07-31","margin_balance":51268,"margin_change":869,"short_balance":5865,"short_change":-115},{"date":"2026-08-03","margin_balance":51593,"margin_change":325,"short_balance":5764,"short_change":-101},{"date":"2026-08-04","margin_balance":51385,"margin_change":-208,"short_balance":5552,"short_change":-212},{"date":"2026-08-05","margin_balance":52252,"margin_change":867,"short_balance":5359,"short_change":-193},{"date":"2026-08-06","margin_balance":53135,"margin_change":883,"short_balance":5219,"short_change":-140},{"date":"2026-08-07","margin_balance":52616,"margin_change":-519,"short_balance":5127,"short_change":-92}],"fundamentals":{"pe_ratio":14.36,"dividend_yield":5.61,"pb_ratio":2.27},"insights":["近 5 個交易日股價下跌 10.48%","近 20 個交易日股價下跌 13.63%","收盤價位於 5 日均價（721.12）之下","外資近 10 個交易日累計賣超 1,824 張","投信近 10 個交易日累計買超 1,737 張","融資餘額較 10 個交易日前增加 1,172 張","融券餘額較 10 個交易日前減少 716 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"6147":{"ohlc":[{"date":"2026-06-15","open":726.15,"high":729.66,"low":716.89,"close":724.98,"volume":44404000},{"date":"2026-06-16","open":735.7,"high":747.85,"low":721.74,"close":730.71,"volume":25173000},{"date":"2026-06-17","open":727.16,"high":734.03,"low":717.82,"close":722.36,"volume":15623000},{"date":"2026-06-18","open":721.76,"high":728.24,"low":710.21,"close":716.1,"volume":14986000},{"date":"2026-06-19","open":705.95,"high":711.36,"low":698.16,"close":703.78,"volume":4977000},{"date":"2026-06-22","open":704.72,"high":722.94,"low":697.34,"close":711.82,"volume":44314000},{"date":"2026-06-23","open":723.85,"high":727.95,"low":710.39,"close":719.14,"volume":44374000},{"date":"2026-06-24","open":715.87,"high":724.39,"low":703.02,"close":717.44,"volume":33733000},{"date":"2026-06-25","open":721.76,"high":725.69,"low":706.05,"close":715.75,"volume":14791000},{"date":"2026-06-26","open":700.62,"high":707.03,"low":696.74,"close":703.17,"volume":9846000},{"date":"2026-06-29","open":713.13,"high":715.58,"low":705.55,"close":707.22,"volume":2919000},{"date":"2026-06-30","open":695.62,"high":706.51,"low":687.0,"close":701.4,"volume":23944000},{"date":"2026-07-01","open":705.69,"high":720.82,"low":698.24,"close":711.05,"volume":42033000},{"date":"2026-07-02","open":716.75,"high":721.87,"low":708.69,"close":718.06,"volume":14330000},{"date":"2026-07-03","open":715.43,"high":730.96,"low":701.93,"close":721.23,"volume":41900000},{"date":"2026-07-06","open":722.81,"high":731.37,"low":719.18,"close":722.71,"volume":37040000},{"date":"2026-07-07","open":720.67,"high":726.84,"low":711.92,"close":720.25,"volume":39962000},{"date":"2026-07-08","open":719.52,"high":726.41,"low":717.81,"close":719.35,"volume":37179000},{"date":"2026-07-09","open":728.9,"high":738.19,"low":728.39,"close":729.88,"volume":42778000},{"date":"2026-07-10","open":739.31,"high":752.36,"low":728.22,"close":734.57,"volume":15021000},{"date":"2026-07-13","open":739.86,"high":754.72,"low":733.53,"close":744.62,"volume":28449000},{"date":"2026-07-14","open":747.18,"high":749.92,"low":741.69,"close":743.48,"volume":22120000},{"date":"2026-07-15","open":731.56,"high":740.6,"low":727.64,"close":734.13,"volume":34104000},{"date":"2026-07-16","open":738.05,"high":754.17,"low":728.63,"close":741.31,"volume":18748000},{"date":"2026-07-17","open":754.29,"high":756.54,"low":752.24,"close":754.58,"volume":3904000},{"date":"2026-07-20","open":770.02,"high":776.37,"low":762.48,"close":765.64,"volume":8536000},{"date":"2026-07-21","open":782.5,"high":796.69,"low":774.62,"close":778.35,"volume":42533000},{"date":"2026-07-22","open":774.14,"high":783.66,"low":769.87,"close":777.83,"volume":27799000},{"date":"2026-07-23","open":780.44,"high":783.88,"low":770.67,"close":779.18,"volume":29420000},{"date":"2026-07-24","open":766.24,"high":773.5,"low":760.38,"close":764.05,"volume":2986000},{"date":"2026-07-27","open":766.25,"high":782.94,"low":758.04,"close":769.76,"volume":24816000},{"date":"2026-07-28","open":779.07,"high":789.91,"low":765.74,"close":774.45,"volume":25652000},{"date":"2026-07-29","open":774.64,"high":783.65,"low":769.7,"close":779.41,"volume":16336000},{"date":"2026-07-30","open":779.63,"high":795.11,"low":764.98,"close":778.62,"volume":9077000},{"date":"2026-07-31","open":785.95,"high":793.44,"low":770.63,"close":784.35,"volume":13280000},{"date":"2026-08-03","open":783.48,"high":795.39,"low":782.62,"close":786.74,"volume":1165000},{"date":"2026-08-04","open":791.43,"high":801.71,"low":775.2,"close":788.62,"volume":31709000},{"date":"2026-08-05","open":797.85,"high":807.52,"low":781.61,"close":790.22,"volume":44463000},{"date":"2026-08-06","open":781.11,"high":792.47,"low":773.8,"close":778.19,"volume":18707000},{"date":"2026-08-07","open":633.44,"high":645.67,"low":629.63,"close":632.85,"volume":39487000}],"institutional":[{"date":"2026-07-27","foreign":-786,"trust":-626,"dealer":-144},{"date":"2026-07-28","foreign":-1830,"trust":-688,"dealer":445},{"date":"2026-07-29","foreign":580,"trust":255,"dealer":91},{"date":"2026-07-30","foreign":-1968,"trust":694,"dealer":347},{"date":"2026-07-31","foreign":-2017,"trust":-192,"dealer":474},{"date":"2026-08-03","foreign":493,"trust":104,"dealer":115},{"date":"2026-08-04","foreign":-1468,"trust":-176,"dealer":-207},{"date":"2026-08-05","foreign":-2642,"trust":190,"dealer":66},{"date":"2026-08-06","foreign":392,"trust":370,"dealer":-20},{"date":"2026-08-07","foreign":2257,"trust":-209,"dealer":-97}],"margin":[{"date":"2026-07-27","margin_balance":17000,"margin_change":-1492,"short_balance":7439,"short_change":269},{"date":"2026-07-28","margin_balance":17422,"margin_change":422,"short_balance":7162,"short_change":-277},{"date":"2026-07-29","margin_balance":18517,"margin_change":1095,"short_balance":6882,"short_change":-280},{"date":"2026-07-30","margin_balance":18946,"margin_change":429,"short_balance":6913,"short_change":31},{"date":"2026-07-31","margin_balance":18555,"margin_change":-391,"short_balance":7090,"short_change":177},{"date":"2026-08-03","margin_balance":17257,"margin_change":-1298,"short_balance":6915,"short_change":-175},{"date":"2026-08-04","margin_balance":16836,"margin_change":-421,"short_balance":7047,"short_change":132},{"date":"2026-08-05","margin_balance":15479,"margin_change":-1357,"short_balance":7275,"short_change":228},{"date":"2026-08-06","margin_balance":15026,"margin_change":-453,"short_balance":7541,"short_change":266},{"date":"2026-08-07","margin_balance":14167,"margin_change":-859,"short_balance":7628,"short_change":87}],"fundamentals":{"pe_ratio":31.31,"dividend_yield":4.69,"pb_ratio":4.96},"insights":["近 5 個交易日股價下跌 19.32%","近 20 個交易日股價下跌 13.85%","收盤價位於 5 日均價（755.32）之下","外資近 10 個交易日累計賣超 6,989 張","投信近 10 個交易日累計賣超 278 張","融資餘額較 10 個交易日前減少 2,833 張","融券餘額較 10 個交易日前增加 189 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]},"3374":{"ohlc":[{"date":"2026-06-15","open":92.22,"high":93.48,"low":90.57,"close":92.95,"volume":26859000},{"date":"2026-06-16","open":94.1,"high":94.29,"low":92.9,"close":93.79,"volume":8981000},{"date":"2026-06-17","open":93.92,"high":94.92,"low":91.48,"close":93.26,"volume":22187000},{"date":"2026-06-18","open":91.93,"high":93.27,"low":90.57,"close":91.87,"volume":37320000},{"date":"2026-06-19","open":93.21,"high":93.49,"low":92.31,"close":92.92,"volume":6238000},{"date":"2026-06-22","open":95.16,"high":95.24,"low":93.56,"close":94.53,"volume":24462000},{"date":"2026-06-23","open":94.63,"high":96.39,"low":94.35,"close":94.51,"volume":13981000},{"date":"2026-06-24","open":97.08,"high":98.06,"low":95.84,"close":96.22,"volume":16935000},{"date":"2026-06-25","open":95.04,"high":96.18,"low":93.97,"close":94.52,"volume":25229000},{"date":"2026-06-26","open":93.7,"high":95.46,"low":92.43,"close":94.57,"volume":31851000},{"date":"2026-06-29","open":95.98,"high":97.73,"low":94.29,"close":95.51,"volume":4615000},{"date":"2026-06-30","open":96.04,"high":96.92,"low":93.81,"close":95.11,"volume":7473000},{"date":"2026-07-01","open":94.68,"high":96.98,"low":93.08,"close":95.49,"volume":5668000},{"date":"2026-07-02","open":96.29,"high":97.73,"low":95.29,"close":95.38,"volume":34924000},{"date":"2026-07-03","open":94.29,"high":96.02,"low":92.47,"close":94.38,"volume":13632000},{"date":"2026-07-06","open":93.58,"high":94.98,"low":92.71,"close":94.36,"volume":13119000},{"date":"2026-07-07","open":95.77,"high":96.81,"low":94.15,"close":95.33,"volume":13147000},{"date":"2026-07-08","open":94.66,"high":96.19,"low":94.23,"close":94.71,"volume":44829000},{"date":"2026-07-09","open":95.31,"high":95.79,"low":93.54,"close":95.04,"volume":39370000},{"date":"2026-07-10","open":96.04,"high":96.84,"low":94.81,"close":95.71,"volume":36554000},{"date":"2026-07-13","open":96.84,"high":97.46,"low":95.62,"close":97.37,"volume":25891000},{"date":"2026-07-14","open":99.43,"high":100.23,"low":97.63,"close":98.69,"volume":17981000},{"date":"2026-07-15","open":97.54,"high":98.75,"low":97.48,"close":98.01,"volume":39540000},{"date":"2026-07-16","open":97.73,"high":98.81,"low":96.37,"close":97.17,"volume":32212000},{"date":"2026-07-17","open":96.44,"high":96.79,"low":95.39,"close":96.02,"volume":2768000},{"date":"2026-07-20","open":96.09,"high":96.28,"low":95.56,"close":96.0,"volume":37783000},{"date":"2026-07-21","open":93.96,"high":95.24,"low":92.87,"close":94.33,"volume":31844000},{"date":"2026-07-22","open":92.98,"high":94.14,"low":92.46,"close":93.11,"volume":13106000},{"date":"2026-07-23","open":92.85,"high":94.55,"low":92.29,"close":93.41,"volume":16743000},{"date":"2026-07-24","open":93.55,"high":95.03,"low":92.74,"close":93.68,"volume":31553000},{"date":"2026-07-27","open":92.07,"high":94.84,"low":91.4,"close":92.99,"volume":40960000},{"date":"2026-07-28","open":95.13,"high":96.13,"low":94.01,"close":94.77,"volume":3044000},{"date":"2026-07-29","open":92.86,"high":94.6,"low":92.33,"close":93.06,"volume":39696000},{"date":"2026-07-30","open":93.5,"high":94.64,"low":91.88,"close":93.52,"volume":13154000},{"date":"2026-07-31","open":91.64,"high":92.25,"low":90.11,"close":92.05,"volume":38007000},{"date":"2026-08-03","open":91.3,"high":91.53,"low":90.61,"close":91.28,"volume":18551000},{"date":"2026-08-04","open":89.53,"high":91.16,"low":88.68,"close":89.45,"volume":32390000},{"date":"2026-08-05","open":88.12,"high":90.08,"low":87.34,"close":88.5,"volume":19825000},{"date":"2026-08-06","open":90.05,"high":91.56,"low":88.4,"close":89.23,"volume":31638000},{"date":"2026-08-07","open":94.04,"high":94.58,"low":93.31,"close":93.63,"volume":15558000}],"institutional":[{"date":"2026-07-27","foreign":1150,"trust":-385,"dealer":-409},{"date":"2026-07-28","foreign":-469,"trust":-212,"dealer":311},{"date":"2026-07-29","foreign":-1633,"trust":-55,"dealer":340},{"date":"2026-07-30","foreign":-1176,"trust":-785,"dealer":-118},{"date":"2026-07-31","foreign":-242,"trust":417,"dealer":-94},{"date":"2026-08-03","foreign":-2056,"trust":-138,"dealer":-211},{"date":"2026-08-04","foreign":-2293,"trust":-766,"dealer":374},{"date":"2026-08-05","foreign":-1082,"trust":-651,"dealer":423},{"date":"2026-08-06","foreign":-1368,"trust":103,"dealer":266},{"date":"2026-08-07","foreign":-1901,"trust":-581,"dealer":-201}],"margin":[{"date":"2026-07-27","margin_balance":39935,"margin_change":808,"short_balance":2548,"short_change":147},{"date":"2026-07-28","margin_balance":38972,"margin_change":-963,"short_balance":2748,"short_change":200},{"date":"2026-07-29","margin_balance":38068,"margin_change":-904,"short_balance":2722,"short_change":-26},{"date":"2026-07-30","margin_balance":38216,"margin_change":148,"short_balance":2875,"short_change":153},{"date":"2026-07-31","margin_balance":37082,"margin_change":-1134,"short_balance":3034,"short_change":159},{"date":"2026-08-03","margin_balance":38256,"margin_change":1174,"short_balance":3308,"short_change":274},{"date":"2026-08-04","margin_balance":38315,"margin_change":59,"short_balance":3209,"short_change":-99},{"date":"2026-08-05","margin_balance":37809,"margin_change":-506,"short_balance":3499,"short_change":290},{"date":"2026-08-06","margin_balance":38654,"margin_change":845,"short_balance":3228,"short_change":-271},{"date":"2026-08-07","margin_balance":39102,"margin_change":448,"short_balance":3473,"short_change":245}],"fundamentals":{"pe_ratio":16.5,"dividend_yield":4.2,"pb_ratio":8.79},"insights":["近 5 個交易日股價上漲 1.72%","近 20 個交易日股價下跌 2.17%","收盤價位於 5 日均價（90.42）之上","外資近 10 個交易日累計賣超 11,070 張","投信近 10 個交易日累計賣超 3,053 張","融資餘額較 10 個交易日前減少 833 張","融券餘額較 10 個交易日前增加 925 張","以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"]}}
+</script>
+
+<script>
+(function () {
+  "use strict";
+
+  var SAMPLE_DATA = JSON.parse(document.getElementById("sample-data").textContent);
+  var SAMPLE_DETAIL = JSON.parse(document.getElementById("sample-detail").textContent);
+
+  var state = {
+    data: SAMPLE_DATA,
+    detail: SAMPLE_DETAIL,
+    isSample: true,
+    isDetailSample: true,
+    detailSourceLabel: "TWSE（範例）",
+    sourceLabel: "moneydj.com（範例）",
+    category: null,
+    query: "",
+    sortKey: "change_pct",
+    sortDir: -1,
+    activeStockId: null,
+  };
+
+  function pctFloat(rec) {
+    if (!rec.change_pct) return null;
+    var n = parseFloat(String(rec.change_pct).replace("%", "").replace(",", ""));
+    return isNaN(n) ? null : n;
+  }
+  function numFloat(v) {
+    if (v === null || v === undefined || v === "") return null;
+    var n = parseFloat(String(v).replace(/,/g, ""));
+    return isNaN(n) ? null : n;
+  }
+
+  function filtered() {
+    var q = state.query.trim().toLowerCase();
+    return state.data.filter(function (r) {
+      if (state.category && r.category !== state.category) return false;
+      if (!q) return true;
+      var hay = ((r.stock_id || "") + " " + (r.stock_name || "")).toLowerCase();
+      return hay.indexOf(q) !== -1;
+    });
+  }
+
+  function sorted(rows) {
+    var key = state.sortKey, dir = state.sortDir;
+    return rows.slice().sort(function (a, b) {
+      var av, bv;
+      if (key === "change_pct") { av = pctFloat(a); bv = pctFloat(b); }
+      else if (key === "close_price" || key === "change" || key === "volume") { av = numFloat(a[key]); bv = numFloat(b[key]); }
+      else { av = (a[key] || "").toString(); bv = (b[key] || "").toString(); }
+      if (av === null || av === undefined) av = -Infinity;
+      if (bv === null || bv === undefined) bv = -Infinity;
+      if (av < bv) return -1 * dir;
+      if (av > bv) return 1 * dir;
+      return 0;
+    });
+  }
+
+  function fmtDelta(rec) {
+    var p = pctFloat(rec);
+    var cls = p > 0 ? "rise" : p < 0 ? "fall" : "flat";
+    var arrow = p > 0 ? "▲" : p < 0 ? "▼" : "‒";
+    return { cls: cls, arrow: arrow, p: p };
+  }
+
+  function renderChips() {
+    var cats = Array.from(new Set(state.data.map(function (r) { return r.category || "未分類"; })));
+    var wrap = document.getElementById("category-chips");
+    wrap.innerHTML = "";
+    var all = document.createElement("button");
+    all.type = "button";
+    all.className = "chip" + (state.category === null ? " active" : "");
+    all.textContent = "全部 (" + state.data.length + ")";
+    all.addEventListener("click", function () { state.category = null; render(); });
+    wrap.appendChild(all);
+    cats.forEach(function (c) {
+      var count = state.data.filter(function (r) { return (r.category || "未分類") === c; }).length;
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "chip" + (state.category === c ? " active" : "");
+      btn.textContent = c + " (" + count + ")";
+      btn.addEventListener("click", function () { state.category = (state.category === c ? null : c); render(); });
+      wrap.appendChild(btn);
+    });
+  }
+
+  function renderKpis(rows) {
+    document.getElementById("kpi-total").textContent = state.data.length;
+    var rise = state.data.filter(function (r) { var p = pctFloat(r); return p !== null && p > 0; }).length;
+    var fall = state.data.filter(function (r) { var p = pctFloat(r); return p !== null && p < 0; }).length;
+    document.getElementById("kpi-rise").textContent = rise;
+    document.getElementById("kpi-fall").textContent = fall;
+    var cats = new Set(state.data.map(function (r) { return r.category || "未分類"; }));
+    document.getElementById("kpi-cats").textContent = cats.size;
+  }
+
+  function renderLeaderboards() {
+    var pool = filtered().filter(function (r) { return pctFloat(r) !== null; });
+    var gainers = pool.slice().sort(function (a, b) { return pctFloat(b) - pctFloat(a); }).slice(0, 5);
+    var losers = pool.slice().sort(function (a, b) { return pctFloat(a) - pctFloat(b); }).slice(0, 5);
+
+    function buildList(el, rows) {
+      el.innerHTML = "";
+      if (!rows.length) {
+        var li = document.createElement("li");
+        li.textContent = "—";
+        li.style.color = "var(--muted)";
+        el.appendChild(li);
+        return;
+      }
+      rows.forEach(function (r, i) {
+        var d = fmtDelta(r);
+        var li = document.createElement("li");
+        li.innerHTML =
+          '<span class="lb-rank">' + (i + 1) + '</span>' +
+          '<span class="lb-name"><span class="n">' + escapeHtml(r.stock_name || "") + '</span>' +
+          '<span class="c">' + escapeHtml(r.stock_id || "") + '</span></span>' +
+          '<span class="lb-pct ' + d.cls + '">' + d.arrow + ' ' + escapeHtml(r.change_pct || "—") + '</span>';
+        el.appendChild(li);
+      });
+    }
+    buildList(document.getElementById("lb-gainers"), gainers);
+    buildList(document.getElementById("lb-losers"), losers);
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function renderTable() {
+    var rows = sorted(filtered());
+    var tbody = document.getElementById("table-body");
+    var empty = document.getElementById("empty-state");
+    tbody.innerHTML = "";
+
+    if (!rows.length) {
+      empty.hidden = false;
+      return;
+    }
+    empty.hidden = true;
+
+    var maxAbsPct = Math.max(1, Math.max.apply(null, state.data.map(function (r) {
+      var p = pctFloat(r); return p === null ? 0 : Math.abs(p);
+    })));
+
+    rows.forEach(function (r) {
+      var d = fmtDelta(r);
+      var p = pctFloat(r);
+      var barWidth = p === null ? 0 : Math.min(50, (Math.abs(p) / maxAbsPct) * 50);
+      var tr = document.createElement("tr");
+
+      var nameTd = document.createElement("td");
+      nameTd.className = "name-cell";
+      nameTd.innerHTML =
+        '<span class="code">' + escapeHtml(r.stock_id || "—") + '</span><br/>' +
+        '<span class="name">' + escapeHtml(r.stock_name || "—") + '</span>' +
+        (r.role ? ' <span class="role">· ' + escapeHtml(r.role) + '</span>' : '');
+      tr.appendChild(nameTd);
+
+      var catTd = document.createElement("td");
+      catTd.innerHTML = '<span class="cat-tag">' + escapeHtml(r.category || "未分類") + '</span>';
+      tr.appendChild(catTd);
+
+      var closeTd = document.createElement("td");
+      closeTd.className = "num";
+      closeTd.textContent = r.close_price || "—";
+      tr.appendChild(closeTd);
+
+      var changeTd = document.createElement("td");
+      changeTd.className = "num";
+      changeTd.innerHTML = '<span class="delta ' + d.cls + '">' + d.arrow + ' ' + escapeHtml(r.change || "—") + '</span>';
+      tr.appendChild(changeTd);
+
+      var pctTd = document.createElement("td");
+      pctTd.className = "num";
+      pctTd.innerHTML =
+        '<div class="pctcell">' +
+          '<span class="delta ' + d.cls + '">' + escapeHtml(r.change_pct || "—") + '</span>' +
+          '<div class="pctbar"><div class="fill ' + d.cls + '" style="width:' + barWidth + '%"></div></div>' +
+        '</div>';
+      tr.appendChild(pctTd);
+
+      var volTd = document.createElement("td");
+      volTd.className = "num";
+      volTd.textContent = r.volume || "—";
+      tr.appendChild(volTd);
+
+      var detailTd = document.createElement("td");
+      detailTd.className = "detail-cell";
+      var detailBtn = document.createElement("button");
+      detailBtn.type = "button";
+      detailBtn.className = "row-detail-btn";
+      detailBtn.textContent = "K線/法人 ›";
+      detailBtn.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        openDetail(r.stock_id);
+      });
+      detailTd.appendChild(detailBtn);
+      tr.appendChild(detailTd);
+
+      tr.className = "is-clickable";
+      tr.addEventListener("click", function () { openDetail(r.stock_id); });
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderHeaderArrows() {
+    document.querySelectorAll("thead th").forEach(function (th) {
+      var arrow = th.querySelector(".arrow");
+      if (!arrow) return;
+      if (th.dataset.key === state.sortKey) {
+        arrow.textContent = state.sortDir === 1 ? "↑" : "↓";
+      } else {
+        arrow.textContent = "";
+      }
+    });
+  }
+
+  function renderMeta() {
+    document.getElementById("source-url-label").textContent = state.sourceLabel;
+    var latest = state.data.reduce(function (acc, r) {
+      return (!acc || (r.scraped_at || "") > acc) ? (r.scraped_at || acc) : acc;
+    }, null);
+    document.getElementById("scraped-at-label").textContent = latest || "—";
+
+    var banner = document.getElementById("data-banner");
+    var resetBtn = document.getElementById("reset-btn");
+    if (state.isSample) {
+      banner.classList.remove("is-real");
+      banner.querySelector(".icon").textContent = "⚠️";
+      banner.querySelector("strong").textContent = "目前顯示範例資料，非即時報價。";
+      banner.querySelector(".sub").innerHTML = '此執行環境的網路政策目前無法連線到 moneydj.com（代理回傳 403），所以先用格式相同的範例資料展示儀表板功能。等你在可連外的環境跑完 <code>main.py</code> 產生 <code>moneydj_concept_stocks.json</code> 後，可以直接上傳取代。';
+      resetBtn.hidden = true;
+    } else {
+      banner.classList.add("is-real");
+      banner.querySelector(".icon").textContent = "✅";
+      banner.querySelector("strong").textContent = "已載入你的資料：" + state.sourceLabel;
+      banner.querySelector(".sub").textContent = "共 " + state.data.length + " 筆記錄。可再次上傳其他 JSON 檔以取代目前資料。";
+      resetBtn.hidden = false;
+    }
+  }
+
+  /* ---------- Stock detail modal: candlestick chart, 法人/資券, 重點整理觀點 ---------- */
+
+  var chartCtx = { canvas: null, ohlc: [], layout: null };
+
+  function cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function fmtNum(v) {
+    return (v === null || v === undefined) ? "—" : Number(v).toFixed(2);
+  }
+  function fmtVol(v) {
+    return (v === null || v === undefined) ? "—" : Number(v).toLocaleString("zh-Hant");
+  }
+  function fmtSigned(v) {
+    if (v === null || v === undefined) return "—";
+    var n = Number(v);
+    return (n > 0 ? "+" : "") + n.toLocaleString("zh-Hant");
+  }
+  function deltaCls(v) {
+    if (v === null || v === undefined) return "";
+    return v > 0 ? "rise" : v < 0 ? "fall" : "";
+  }
+
+  function drawCandleChart(ohlc) {
+    var canvas = document.getElementById("candle-canvas");
+    var wrap = document.getElementById("chart-wrap");
+    chartCtx.canvas = canvas;
+    chartCtx.ohlc = ohlc;
+
+    var dpr = window.devicePixelRatio || 1;
+    var cssWidth = Math.max(280, wrap.clientWidth - 12);
+    var cssHeight = 260;
+    canvas.style.height = cssHeight + "px";
+    canvas.width = Math.max(1, Math.round(cssWidth * dpr));
+    canvas.height = Math.max(1, Math.round(cssHeight * dpr));
+
+    var ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+    if (!ohlc || !ohlc.length) {
+      chartCtx.layout = null;
+      return;
+    }
+
+    var priceTop = 8, priceHeight = cssHeight * 0.6;
+    var volTop = priceTop + priceHeight + 22, volHeight = cssHeight - volTop - 16;
+
+    var highs = ohlc.map(function (r) { return r.high; }).filter(function (v) { return v !== null && v !== undefined; });
+    var lows = ohlc.map(function (r) { return r.low; }).filter(function (v) { return v !== null && v !== undefined; });
+    var maxPrice = highs.length ? Math.max.apply(null, highs) : 1;
+    var minPrice = lows.length ? Math.min.apply(null, lows) : 0;
+    var pad = (maxPrice - minPrice) * 0.08 || Math.max(1, maxPrice * 0.05);
+    maxPrice += pad;
+    minPrice -= pad;
+    var maxVol = Math.max.apply(null, ohlc.map(function (r) { return r.volume || 0; })) || 1;
+
+    var n = ohlc.length;
+    var slotW = cssWidth / n;
+    var bodyW = Math.max(1, slotW * 0.6);
+
+    var lineColor = cssVar("--line");
+    var mutedColor = cssVar("--muted");
+    var riseColor = cssVar("--rise");
+    var fallColor = cssVar("--fall");
+    var monoFont = "10px " + cssVar("--font-mono");
+
+    function yPrice(p) { return priceTop + (maxPrice - p) / (maxPrice - minPrice) * priceHeight; }
+    function yVolTop(v) { return volTop + volHeight - (v / maxVol) * volHeight; }
+
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 1;
+    ctx.font = monoFont;
+    ctx.fillStyle = mutedColor;
+    var gridLines = 4;
+    for (var g = 0; g <= gridLines; g++) {
+      var gy = priceTop + (priceHeight / gridLines) * g;
+      ctx.beginPath();
+      ctx.moveTo(0, Math.round(gy) + 0.5);
+      ctx.lineTo(cssWidth, Math.round(gy) + 0.5);
+      ctx.stroke();
+      var gp = maxPrice - (maxPrice - minPrice) * (g / gridLines);
+      ctx.fillText(gp.toFixed(1), 4, g === 0 ? gy + 10 : gy - 3);
+    }
+
+    var xs = [];
+    for (var i = 0; i < n; i++) {
+      var r = ohlc[i];
+      var xc = i * slotW + slotW / 2;
+      xs.push(xc);
+      var isRise = (r.close !== null && r.open !== null && r.close !== undefined && r.open !== undefined)
+        ? r.close >= r.open : true;
+      var color = isRise ? riseColor : fallColor;
+
+      if (r.high !== null && r.high !== undefined && r.low !== null && r.low !== undefined) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(xc, yPrice(r.high));
+        ctx.lineTo(xc, yPrice(r.low));
+        ctx.stroke();
+      }
+      if (r.open !== null && r.open !== undefined && r.close !== null && r.close !== undefined) {
+        var yOpen = yPrice(r.open), yClose = yPrice(r.close);
+        var top = Math.min(yOpen, yClose);
+        var h = Math.max(1, Math.abs(yClose - yOpen));
+        ctx.fillStyle = color;
+        ctx.fillRect(xc - bodyW / 2, top, bodyW, h);
+      }
+
+      var volBarTop = yVolTop(r.volume || 0);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.85;
+      ctx.fillRect(xc - bodyW / 2, volBarTop, bodyW, (volTop + volHeight) - volBarTop);
+      ctx.globalAlpha = 1;
+    }
+
+    ctx.strokeStyle = lineColor;
+    ctx.beginPath();
+    ctx.moveTo(0, Math.round(volTop + volHeight) + 0.5);
+    ctx.lineTo(cssWidth, Math.round(volTop + volHeight) + 0.5);
+    ctx.stroke();
+
+    ctx.fillStyle = mutedColor;
+    ctx.font = monoFont;
+    var step = Math.max(1, Math.ceil(n / 6));
+    for (var j = 0; j < n; j += step) {
+      var label = (ohlc[j].date || "").slice(5);
+      ctx.fillText(label, Math.max(0, Math.min(cssWidth - 28, xs[j] - 14)), cssHeight - 2);
+    }
+
+    chartCtx.layout = {
+      xs: xs, slotW: slotW, priceTop: priceTop, priceHeight: priceHeight,
+      volTop: volTop, volHeight: volHeight, cssWidth: cssWidth, cssHeight: cssHeight,
+    };
+  }
+
+  function redrawWithCrosshair(idx) {
+    drawCandleChart(chartCtx.ohlc);
+    var layout = chartCtx.layout;
+    if (!layout) return;
+    var ctx = chartCtx.canvas.getContext("2d");
+    var x = layout.xs[idx];
+    ctx.save();
+    ctx.strokeStyle = cssVar("--ink-2");
+    ctx.setLineDash([3, 3]);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(Math.round(x) + 0.5, layout.priceTop);
+    ctx.lineTo(Math.round(x) + 0.5, layout.volTop + layout.volHeight);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function setupChartInteraction() {
+    var canvas = document.getElementById("candle-canvas");
+    var tooltip = document.getElementById("chart-tooltip");
+    canvas.addEventListener("mousemove", function (e) {
+      if (!chartCtx.layout || !chartCtx.ohlc.length) return;
+      var rect = canvas.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var layout = chartCtx.layout;
+      var idx = Math.min(chartCtx.ohlc.length - 1, Math.max(0, Math.floor(x / layout.slotW)));
+      var r = chartCtx.ohlc[idx];
+      if (!r) { tooltip.classList.remove("visible"); return; }
+
+      redrawWithCrosshair(idx);
+
+      tooltip.innerHTML =
+        '<div class="d">' + escapeHtml(r.date || "") + '</div>' +
+        '開 ' + fmtNum(r.open) + '　高 ' + fmtNum(r.high) + '<br/>' +
+        '低 ' + fmtNum(r.low) + '　收 ' + fmtNum(r.close) + '<br/>' +
+        '量 ' + fmtVol(r.volume);
+      var tx = Math.min(layout.cssWidth - 130, Math.max(4, layout.xs[idx] + 10));
+      tooltip.style.left = tx + "px";
+      tooltip.style.top = "8px";
+      tooltip.classList.add("visible");
+    });
+    canvas.addEventListener("mouseleave", function () {
+      tooltip.classList.remove("visible");
+      if (chartCtx.ohlc && chartCtx.ohlc.length) drawCandleChart(chartCtx.ohlc);
+    });
+  }
+
+  function renderInstitutionalTable(rows) {
+    var tbody = document.getElementById("institutional-body");
+    tbody.innerHTML = "";
+    if (!rows || !rows.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);">尚無資料</td></tr>';
+      return;
+    }
+    rows.slice().reverse().forEach(function (r) {
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        '<td>' + escapeHtml((r.date || "").slice(5)) + '</td>' +
+        '<td class="' + deltaCls(r.foreign) + '">' + fmtSigned(r.foreign) + '</td>' +
+        '<td class="' + deltaCls(r.trust) + '">' + fmtSigned(r.trust) + '</td>' +
+        '<td class="' + deltaCls(r.dealer) + '">' + fmtSigned(r.dealer) + '</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderMarginTable(rows) {
+    var tbody = document.getElementById("margin-body");
+    tbody.innerHTML = "";
+    if (!rows || !rows.length) {
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);">尚無資料</td></tr>';
+      return;
+    }
+    rows.slice().reverse().forEach(function (r) {
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        '<td>' + escapeHtml((r.date || "").slice(5)) + '</td>' +
+        '<td>' + fmtVol(r.margin_balance) + '</td>' +
+        '<td>' + fmtVol(r.short_balance) + '</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderFundamentals(fund) {
+    var wrap = document.getElementById("fundamentals-row");
+    wrap.innerHTML = "";
+    var items = [
+      ["本益比 (PER)", fund && fund.pe_ratio, ""],
+      ["殖利率", fund && fund.dividend_yield, "%"],
+      ["股價淨值比 (PBR)", fund && fund.pb_ratio, ""],
+    ];
+    items.forEach(function (it) {
+      var tile = document.createElement("div");
+      tile.className = "fund-tile";
+      var v = it[1];
+      var val = (v === null || v === undefined) ? "—" : Number(v).toFixed(2) + it[2];
+      tile.innerHTML = '<p class="label">' + it[0] + '</p><p class="value">' + val + '</p>';
+      wrap.appendChild(tile);
+    });
+  }
+
+  function pctChange(oldV, newV) {
+    if (oldV === null || oldV === undefined || oldV === 0 || newV === null || newV === undefined) return null;
+    return (newV - oldV) / oldV * 100;
+  }
+
+  // 與 insights.py 的 summarize_stock_insights() 對應的 JS 版本，供缺少預先算好 insights 欄位的
+  // 上傳資料使用（例如手動組出來、還沒跑過 summarize_stock_insights 的明細 JSON）。
+  function computeInsightsJs(ohlc, institutional, margin) {
+    var bullets = [];
+    var closes = (ohlc || []).map(function (r) { return r.close; })
+      .filter(function (v) { return v !== null && v !== undefined; });
+
+    if (closes.length) {
+      var latest = closes[closes.length - 1];
+      if (closes.length >= 6) {
+        var chg5 = pctChange(closes[closes.length - 6], latest);
+        if (chg5 !== null) {
+          bullets.push("近 5 個交易日股價" + (chg5 >= 0 ? "上漲" : "下跌") + " " + Math.abs(chg5).toFixed(2) + "%");
+        }
+      }
+      if (closes.length >= 21) {
+        var chg20 = pctChange(closes[closes.length - 21], latest);
+        if (chg20 !== null) {
+          bullets.push("近 20 個交易日股價" + (chg20 >= 0 ? "上漲" : "下跌") + " " + Math.abs(chg20).toFixed(2) + "%");
+        }
+      }
+      var win = closes.length >= 5 ? closes.slice(-5) : closes;
+      var ma5 = win.reduce(function (a, b) { return a + b; }, 0) / win.length;
+      bullets.push("收盤價位於 5 日均價（" + ma5.toFixed(2) + "）" + (latest >= ma5 ? "之上" : "之下"));
+    }
+
+    if (institutional && institutional.length) {
+      var n = institutional.length;
+      var foreignVals = institutional.map(function (r) { return r.foreign; })
+        .filter(function (v) { return v !== null && v !== undefined; });
+      var trustVals = institutional.map(function (r) { return r.trust; })
+        .filter(function (v) { return v !== null && v !== undefined; });
+      if (foreignVals.length) {
+        var fs = foreignVals.reduce(function (a, b) { return a + b; }, 0);
+        bullets.push("外資近 " + n + " 個交易日累計" + (fs >= 0 ? "買超" : "賣超") + " " + Math.abs(fs).toLocaleString("zh-Hant") + " 張");
+      }
+      if (trustVals.length) {
+        var ts = trustVals.reduce(function (a, b) { return a + b; }, 0);
+        bullets.push("投信近 " + n + " 個交易日累計" + (ts >= 0 ? "買超" : "賣超") + " " + Math.abs(ts).toLocaleString("zh-Hant") + " 張");
+      }
+    }
+
+    if (margin && margin.length >= 2) {
+      var n2 = margin.length;
+      var first = margin[0], last = margin[margin.length - 1];
+      if (first.margin_balance != null && last.margin_balance != null) {
+        var diff = last.margin_balance - first.margin_balance;
+        bullets.push("融資餘額較 " + n2 + " 個交易日前" + (diff >= 0 ? "增加" : "減少") + " " + Math.abs(diff).toLocaleString("zh-Hant") + " 張");
+      }
+      if (first.short_balance != null && last.short_balance != null) {
+        var diff2 = last.short_balance - first.short_balance;
+        bullets.push("融券餘額較 " + n2 + " 個交易日前" + (diff2 >= 0 ? "增加" : "減少") + " " + Math.abs(diff2).toLocaleString("zh-Hant") + " 張");
+      }
+    }
+
+    if (bullets.length) {
+      bullets.push("以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。");
+    }
+    return bullets;
+  }
+
+  function renderInsights(bullets) {
+    var list = document.getElementById("insight-list");
+    list.innerHTML = "";
+    if (!bullets || !bullets.length) {
+      var li = document.createElement("li");
+      li.textContent = "資料不足，暫無法產生重點整理。";
+      li.style.color = "var(--muted)";
+      list.appendChild(li);
+      return;
+    }
+    bullets.forEach(function (b, i) {
+      var item = document.createElement("li");
+      item.className = (i === bullets.length - 1) ? "disclaimer" : "";
+      item.textContent = b;
+      list.appendChild(item);
+    });
+  }
+
+  function openDetail(stockId) {
+    var record = state.data.find(function (r) { return r.stock_id === stockId; });
+    var detail = state.detail[stockId];
+    state.activeStockId = stockId;
+
+    document.getElementById("detail-code").textContent = stockId;
+    document.getElementById("detail-title").textContent = (record && record.stock_name) || stockId;
+
+    if (record) {
+      var d = fmtDelta(record);
+      document.getElementById("detail-price").textContent = record.close_price || "—";
+      var changeEl = document.getElementById("detail-change");
+      changeEl.className = "delta " + d.cls;
+      changeEl.textContent = d.arrow + " " + (record.change || "—") + "（" + (record.change_pct || "—") + "）";
+    } else {
+      document.getElementById("detail-price").textContent = "—";
+      document.getElementById("detail-change").textContent = "";
+    }
+
+    var overlay = document.getElementById("detail-overlay");
+    overlay.hidden = false;
+    document.body.style.overflow = "hidden";
+
+    var chartWrap = document.getElementById("chart-wrap");
+    var existingEmpty = chartWrap.querySelector(".chart-empty");
+    if (existingEmpty) existingEmpty.remove();
+
+    if (detail && detail.ohlc && detail.ohlc.length) {
+      document.getElementById("candle-canvas").hidden = false;
+      drawCandleChart(detail.ohlc);
+    } else {
+      document.getElementById("candle-canvas").hidden = true;
+      var empty = document.createElement("div");
+      empty.className = "chart-empty";
+      empty.textContent = "尚無此股票的 K 線資料。可用 main.py --with-detail 產生後，點上方「上傳個股明細」載入。";
+      chartWrap.appendChild(empty);
+    }
+
+    renderInstitutionalTable(detail && detail.institutional);
+    renderMarginTable(detail && detail.margin);
+    renderFundamentals(detail && detail.fundamentals);
+
+    var insights = (detail && detail.insights && detail.insights.length)
+      ? detail.insights
+      : computeInsightsJs(detail && detail.ohlc, detail && detail.institutional, detail && detail.margin);
+    renderInsights(insights);
+
+    document.getElementById("detail-close").focus();
+  }
+
+  function closeDetail() {
+    document.getElementById("detail-overlay").hidden = true;
+    document.body.style.overflow = "";
+    state.activeStockId = null;
+  }
+
+  function debounce(fn, ms) {
+    var t;
+    return function () {
+      clearTimeout(t);
+      var args = arguments;
+      t = setTimeout(function () { fn.apply(null, args); }, ms);
+    };
+  }
+
+  function render() {
+    renderMeta();
+    renderChips();
+    renderKpis();
+    renderLeaderboards();
+    renderTable();
+    renderHeaderArrows();
+  }
+
+  document.querySelectorAll("thead th[data-key]").forEach(function (th) {
+    th.addEventListener("click", function () {
+      var key = th.dataset.key;
+      if (state.sortKey === key) {
+        state.sortDir *= -1;
+      } else {
+        state.sortKey = key;
+        state.sortDir = (key === "stock_id" || key === "category") ? 1 : -1;
+      }
+      renderTable();
+      renderHeaderArrows();
+    });
+  });
+
+  document.getElementById("search-input").addEventListener("input", function (e) {
+    state.query = e.target.value;
+    renderTable();
+  });
+
+  document.getElementById("upload-btn").addEventListener("click", function () {
+    document.getElementById("file-input").click();
+  });
+
+  document.getElementById("file-input").addEventListener("change", function (e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var parsed = JSON.parse(String(reader.result));
+        if (!Array.isArray(parsed) || !parsed.length || !("stock_id" in parsed[0])) {
+          throw new Error("shape");
+        }
+        state.data = parsed;
+        state.isSample = false;
+        state.sourceLabel = file.name;
+        render();
+      } catch (err) {
+        alert("無法讀取這個檔案：請確認是 moneydj_scraper 輸出的 JSON（StockRecord 陣列）。");
+      }
+    };
+    reader.readAsText(file, "utf-8");
+    e.target.value = "";
+  });
+
+  document.getElementById("reset-btn").addEventListener("click", function () {
+    state.data = SAMPLE_DATA;
+    state.isSample = true;
+    state.sourceLabel = "moneydj.com（範例）";
+    state.detail = SAMPLE_DETAIL;
+    state.isDetailSample = true;
+    state.detailSourceLabel = "TWSE（範例）";
+    render();
+  });
+
+  document.getElementById("upload-detail-btn").addEventListener("click", function () {
+    document.getElementById("detail-file-input").click();
+  });
+
+  document.getElementById("detail-file-input").addEventListener("change", function (e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var parsed = JSON.parse(String(reader.result));
+        if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+          throw new Error("shape");
+        }
+        state.detail = parsed;
+        state.isDetailSample = false;
+        state.detailSourceLabel = file.name;
+        if (state.activeStockId) openDetail(state.activeStockId);
+        alert("已載入個股明細資料（" + Object.keys(parsed).length + " 檔股票）。點表格列即可查看 K 線/法人/資券。");
+      } catch (err) {
+        alert("無法讀取這個檔案：請確認是 main.py --with-detail 產生的 JSON（以股票代碼為 key 的物件）。");
+      }
+    };
+    reader.readAsText(file, "utf-8");
+    e.target.value = "";
+  });
+
+  document.getElementById("detail-close").addEventListener("click", closeDetail);
+  document.getElementById("detail-overlay").addEventListener("click", function (e) {
+    if (e.target === this) closeDetail();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !document.getElementById("detail-overlay").hidden) closeDetail();
+  });
+
+  window.addEventListener("resize", debounce(function () {
+    if (state.activeStockId && chartCtx.ohlc && chartCtx.ohlc.length) {
+      drawCandleChart(chartCtx.ohlc);
+    }
+  }, 150));
+
+  if (window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () {
+      if (state.activeStockId && chartCtx.ohlc && chartCtx.ohlc.length) {
+        drawCandleChart(chartCtx.ohlc);
+      }
+    });
+  }
+
+  setupChartInteraction();
+  render();
+})();
+</script>

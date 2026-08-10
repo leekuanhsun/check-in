@@ -8,6 +8,7 @@ Goodinfo 等任何網站的頁面，爬完後再跨來源比對。不做股價�
 ## 模組結構
 
 ```
+dashboard.html          純前端資料儀表板（含範例資料、上傳、K線/法人/資券/重點整理觀點）
 fetcher.py             請求層：UA 輪替、Big5/cp950/utf-8 解碼、重試（指數退避）
 parser.py               解析層：表格解析、欄位映射、_split_id_and_name / _extract_id_from_href、rank_today_gainers
 models.py               資料模型：StockRecord
@@ -124,6 +125,28 @@ python main.py --targets targets.json --with-detail --detail-output concept_deta
 仍是依公開文件慣例撰寫、**尚未在可連外環境對照過真實回應**。正式使用前務必用
 `twse_api.debug_fetch_raw(url, params)` 核對一次。另外目前只支援**上市（TWSE）**股票，
 上櫃（TPEX）代碼會直接拿到空結果（見「已知限制」）。
+
+## 儀表板（dashboard.html）
+
+`dashboard.html` 是純前端、不需架站的單檔頁面（用瀏覽器直接打開即可），內建範例資料
+（`generate_sample_data.py` / `generate_sample_detail.py` 產生的 18 檔虛構股票），功能：
+
+- 分類篩選、代碼／名稱搜尋、各欄位排序、當日漲跌幅排行（Top 5 漲幅／跌幅）
+- 點任一列（或列尾的「K線/法人 ›」按鈕）開啟個股詳情：K 線＋成交量（Canvas 手繪，含十字準線與
+  懸停 tooltip）、三大法人買賣超表、融資融券表、基本資訊（PER／殖利率／PBR）、重點整理觀點
+- 兩個獨立上傳入口：「上傳股票資料」對應 `main.py` 一般輸出（`StockRecord` 陣列）；
+  「上傳個股明細」對應 `--with-detail` 的輸出（以股票代碼為 key 的字典）。沒有明細資料的股票
+  點開會顯示「尚無此股票的 K 線資料」，不會壞掉。
+- 深色模式自動跟隨系統設定，K 線圖會依主題重繪配色（紅漲綠跌，符合台股慣例）。
+
+要接上真實資料：在有網路的環境跑
+
+```bash
+python main.py --targets targets.json --with-detail
+```
+
+會產生 `moneydj_concept_stocks.json`（股票清單）與 `moneydj_concept_detail.json`（個股明細），
+把這兩個檔案分別用儀表板上方的兩個上傳按鈕載入即可，不需要改任何程式碼。
 
 ## 測試
 
