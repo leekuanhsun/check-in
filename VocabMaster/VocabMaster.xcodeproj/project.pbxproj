@@ -1,0 +1,390 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		6924817B1B7142DB93585A18 /* VocabMasterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068031400A1F4459948A968C /* VocabMasterApp.swift */; };
+		B09A7E5F146B48F5819A83AE /* VocabWord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 124FE9E046A348B4AA089E9D /* VocabWord.swift */; };
+		56183DF46F274110B75924EE /* Band.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5CAD3603D846A5B2EEB55A /* Band.swift */; };
+		4475A65795FF43DFA4D6F7B4 /* VocabStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6E1B9A7AE8E4F938D95A680 /* VocabStore.swift */; };
+		2C009A4B9FF34F2EB16831B3 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A53C622CD1F4FADAFCF185A /* Speaker.swift */; };
+		ABC4A0C2B13E415A88933711 /* BandListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A17C96235AD479DBC32E2A8 /* BandListView.swift */; };
+		D603C0F321164CC3A36A42C5 /* GroupListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406A30251501488EBD5B9C53 /* GroupListView.swift */; };
+		2693D745BEEB48C6B6344654 /* GroupDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2268C98ACBA14384B78DBBF1 /* GroupDetailView.swift */; };
+		1562EB07385640DA89FF3F79 /* FlashcardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 362548D8FF2B48C8AE6AA8D3 /* FlashcardView.swift */; };
+		D8A5A91AA16D49D485CCDF82 /* QuizView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4223F34ABD304A34967D940D /* QuizView.swift */; };
+		1FC844AA076546E9B079EC7C /* vocab.json in Resources */ = {isa = PBXBuildFile; fileRef = 0E65417B8FF94A439C152FB5 /* vocab.json */; };
+		21E1E324E44E4BBCAD31A999 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 54F74E81208149FE99D87B63 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		068031400A1F4459948A968C /* VocabMasterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabMasterApp.swift; sourceTree = "<group>"; };
+		124FE9E046A348B4AA089E9D /* VocabWord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabWord.swift; sourceTree = "<group>"; };
+		9A5CAD3603D846A5B2EEB55A /* Band.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Band.swift; sourceTree = "<group>"; };
+		D6E1B9A7AE8E4F938D95A680 /* VocabStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabStore.swift; sourceTree = "<group>"; };
+		5A53C622CD1F4FADAFCF185A /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
+		8A17C96235AD479DBC32E2A8 /* BandListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandListView.swift; sourceTree = "<group>"; };
+		406A30251501488EBD5B9C53 /* GroupListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupListView.swift; sourceTree = "<group>"; };
+		2268C98ACBA14384B78DBBF1 /* GroupDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDetailView.swift; sourceTree = "<group>"; };
+		362548D8FF2B48C8AE6AA8D3 /* FlashcardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashcardView.swift; sourceTree = "<group>"; };
+		4223F34ABD304A34967D940D /* QuizView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizView.swift; sourceTree = "<group>"; };
+		0E65417B8FF94A439C152FB5 /* vocab.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = vocab.json; sourceTree = "<group>"; };
+		54F74E81208149FE99D87B63 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		97365E4A3C484F3E83530B84 /* VocabMaster.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VocabMaster.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		42CB6FFDCB634430A7812338 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		9E459D7AB32A4B378A343D17 = {
+			isa = PBXGroup;
+			children = (
+				27BC119429CA492B88FB6AEB /* VocabMaster */,
+				5BE537E2AAD048579C9316D9 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5BE537E2AAD048579C9316D9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				97365E4A3C484F3E83530B84 /* VocabMaster.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		27BC119429CA492B88FB6AEB /* VocabMaster */ = {
+			isa = PBXGroup;
+			children = (
+				068031400A1F4459948A968C /* VocabMasterApp.swift */,
+				D9058FB019F54EFFBBEC8650 /* Models */,
+				B87E77B3FA964886898AE5CB /* Views */,
+				A046D615247F441481876680 /* Resources */,
+				54F74E81208149FE99D87B63 /* Assets.xcassets */
+			);
+			path = VocabMaster;
+			sourceTree = "<group>";
+		};
+		D9058FB019F54EFFBBEC8650 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				124FE9E046A348B4AA089E9D /* VocabWord.swift */,
+				9A5CAD3603D846A5B2EEB55A /* Band.swift */,
+				D6E1B9A7AE8E4F938D95A680 /* VocabStore.swift */,
+				5A53C622CD1F4FADAFCF185A /* Speaker.swift */
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		B87E77B3FA964886898AE5CB /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				8A17C96235AD479DBC32E2A8 /* BandListView.swift */,
+				406A30251501488EBD5B9C53 /* GroupListView.swift */,
+				2268C98ACBA14384B78DBBF1 /* GroupDetailView.swift */,
+				362548D8FF2B48C8AE6AA8D3 /* FlashcardView.swift */,
+				4223F34ABD304A34967D940D /* QuizView.swift */
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A046D615247F441481876680 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				0E65417B8FF94A439C152FB5 /* vocab.json */
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		465C2A58902D43929BC5C514 /* VocabMaster */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B59D188CE398461E9997E4A5 /* Build configuration list for PBXNativeTarget "VocabMaster" */;
+			buildPhases = (
+				5DEAEACE4ED64E1988DFDDBE /* Sources */,
+				42CB6FFDCB634430A7812338 /* Frameworks */,
+				21BEFEBC11B04CDA9BFF1954 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VocabMaster;
+			productName = VocabMaster;
+			productReference = 97365E4A3C484F3E83530B84 /* VocabMaster.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1E30E30C668E4913A9854156 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1520;
+				LastUpgradeCheck = 1520;
+				TargetAttributes = {
+					465C2A58902D43929BC5C514 = {
+						CreatedOnToolsVersion = 15.2;
+					};
+				};
+			};
+			buildConfigurationList = 1E92740EBE214444BA111A67 /* Build configuration list for PBXProject "VocabMaster" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				"zh-Hant",
+			);
+			mainGroup = 9E459D7AB32A4B378A343D17;
+			productRefGroup = 5BE537E2AAD048579C9316D9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				465C2A58902D43929BC5C514 /* VocabMaster */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		21BEFEBC11B04CDA9BFF1954 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1FC844AA076546E9B079EC7C /* vocab.json in Resources */,
+				21E1E324E44E4BBCAD31A999 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5DEAEACE4ED64E1988DFDDBE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6924817B1B7142DB93585A18 /* VocabMasterApp.swift in Sources */,
+				B09A7E5F146B48F5819A83AE /* VocabWord.swift in Sources */,
+				56183DF46F274110B75924EE /* Band.swift in Sources */,
+				4475A65795FF43DFA4D6F7B4 /* VocabStore.swift in Sources */,
+				2C009A4B9FF34F2EB16831B3 /* Speaker.swift in Sources */,
+				ABC4A0C2B13E415A88933711 /* BandListView.swift in Sources */,
+				D603C0F321164CC3A36A42C5 /* GroupListView.swift in Sources */,
+				2693D745BEEB48C6B6344654 /* GroupDetailView.swift in Sources */,
+				1562EB07385640DA89FF3F79 /* FlashcardView.swift in Sources */,
+				D8A5A91AA16D49D485CCDF82 /* QuizView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		CDD41E73007F4A8EBB9C4E23 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		D7166E5DB9154A82A62F5A3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		932DD4DB2AA64539A6045509 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_CFBundleDisplayName = "多益背單字";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.vocabmaster.app";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D26D847ECD1248BCAB8B6880 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_CFBundleDisplayName = "多益背單字";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.vocabmaster.app";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1E92740EBE214444BA111A67 /* Build configuration list for PBXProject "VocabMaster" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CDD41E73007F4A8EBB9C4E23 /* Debug */,
+				D7166E5DB9154A82A62F5A3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B59D188CE398461E9997E4A5 /* Build configuration list for PBXNativeTarget "VocabMaster" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				932DD4DB2AA64539A6045509 /* Debug */,
+				D26D847ECD1248BCAB8B6880 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1E30E30C668E4913A9854156 /* Project object */;
+}
