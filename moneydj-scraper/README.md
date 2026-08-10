@@ -14,6 +14,8 @@ models.py               資料模型：StockRecord
 company_map.py          美股公司 → 多來源概念股頁面對照表（不綁定單一網站）
 aggregate.py            跨來源彙整：同一檔股票出現在幾個網站
 tradingview.py          （選用）報價層：用 TradingView 批次查價，取代/覆蓋頁面本身的價格欄位
+twse_api.py             （選用）個股明細層：TWSE 官方端點取得日K線/三大法人買賣超/融資融券/基本資訊
+insights.py             依個股明細整理重點觀點的規則式摘要（純統計，非預測）
 scraper.py               批次控制 + 輸出層：MoneyDJConceptScraper（run_batch / run_batch_with_tradingview_quotes / save_json / inspect_page）
 main.py                  CLI 入口
 tests/                   pytest 單元測試
@@ -97,6 +99,32 @@ python main.py --targets targets.json --quotes-source tradingview
 3. 這個環境目前無法連線到外部網站實測（見「已知限制」），程式碼與單元測試都以純函式
    （`apply_quote`）驗證合併邏輯，實際串接後請先小量測試再擴大 targets。
 
+### 個股明細：K 線、三大法人買賣超、融資融券、基本資訊、重點整理觀點
+
+加上 `--with-detail`，會針對這次爬到的每檔股票另外呼叫 TWSE 官方端點，取得：
+
+- **日 K 線**（近 2 個月，開高低收 + 成交量）
+- **三大法人買賣超**（近 10 個交易日，外資／投信／自營商）
+- **融資融券餘額**（近 10 個交易日，含日增減）
+- **基本資訊**（本益比／殖利率／股價淨值比）
+- **重點整理觀點**：`insights.summarize_stock_insights` 依上述數據產生的規則式摘要，例如
+  「近 5 個交易日股價上漲 3.2%」「外資近 10 個交易日累計買超 1,200 張」，最後固定加一行
+  「僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測」。
+
+```bash
+python main.py --targets targets.json --with-detail --detail-output concept_detail.json
+```
+
+輸出的 `concept_detail.json` 是以股票代碼為 key 的字典，每筆包含 `ohlc` / `institutional` /
+`margin` / `fundamentals` / `insights` 五個欄位；可以直接餵給儀表板的「上傳資料」功能查看個股明細
+（見下方儀表板一節）。
+
+**重要注意事項**：`twse_api.py` 用的是 TWSE 官方公開端點（`STOCK_DAY`、`T86`、`MI_MARGN`、
+`BWIBBU_ALL`），比 `tradingview.py` 的未公開端點穩定、有文件，但欄位順序、日期格式（民國年）
+仍是依公開文件慣例撰寫、**尚未在可連外環境對照過真實回應**。正式使用前務必用
+`twse_api.debug_fetch_raw(url, params)` 核對一次。另外目前只支援**上市（TWSE）**股票，
+上櫃（TPEX）代碼會直接拿到空結果（見「已知限制」）。
+
 ## 測試
 
 ```bash
@@ -105,7 +133,8 @@ pytest
 
 單元測試涵蓋純函式（`_split_id_and_name`、`_extract_id_from_href`、`StockRecord.change_pct_float`、
 `rank_today_gainers`、`tradingview.apply_quote`、`company_map.resolve_company_targets`、
-`aggregate.summarize_by_stock`）與 `parse_page` 對假 HTML 表格的解析。
+`aggregate.summarize_by_stock`、`twse_api` 的解析函式、`insights.summarize_stock_insights`）
+與 `parse_page` 對假 HTML 表格的解析。
 
 ## 已知限制
 
@@ -113,6 +142,9 @@ pytest
 - 不同網站/頁面的欄位順序可能不同，請先跑 `--inspect` 核對後再調整；`parser.py` 目前的通用表格
   啟發式（找最大 table + `%` 儲存格定位）不保證適用所有網站。
 - `company_map.json` 需要人工維護每家公司的目標頁面網址，沒有自動搜尋機制。
+- `twse_api.py` 目前只支援上市（TWSE）股票，上櫃（TPEX）代碼會拿到空的 ohlc/institutional/margin；
+  且三大法人／融資融券是「每個交易日打一次全市場端點再過濾」，股票數多、天數多時請求數會累加，
+  記得保留內建的延遲（`fetch_stock_details` 的 `delay` 參數），不要調成 0。
 - 反爬蟲方面目前有 User-Agent 輪替、隨機延遲、以及抓取失敗時的指數退避重試（`fetch_html` 的
   `retries`/`backoff_base` 參數）；若對方有更嚴格的頻率限制或需要 Cookie/Session 驗證，需自行加上
   `requests.Session()` 的 cookie 持久化、或改用瀏覽器自動化工具。

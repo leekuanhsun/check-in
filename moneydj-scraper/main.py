@@ -5,8 +5,10 @@ from typing import Dict, List
 
 from aggregate import summarize_by_stock
 from company_map import load_company_map, resolve_company_targets
+from insights import summarize_stock_insights
 from parser import rank_today_gainers
 from scraper import MoneyDJConceptScraper
+from twse_api import fetch_stock_details
 
 
 def _load_targets(path: str) -> List[Dict[str, str]]:
@@ -48,6 +50,17 @@ def main() -> None:
     parser.add_argument("--inspect", help="只印出指定 URL 的表格結構，不執行完整爬取")
     parser.add_argument("--top", type=int, default=10, help="顯示當日漲幅排行前 N 名")
     parser.add_argument(
+        "--with-detail",
+        action="store_true",
+        help="額外用 TWSE 官方端點取得每檔股票的日K線/三大法人買賣超/融資融券/基本資訊，"
+        "並產生重點整理觀點（見 README「個股明細」一節，屬上市股票專用、未實測過）",
+    )
+    parser.add_argument(
+        "--detail-output",
+        default="moneydj_concept_detail.json",
+        help="--with-detail 的輸出路徑",
+    )
+    parser.add_argument(
         "--quotes-source",
         choices=["moneydj", "tradingview"],
         default="moneydj",
@@ -70,6 +83,17 @@ def main() -> None:
     else:
         records = scraper.run_batch(targets)
     scraper.save_json(records, args.output)
+
+    if args.with_detail:
+        stock_ids = sorted({r.stock_id for r in records if r.stock_id})
+        details = fetch_stock_details(stock_ids)
+        for detail in details.values():
+            detail["insights"] = summarize_stock_insights(
+                detail["ohlc"], detail["institutional"], detail["margin"]
+            )
+        with open(args.detail_output, "w", encoding="utf-8") as f:
+            json.dump(details, f, ensure_ascii=False, indent=2)
+        print(f"個股明細（K線/法人/資券/基本資訊/重點整理）已寫入 {args.detail_output}")
 
     if args.summary_output:
         summary = summarize_by_stock(records)
