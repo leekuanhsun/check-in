@@ -1,0 +1,37 @@
+{
+  "NVIDIA": {
+    "aliases": ["輝達", "NVDA", "Nvidia"],
+    "targets": [
+      {
+        "url": "https://www.moneydj.com/z/zc/zca/zca_0.djhtm?a=請替換為實際頁面路徑",
+        "category": "輝達概念股",
+        "note": "範例佔位網址，請替換為 MoneyDJ 上實際的輝達概念股頁面"
+      },
+      {
+        "url": "https://www.cnyes.com/請替換為實際頁面路徑",
+        "category": "輝達概念股",
+        "note": "範例佔位網址，請替換為鉅亨網（Anue）上實際的頁面"
+      },
+      {
+        "url": "https://www.wantgoo.com/請替換為實際頁面路徑",
+        "category": "輝達概念股",
+        "note": "範例佔位網址，請替換為玩股網上實際的頁面"
+      }
+    ]
+  },
+  "APPLE": {
+    "aliases": ["蘋果", "AAPL", "Apple"],
+    "targets": [
+      {
+        "url": "https://www.moneydj.com/z/zc/zca/zca_0.djhtm?a=請替換為實際頁面路徑",
+        "category": "蘋果概念股",
+        "note": "範例佔位網址，請替換為 MoneyDJ 上實際的蘋果概念股頁面"
+      },
+      {
+        "url": "https://goodinfo.tw/請替換為實際頁面路徑",
+        "category": "蘋果概念股",
+        "note": "範例佔位網址，請替換為 Goodinfo 上實際的頁面"
+      }
+    ]
+  }
+}
