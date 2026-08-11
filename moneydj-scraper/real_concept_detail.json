@@ -229,67 +229,137 @@
     "institutional": [
       {
         "date": "2026-07-29",
-        "foreign": -11210895,
-        "trust": 1652413,
-        "dealer": 5032434
+        "foreign": -11211,
+        "trust": 1652,
+        "dealer": 4893
       },
       {
         "date": "2026-07-30",
-        "foreign": -3957455,
-        "trust": 939367,
-        "dealer": 1446133
+        "foreign": -3957,
+        "trust": 939,
+        "dealer": 1638
       },
       {
         "date": "2026-07-31",
-        "foreign": 13780099,
-        "trust": 7063889,
-        "dealer": 2168171
+        "foreign": 13780,
+        "trust": 7064,
+        "dealer": 2725
       },
       {
         "date": "2026-08-03",
-        "foreign": -9716947,
-        "trust": 387450,
-        "dealer": -931500
+        "foreign": -9717,
+        "trust": 387,
+        "dealer": -1587
       },
       {
         "date": "2026-08-04",
-        "foreign": -12429517,
-        "trust": 433720,
-        "dealer": -1245163
+        "foreign": -12430,
+        "trust": 434,
+        "dealer": -2327
       },
       {
         "date": "2026-08-05",
-        "foreign": 12251238,
-        "trust": -1204507,
-        "dealer": -674266
+        "foreign": 12251,
+        "trust": -1205,
+        "dealer": -1099
       },
       {
         "date": "2026-08-06",
-        "foreign": -4011452,
-        "trust": -82362,
-        "dealer": -310663
+        "foreign": -4011,
+        "trust": -82,
+        "dealer": -583
       },
       {
         "date": "2026-08-07",
-        "foreign": 641660,
-        "trust": 61000,
-        "dealer": 330235
+        "foreign": 642,
+        "trust": 61,
+        "dealer": 1243
       },
       {
         "date": "2026-08-10",
-        "foreign": 119096,
-        "trust": 152629,
-        "dealer": 133368
+        "foreign": 119,
+        "trust": 153,
+        "dealer": 448
       }
     ],
-    "margin": [],
-    "fundamentals": {},
+    "margin": [
+      {
+        "date": "2026-07-29",
+        "margin_balance": 30832,
+        "margin_change": -695,
+        "short_balance": 230,
+        "short_change": 117
+      },
+      {
+        "date": "2026-07-30",
+        "margin_balance": 30664,
+        "margin_change": -168,
+        "short_balance": 130,
+        "short_change": -100
+      },
+      {
+        "date": "2026-07-31",
+        "margin_balance": 29289,
+        "margin_change": -1375,
+        "short_balance": 124,
+        "short_change": -6
+      },
+      {
+        "date": "2026-08-03",
+        "margin_balance": 30003,
+        "margin_change": 714,
+        "short_balance": 101,
+        "short_change": -23
+      },
+      {
+        "date": "2026-08-04",
+        "margin_balance": 30765,
+        "margin_change": 762,
+        "short_balance": 47,
+        "short_change": -54
+      },
+      {
+        "date": "2026-08-05",
+        "margin_balance": 29226,
+        "margin_change": -1539,
+        "short_balance": 62,
+        "short_change": 15
+      },
+      {
+        "date": "2026-08-06",
+        "margin_balance": 29949,
+        "margin_change": 723,
+        "short_balance": 38,
+        "short_change": -24
+      },
+      {
+        "date": "2026-08-07",
+        "margin_balance": 29657,
+        "margin_change": -292,
+        "short_balance": 33,
+        "short_change": -5
+      },
+      {
+        "date": "2026-08-10",
+        "margin_balance": 29788,
+        "margin_change": 131,
+        "short_balance": 32,
+        "short_change": -1
+      }
+    ],
+    "fundamentals": {
+      "pe_ratio": 32.0,
+      "dividend_yield": 0.92,
+      "pb_ratio": 10.48
+    },
     "insights": [
       "近 5 個交易日股價上漲 0.42%",
       "近 20 個交易日股價下跌 2.46%",
       "收盤價位於 5 日均價（2368.00）之上",
-      "外資近 9 個交易日累計賣超 14,534,173 張",
-      "投信近 9 個交易日累計買超 9,403,599 張",
+      "外資近 9 個交易日累計賣超 14,534 張",
+      "投信近 9 個交易日累計買超 9,403 張",
+      "融資餘額較 9 個交易日前減少 1,044 張",
+      "融券餘額較 9 個交易日前減少 198 張",
       "以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"
     ]
   },
@@ -523,67 +593,137 @@
     "institutional": [
       {
         "date": "2026-07-29",
-        "foreign": -1315535,
-        "trust": 1094229,
-        "dealer": 2098454
+        "foreign": -1316,
+        "trust": 1094,
+        "dealer": 2249
       },
       {
         "date": "2026-07-30",
-        "foreign": -33608017,
-        "trust": 307892,
-        "dealer": 467246
+        "foreign": -33608,
+        "trust": 308,
+        "dealer": 761
       },
       {
         "date": "2026-07-31",
-        "foreign": 49858145,
-        "trust": 3505375,
-        "dealer": 3017367
+        "foreign": 49858,
+        "trust": 3505,
+        "dealer": 3015
       },
       {
         "date": "2026-08-03",
-        "foreign": 10136158,
-        "trust": 213516,
-        "dealer": -364656
+        "foreign": 10136,
+        "trust": 214,
+        "dealer": -1208
       },
       {
         "date": "2026-08-04",
-        "foreign": 2130602,
-        "trust": -520491,
-        "dealer": -551110
+        "foreign": 2131,
+        "trust": -520,
+        "dealer": -1104
       },
       {
         "date": "2026-08-05",
-        "foreign": 36977842,
-        "trust": -1107959,
-        "dealer": 431917
+        "foreign": 36978,
+        "trust": -1108,
+        "dealer": 489
       },
       {
         "date": "2026-08-06",
-        "foreign": 21743362,
-        "trust": 135888,
-        "dealer": 124890
+        "foreign": 21743,
+        "trust": 136,
+        "dealer": 148
       },
       {
         "date": "2026-08-07",
-        "foreign": -5328129,
-        "trust": -800000,
-        "dealer": -747408
+        "foreign": -5328,
+        "trust": -800,
+        "dealer": -626
       },
       {
         "date": "2026-08-10",
-        "foreign": 7881540,
-        "trust": 136726,
-        "dealer": 577
+        "foreign": 7882,
+        "trust": 137,
+        "dealer": 379
       }
     ],
-    "margin": [],
-    "fundamentals": {},
+    "margin": [
+      {
+        "date": "2026-07-29",
+        "margin_balance": 51983,
+        "margin_change": -41,
+        "short_balance": 290,
+        "short_change": 60
+      },
+      {
+        "date": "2026-07-30",
+        "margin_balance": 52661,
+        "margin_change": 678,
+        "short_balance": 282,
+        "short_change": -8
+      },
+      {
+        "date": "2026-07-31",
+        "margin_balance": 50864,
+        "margin_change": -1797,
+        "short_balance": 322,
+        "short_change": 40
+      },
+      {
+        "date": "2026-08-03",
+        "margin_balance": 50550,
+        "margin_change": -314,
+        "short_balance": 342,
+        "short_change": 20
+      },
+      {
+        "date": "2026-08-04",
+        "margin_balance": 50624,
+        "margin_change": 74,
+        "short_balance": 308,
+        "short_change": -34
+      },
+      {
+        "date": "2026-08-05",
+        "margin_balance": 49879,
+        "margin_change": -745,
+        "short_balance": 556,
+        "short_change": 248
+      },
+      {
+        "date": "2026-08-06",
+        "margin_balance": 51547,
+        "margin_change": 1668,
+        "short_balance": 669,
+        "short_change": 113
+      },
+      {
+        "date": "2026-08-07",
+        "margin_balance": 50435,
+        "margin_change": -1112,
+        "short_balance": 642,
+        "short_change": -27
+      },
+      {
+        "date": "2026-08-10",
+        "margin_balance": 50336,
+        "margin_change": -99,
+        "short_balance": 642,
+        "short_change": 0
+      }
+    ],
+    "fundamentals": {
+      "pe_ratio": 18.79,
+      "dividend_yield": 2.71,
+      "pb_ratio": 2.08
+    },
     "insights": [
       "近 5 個交易日股價上漲 4.55%",
       "近 20 個交易日股價上漲 11.84%",
       "收盤價位於 5 日均價（259.50）之上",
-      "外資近 9 個交易日累計買超 88,475,968 張",
-      "投信近 9 個交易日累計買超 2,965,176 張",
+      "外資近 9 個交易日累計買超 88,476 張",
+      "投信近 9 個交易日累計買超 2,966 張",
+      "融資餘額較 9 個交易日前減少 1,647 張",
+      "融券餘額較 9 個交易日前增加 352 張",
       "以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"
     ]
   },
@@ -817,67 +957,137 @@
     "institutional": [
       {
         "date": "2026-07-29",
-        "foreign": 519439,
-        "trust": 371799,
-        "dealer": 587056
+        "foreign": 519,
+        "trust": 372,
+        "dealer": -873
       },
       {
         "date": "2026-07-30",
-        "foreign": -27311038,
-        "trust": 227635,
-        "dealer": 476243
+        "foreign": -27311,
+        "trust": 228,
+        "dealer": 552
       },
       {
         "date": "2026-07-31",
-        "foreign": -4083394,
-        "trust": 840369,
-        "dealer": 233000
+        "foreign": -4083,
+        "trust": 840,
+        "dealer": 131
       },
       {
         "date": "2026-08-03",
-        "foreign": 2009889,
-        "trust": -234966,
-        "dealer": -9685
+        "foreign": 2010,
+        "trust": -235,
+        "dealer": -46
       },
       {
         "date": "2026-08-04",
-        "foreign": -2549175,
-        "trust": -682000,
-        "dealer": -178838
+        "foreign": -2549,
+        "trust": -682,
+        "dealer": -432
       },
       {
         "date": "2026-08-05",
-        "foreign": -3355631,
-        "trust": -10065,
-        "dealer": -127165
+        "foreign": -3356,
+        "trust": -10,
+        "dealer": -851
       },
       {
         "date": "2026-08-06",
-        "foreign": -1536661,
-        "trust": -349000,
-        "dealer": 23044
+        "foreign": -1537,
+        "trust": -349,
+        "dealer": 95
       },
       {
         "date": "2026-08-07",
-        "foreign": -6303273,
-        "trust": 79332,
-        "dealer": -70944
+        "foreign": -6303,
+        "trust": 79,
+        "dealer": -379
       },
       {
         "date": "2026-08-10",
-        "foreign": 2326796,
-        "trust": 322642,
-        "dealer": 70200
+        "foreign": 2327,
+        "trust": 323,
+        "dealer": 447
       }
     ],
-    "margin": [],
-    "fundamentals": {},
+    "margin": [
+      {
+        "date": "2026-07-29",
+        "margin_balance": 13813,
+        "margin_change": -335,
+        "short_balance": 163,
+        "short_change": 21
+      },
+      {
+        "date": "2026-07-30",
+        "margin_balance": 15108,
+        "margin_change": 1295,
+        "short_balance": 777,
+        "short_change": 614
+      },
+      {
+        "date": "2026-07-31",
+        "margin_balance": 15889,
+        "margin_change": 781,
+        "short_balance": 148,
+        "short_change": -629
+      },
+      {
+        "date": "2026-08-03",
+        "margin_balance": 15673,
+        "margin_change": -216,
+        "short_balance": 215,
+        "short_change": 67
+      },
+      {
+        "date": "2026-08-04",
+        "margin_balance": 15963,
+        "margin_change": 290,
+        "short_balance": 205,
+        "short_change": -10
+      },
+      {
+        "date": "2026-08-05",
+        "margin_balance": 16444,
+        "margin_change": 481,
+        "short_balance": 200,
+        "short_change": -5
+      },
+      {
+        "date": "2026-08-06",
+        "margin_balance": 16628,
+        "margin_change": 184,
+        "short_balance": 153,
+        "short_change": -47
+      },
+      {
+        "date": "2026-08-07",
+        "margin_balance": 16790,
+        "margin_change": 162,
+        "short_balance": 148,
+        "short_change": -5
+      },
+      {
+        "date": "2026-08-10",
+        "margin_balance": 17121,
+        "margin_change": 331,
+        "short_balance": 145,
+        "short_change": -3
+      }
+    ],
+    "fundamentals": {
+      "pe_ratio": 15.76,
+      "dividend_yield": 4.98,
+      "pb_ratio": 5.82
+    },
     "insights": [
       "近 5 個交易日股價上漲 5.73%",
       "近 20 個交易日股價下跌 17.06%",
       "收盤價位於 5 日均價（303.60）之上",
-      "外資近 9 個交易日累計賣超 40,283,048 張",
-      "投信近 9 個交易日累計買超 565,746 張",
+      "外資近 9 個交易日累計賣超 40,283 張",
+      "投信近 9 個交易日累計買超 566 張",
+      "融資餘額較 9 個交易日前增加 3,308 張",
+      "融券餘額較 9 個交易日前減少 18 張",
       "以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"
     ]
   },
@@ -1111,67 +1321,137 @@
     "institutional": [
       {
         "date": "2026-07-29",
-        "foreign": 4022653,
-        "trust": 1253878,
-        "dealer": -549197
+        "foreign": 4023,
+        "trust": 1254,
+        "dealer": -818
       },
       {
         "date": "2026-07-30",
-        "foreign": -18970,
-        "trust": 419801,
-        "dealer": 48084
+        "foreign": -19,
+        "trust": 420,
+        "dealer": -73
       },
       {
         "date": "2026-07-31",
-        "foreign": 18281364,
-        "trust": 3193621,
-        "dealer": 1355503
+        "foreign": 18281,
+        "trust": 3194,
+        "dealer": 1588
       },
       {
         "date": "2026-08-03",
-        "foreign": 13991730,
-        "trust": 9288339,
-        "dealer": 1677323
+        "foreign": 13992,
+        "trust": 9288,
+        "dealer": 2026
       },
       {
         "date": "2026-08-04",
-        "foreign": 18453095,
-        "trust": 5570000,
-        "dealer": 7780
+        "foreign": 18453,
+        "trust": 5570,
+        "dealer": -47
       },
       {
         "date": "2026-08-05",
-        "foreign": 35613026,
-        "trust": 5824909,
-        "dealer": -2026650
+        "foreign": 35613,
+        "trust": 5825,
+        "dealer": -3332
       },
       {
         "date": "2026-08-06",
-        "foreign": -10142679,
-        "trust": -38000,
-        "dealer": -780884
+        "foreign": -10143,
+        "trust": -38,
+        "dealer": -900
       },
       {
         "date": "2026-08-07",
-        "foreign": 17158210,
-        "trust": -10276000,
-        "dealer": 152453
+        "foreign": 17158,
+        "trust": -10276,
+        "dealer": 861
       },
       {
         "date": "2026-08-10",
-        "foreign": 9681522,
-        "trust": -1074567,
-        "dealer": 242408
+        "foreign": 9682,
+        "trust": -1075,
+        "dealer": 188
       }
     ],
-    "margin": [],
-    "fundamentals": {},
+    "margin": [
+      {
+        "date": "2026-07-29",
+        "margin_balance": 48319,
+        "margin_change": 181,
+        "short_balance": 753,
+        "short_change": -532
+      },
+      {
+        "date": "2026-07-30",
+        "margin_balance": 45212,
+        "margin_change": -3107,
+        "short_balance": 780,
+        "short_change": 27
+      },
+      {
+        "date": "2026-07-31",
+        "margin_balance": 52580,
+        "margin_change": 7368,
+        "short_balance": 1160,
+        "short_change": 380
+      },
+      {
+        "date": "2026-08-03",
+        "margin_balance": 52571,
+        "margin_change": -9,
+        "short_balance": 1019,
+        "short_change": -141
+      },
+      {
+        "date": "2026-08-04",
+        "margin_balance": 54517,
+        "margin_change": 1946,
+        "short_balance": 1252,
+        "short_change": 233
+      },
+      {
+        "date": "2026-08-05",
+        "margin_balance": 40653,
+        "margin_change": -13864,
+        "short_balance": 1440,
+        "short_change": 188
+      },
+      {
+        "date": "2026-08-06",
+        "margin_balance": 43324,
+        "margin_change": 2671,
+        "short_balance": 1193,
+        "short_change": -247
+      },
+      {
+        "date": "2026-08-07",
+        "margin_balance": 41020,
+        "margin_change": -2304,
+        "short_balance": 1253,
+        "short_change": 60
+      },
+      {
+        "date": "2026-08-10",
+        "margin_balance": 41315,
+        "margin_change": 295,
+        "short_balance": 1067,
+        "short_change": -186
+      }
+    ],
+    "fundamentals": {
+      "pe_ratio": 15.33,
+      "dividend_yield": 2.85,
+      "pb_ratio": 3.16
+    },
     "insights": [
       "近 5 個交易日股價上漲 3.76%",
       "近 20 個交易日股價上漲 34.49%",
       "收盤價位於 5 日均價（190.80）之上",
-      "外資近 9 個交易日累計買超 107,039,951 張",
-      "投信近 9 個交易日累計買超 14,161,981 張",
+      "外資近 9 個交易日累計買超 107,040 張",
+      "投信近 9 個交易日累計買超 14,162 張",
+      "融資餘額較 9 個交易日前減少 7,004 張",
+      "融券餘額較 9 個交易日前增加 314 張",
       "以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"
     ]
   },
@@ -1405,67 +1685,137 @@
     "institutional": [
       {
         "date": "2026-07-29",
-        "foreign": 7498082,
-        "trust": 751426,
-        "dealer": 50682
+        "foreign": 7498,
+        "trust": 751,
+        "dealer": -62
       },
       {
         "date": "2026-07-30",
-        "foreign": -3455222,
-        "trust": 181689,
-        "dealer": -362974
+        "foreign": -3455,
+        "trust": 182,
+        "dealer": -489
       },
       {
         "date": "2026-07-31",
-        "foreign": 2133286,
-        "trust": 166000,
-        "dealer": 792793
+        "foreign": 2133,
+        "trust": 166,
+        "dealer": 493
       },
       {
         "date": "2026-08-03",
-        "foreign": 12570486,
-        "trust": -207142,
-        "dealer": 729457
+        "foreign": 12570,
+        "trust": -207,
+        "dealer": 626
       },
       {
         "date": "2026-08-04",
-        "foreign": 8852315,
-        "trust": 707000,
-        "dealer": 360337
+        "foreign": 8852,
+        "trust": 707,
+        "dealer": 273
       },
       {
         "date": "2026-08-05",
-        "foreign": -5100029,
-        "trust": -80114,
-        "dealer": -805174
+        "foreign": -5100,
+        "trust": -80,
+        "dealer": -828
       },
       {
         "date": "2026-08-06",
-        "foreign": 1752747,
-        "trust": 545000,
-        "dealer": -24524
+        "foreign": 1753,
+        "trust": 545,
+        "dealer": -62
       },
       {
         "date": "2026-08-07",
-        "foreign": 1479463,
-        "trust": -747000,
-        "dealer": -228606
+        "foreign": 1479,
+        "trust": -747,
+        "dealer": -171
       },
       {
         "date": "2026-08-10",
-        "foreign": 7193927,
-        "trust": -24122,
-        "dealer": 162325
+        "foreign": 7194,
+        "trust": -24,
+        "dealer": 219
       }
     ],
-    "margin": [],
-    "fundamentals": {},
+    "margin": [
+      {
+        "date": "2026-07-29",
+        "margin_balance": 28209,
+        "margin_change": -1080,
+        "short_balance": 504,
+        "short_change": 85
+      },
+      {
+        "date": "2026-07-30",
+        "margin_balance": 27396,
+        "margin_change": -813,
+        "short_balance": 1160,
+        "short_change": 656
+      },
+      {
+        "date": "2026-07-31",
+        "margin_balance": 28106,
+        "margin_change": 710,
+        "short_balance": 364,
+        "short_change": -796
+      },
+      {
+        "date": "2026-08-03",
+        "margin_balance": 28090,
+        "margin_change": -16,
+        "short_balance": 581,
+        "short_change": 217
+      },
+      {
+        "date": "2026-08-04",
+        "margin_balance": 28248,
+        "margin_change": 158,
+        "short_balance": 653,
+        "short_change": 72
+      },
+      {
+        "date": "2026-08-05",
+        "margin_balance": 28710,
+        "margin_change": 462,
+        "short_balance": 638,
+        "short_change": -15
+      },
+      {
+        "date": "2026-08-06",
+        "margin_balance": 28601,
+        "margin_change": -109,
+        "short_balance": 624,
+        "short_change": -14
+      },
+      {
+        "date": "2026-08-07",
+        "margin_balance": 28158,
+        "margin_change": -443,
+        "short_balance": 592,
+        "short_change": -32
+      },
+      {
+        "date": "2026-08-10",
+        "margin_balance": 27642,
+        "margin_change": -516,
+        "short_balance": 604,
+        "short_change": 12
+      }
+    ],
+    "fundamentals": {
+      "pe_ratio": 25.1,
+      "dividend_yield": 3.03,
+      "pb_ratio": 3.22
+    },
     "insights": [
       "近 5 個交易日股價上漲 3.29%",
       "近 20 個交易日股價上漲 2.01%",
       "收盤價位於 5 日均價（65.44）之上",
-      "外資近 9 個交易日累計買超 32,925,055 張",
-      "投信近 9 個交易日累計買超 1,292,737 張",
+      "外資近 9 個交易日累計買超 32,924 張",
+      "投信近 9 個交易日累計買超 1,293 張",
+      "融資餘額較 9 個交易日前減少 567 張",
+      "融券餘額較 9 個交易日前增加 100 張",
       "以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"
     ]
   },
@@ -1699,67 +2049,137 @@
     "institutional": [
       {
         "date": "2026-07-29",
-        "foreign": 90907,
-        "trust": 137958,
-        "dealer": 21685
+        "foreign": 91,
+        "trust": 138,
+        "dealer": 47
       },
       {
         "date": "2026-07-30",
-        "foreign": -314162,
-        "trust": 192119,
-        "dealer": -154
+        "foreign": -314,
+        "trust": 192,
+        "dealer": -21
       },
       {
         "date": "2026-07-31",
-        "foreign": -198975,
-        "trust": 465947,
-        "dealer": 20831
+        "foreign": -199,
+        "trust": 466,
+        "dealer": 11
       },
       {
         "date": "2026-08-03",
-        "foreign": -131166,
-        "trust": 429921,
-        "dealer": -18956
+        "foreign": -131,
+        "trust": 430,
+        "dealer": -20
       },
       {
         "date": "2026-08-04",
-        "foreign": -442587,
-        "trust": 507099,
-        "dealer": -25339
+        "foreign": -443,
+        "trust": 507,
+        "dealer": -47
       },
       {
         "date": "2026-08-05",
-        "foreign": 280697,
-        "trust": -117578,
-        "dealer": -16044
+        "foreign": 281,
+        "trust": -118,
+        "dealer": -17
       },
       {
         "date": "2026-08-06",
-        "foreign": 240815,
-        "trust": -32921,
-        "dealer": 5825
+        "foreign": 241,
+        "trust": -33,
+        "dealer": 12
       },
       {
         "date": "2026-08-07",
-        "foreign": -138166,
-        "trust": 92000,
-        "dealer": -6962
+        "foreign": -138,
+        "trust": 92,
+        "dealer": -2
       },
       {
         "date": "2026-08-10",
-        "foreign": -136532,
-        "trust": -91013,
-        "dealer": 8343
+        "foreign": -137,
+        "trust": -91,
+        "dealer": 12
       }
     ],
-    "margin": [],
-    "fundamentals": {},
+    "margin": [
+      {
+        "date": "2026-07-29",
+        "margin_balance": 1332,
+        "margin_change": -116,
+        "short_balance": 14,
+        "short_change": 0
+      },
+      {
+        "date": "2026-07-30",
+        "margin_balance": 1269,
+        "margin_change": -63,
+        "short_balance": 18,
+        "short_change": 4
+      },
+      {
+        "date": "2026-07-31",
+        "margin_balance": 1202,
+        "margin_change": -67,
+        "short_balance": 15,
+        "short_change": -3
+      },
+      {
+        "date": "2026-08-03",
+        "margin_balance": 1435,
+        "margin_change": 233,
+        "short_balance": 23,
+        "short_change": 8
+      },
+      {
+        "date": "2026-08-04",
+        "margin_balance": 1461,
+        "margin_change": 26,
+        "short_balance": 25,
+        "short_change": 2
+      },
+      {
+        "date": "2026-08-05",
+        "margin_balance": 1379,
+        "margin_change": -82,
+        "short_balance": 26,
+        "short_change": 1
+      },
+      {
+        "date": "2026-08-06",
+        "margin_balance": 1374,
+        "margin_change": -5,
+        "short_balance": 29,
+        "short_change": 3
+      },
+      {
+        "date": "2026-08-07",
+        "margin_balance": 1366,
+        "margin_change": -8,
+        "short_balance": 24,
+        "short_change": -5
+      },
+      {
+        "date": "2026-08-10",
+        "margin_balance": 1312,
+        "margin_change": -54,
+        "short_balance": 25,
+        "short_change": 1
+      }
+    ],
+    "fundamentals": {
+      "pe_ratio": 19.27,
+      "dividend_yield": 2.74,
+      "pb_ratio": 8.18
+    },
     "insights": [
       "近 5 個交易日股價上漲 1.43%",
       "近 20 個交易日股價上漲 21.17%",
       "收盤價位於 5 日均價（6151.00）之下",
-      "外資近 9 個交易日累計賣超 749,169 張",
-      "投信近 9 個交易日累計買超 1,583,532 張",
+      "外資近 9 個交易日累計賣超 749 張",
+      "投信近 9 個交易日累計買超 1,583 張",
+      "融資餘額較 9 個交易日前減少 20 張",
+      "融券餘額較 9 個交易日前增加 11 張",
       "以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"
     ]
   },
@@ -1993,67 +2413,137 @@
     "institutional": [
       {
         "date": "2026-07-29",
-        "foreign": -346870,
-        "trust": 170965,
-        "dealer": 392509
+        "foreign": -347,
+        "trust": 171,
+        "dealer": 478
       },
       {
         "date": "2026-07-30",
-        "foreign": -1198399,
-        "trust": 532063,
-        "dealer": 218815
+        "foreign": -1198,
+        "trust": 532,
+        "dealer": 381
       },
       {
         "date": "2026-07-31",
-        "foreign": -6105332,
-        "trust": 1947171,
-        "dealer": 52494
+        "foreign": -6105,
+        "trust": 1947,
+        "dealer": 523
       },
       {
         "date": "2026-08-03",
-        "foreign": -3341798,
-        "trust": -215118,
-        "dealer": 5849
+        "foreign": -3342,
+        "trust": -215,
+        "dealer": -13
       },
       {
         "date": "2026-08-04",
-        "foreign": 3588651,
-        "trust": -1555022,
-        "dealer": -70208
+        "foreign": 3589,
+        "trust": -1555,
+        "dealer": -163
       },
       {
         "date": "2026-08-05",
-        "foreign": 117818,
-        "trust": -78077,
-        "dealer": -52091
+        "foreign": 118,
+        "trust": -78,
+        "dealer": 221
       },
       {
         "date": "2026-08-06",
-        "foreign": 73326,
-        "trust": 482140,
-        "dealer": -2918
+        "foreign": 73,
+        "trust": 482,
+        "dealer": 39
       },
       {
         "date": "2026-08-07",
-        "foreign": -1697088,
-        "trust": 55554,
-        "dealer": 19950
+        "foreign": -1697,
+        "trust": 56,
+        "dealer": -158
       },
       {
         "date": "2026-08-10",
-        "foreign": 1370803,
-        "trust": 604175,
-        "dealer": 377042
+        "foreign": 1371,
+        "trust": 604,
+        "dealer": 403
       }
     ],
-    "margin": [],
-    "fundamentals": {},
+    "margin": [
+      {
+        "date": "2026-07-29",
+        "margin_balance": 7245,
+        "margin_change": -498,
+        "short_balance": 17,
+        "short_change": -42
+      },
+      {
+        "date": "2026-07-30",
+        "margin_balance": 7616,
+        "margin_change": 371,
+        "short_balance": 35,
+        "short_change": 18
+      },
+      {
+        "date": "2026-07-31",
+        "margin_balance": 8562,
+        "margin_change": 946,
+        "short_balance": 46,
+        "short_change": 11
+      },
+      {
+        "date": "2026-08-03",
+        "margin_balance": 8811,
+        "margin_change": 249,
+        "short_balance": 31,
+        "short_change": -15
+      },
+      {
+        "date": "2026-08-04",
+        "margin_balance": 8930,
+        "margin_change": 119,
+        "short_balance": 34,
+        "short_change": 3
+      },
+      {
+        "date": "2026-08-05",
+        "margin_balance": 8418,
+        "margin_change": -512,
+        "short_balance": 27,
+        "short_change": -7
+      },
+      {
+        "date": "2026-08-06",
+        "margin_balance": 8387,
+        "margin_change": -31,
+        "short_balance": 31,
+        "short_change": 4
+      },
+      {
+        "date": "2026-08-07",
+        "margin_balance": 8379,
+        "margin_change": -8,
+        "short_balance": 28,
+        "short_change": -3
+      },
+      {
+        "date": "2026-08-10",
+        "margin_balance": 8883,
+        "margin_change": 504,
+        "short_balance": 51,
+        "short_change": 23
+      }
+    ],
+    "fundamentals": {
+      "pe_ratio": 57.77,
+      "dividend_yield": 0.64,
+      "pb_ratio": 16.05
+    },
     "insights": [
       "近 5 個交易日股價上漲 14.87%",
       "近 20 個交易日股價下跌 3.97%",
       "收盤價位於 5 日均價（1683.00）之上",
-      "外資近 9 個交易日累計賣超 7,538,889 張",
-      "投信近 9 個交易日累計買超 1,943,851 張",
+      "外資近 9 個交易日累計賣超 7,538 張",
+      "投信近 9 個交易日累計買超 1,944 張",
+      "融資餘額較 9 個交易日前增加 1,638 張",
+      "融券餘額較 9 個交易日前增加 34 張",
       "以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"
     ]
   },
@@ -2287,67 +2777,137 @@
     "institutional": [
       {
         "date": "2026-07-29",
-        "foreign": 284514,
-        "trust": 1000,
-        "dealer": -4227
+        "foreign": 285,
+        "trust": 1,
+        "dealer": -16
       },
       {
         "date": "2026-07-30",
-        "foreign": 63926,
-        "trust": 26779,
-        "dealer": -5531
+        "foreign": 64,
+        "trust": 27,
+        "dealer": -4
       },
       {
         "date": "2026-07-31",
-        "foreign": 367236,
-        "trust": 67000,
-        "dealer": 51599
+        "foreign": 367,
+        "trust": 67,
+        "dealer": 64
       },
       {
         "date": "2026-08-03",
-        "foreign": -57465,
-        "trust": 2557,
-        "dealer": -7289
+        "foreign": -57,
+        "trust": 3,
+        "dealer": -27
       },
       {
         "date": "2026-08-04",
-        "foreign": 251627,
+        "foreign": 252,
         "trust": 0,
-        "dealer": 13484
+        "dealer": 11
       },
       {
         "date": "2026-08-05",
-        "foreign": -176729,
+        "foreign": -177,
         "trust": 0,
-        "dealer": -4615
+        "dealer": -19
       },
       {
         "date": "2026-08-06",
-        "foreign": -160596,
-        "trust": -90000,
-        "dealer": -16513
+        "foreign": -161,
+        "trust": -90,
+        "dealer": -18
       },
       {
         "date": "2026-08-07",
-        "foreign": -246312,
+        "foreign": -246,
         "trust": 0,
-        "dealer": -8847
+        "dealer": -7
       },
       {
         "date": "2026-08-10",
-        "foreign": 111134,
+        "foreign": 111,
         "trust": 0,
-        "dealer": 27805
+        "dealer": 44
       }
     ],
-    "margin": [],
-    "fundamentals": {},
+    "margin": [
+      {
+        "date": "2026-07-29",
+        "margin_balance": 2941,
+        "margin_change": -229,
+        "short_balance": 17,
+        "short_change": 10
+      },
+      {
+        "date": "2026-07-30",
+        "margin_balance": 2901,
+        "margin_change": -40,
+        "short_balance": 1,
+        "short_change": -16
+      },
+      {
+        "date": "2026-07-31",
+        "margin_balance": 2840,
+        "margin_change": -61,
+        "short_balance": 0,
+        "short_change": -1
+      },
+      {
+        "date": "2026-08-03",
+        "margin_balance": 2889,
+        "margin_change": 49,
+        "short_balance": 0,
+        "short_change": 0
+      },
+      {
+        "date": "2026-08-04",
+        "margin_balance": 2914,
+        "margin_change": 25,
+        "short_balance": 0,
+        "short_change": 0
+      },
+      {
+        "date": "2026-08-05",
+        "margin_balance": 2889,
+        "margin_change": -25,
+        "short_balance": 10,
+        "short_change": 10
+      },
+      {
+        "date": "2026-08-06",
+        "margin_balance": 2903,
+        "margin_change": 14,
+        "short_balance": 11,
+        "short_change": 1
+      },
+      {
+        "date": "2026-08-07",
+        "margin_balance": 2941,
+        "margin_change": 38,
+        "short_balance": 9,
+        "short_change": -2
+      },
+      {
+        "date": "2026-08-10",
+        "margin_balance": 2944,
+        "margin_change": 3,
+        "short_balance": 5,
+        "short_change": -4
+      }
+    ],
+    "fundamentals": {
+      "pe_ratio": 46.12,
+      "dividend_yield": 1.79,
+      "pb_ratio": 25.73
+    },
     "insights": [
       "近 5 個交易日股價下跌 4.55%",
       "近 20 個交易日股價下跌 7.70%",
       "收盤價位於 5 日均價（672.40）之下",
-      "外資近 9 個交易日累計買超 437,335 張",
-      "投信近 9 個交易日累計買超 7,336 張",
+      "外資近 9 個交易日累計買超 438 張",
+      "投信近 9 個交易日累計買超 8 張",
+      "融資餘額較 9 個交易日前增加 3 張",
+      "融券餘額較 9 個交易日前減少 12 張",
       "以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"
     ]
   },
@@ -2581,67 +3141,137 @@
     "institutional": [
       {
         "date": "2026-07-29",
-        "foreign": 1923533,
-        "trust": -77000,
-        "dealer": -113476
+        "foreign": 1924,
+        "trust": -77,
+        "dealer": -303
       },
       {
         "date": "2026-07-30",
-        "foreign": -690928,
-        "trust": -332000,
-        "dealer": -40199
+        "foreign": -691,
+        "trust": -332,
+        "dealer": -152
       },
       {
         "date": "2026-07-31",
-        "foreign": -437600,
-        "trust": -85000,
-        "dealer": 58813
+        "foreign": -438,
+        "trust": -85,
+        "dealer": 57
       },
       {
         "date": "2026-08-03",
-        "foreign": -1520000,
+        "foreign": -1520,
         "trust": 0,
-        "dealer": 45994
+        "dealer": -93
       },
       {
         "date": "2026-08-04",
-        "foreign": 1075660,
-        "trust": 108000,
-        "dealer": 76591
+        "foreign": 1076,
+        "trust": 108,
+        "dealer": 122
       },
       {
         "date": "2026-08-05",
-        "foreign": 2727342,
+        "foreign": 2727,
         "trust": 0,
-        "dealer": 35428
+        "dealer": 223
       },
       {
         "date": "2026-08-06",
-        "foreign": -1574606,
-        "trust": 1760000,
-        "dealer": 34478
+        "foreign": -1575,
+        "trust": 1760,
+        "dealer": 126
       },
       {
         "date": "2026-08-07",
-        "foreign": 5801407,
-        "trust": 1073000,
-        "dealer": -14217
+        "foreign": 5801,
+        "trust": 1073,
+        "dealer": -268
       },
       {
         "date": "2026-08-10",
-        "foreign": 4499459,
-        "trust": 210000,
-        "dealer": -87666
+        "foreign": 4499,
+        "trust": 210,
+        "dealer": 178
       }
     ],
-    "margin": [],
-    "fundamentals": {},
+    "margin": [
+      {
+        "date": "2026-07-29",
+        "margin_balance": 14769,
+        "margin_change": -1543,
+        "short_balance": 235,
+        "short_change": -178
+      },
+      {
+        "date": "2026-07-30",
+        "margin_balance": 14992,
+        "margin_change": 223,
+        "short_balance": 138,
+        "short_change": -97
+      },
+      {
+        "date": "2026-07-31",
+        "margin_balance": 15187,
+        "margin_change": 195,
+        "short_balance": 144,
+        "short_change": 6
+      },
+      {
+        "date": "2026-08-03",
+        "margin_balance": 16599,
+        "margin_change": 1412,
+        "short_balance": 208,
+        "short_change": 64
+      },
+      {
+        "date": "2026-08-04",
+        "margin_balance": 18505,
+        "margin_change": 1906,
+        "short_balance": 335,
+        "short_change": 127
+      },
+      {
+        "date": "2026-08-05",
+        "margin_balance": 19224,
+        "margin_change": 719,
+        "short_balance": 529,
+        "short_change": 194
+      },
+      {
+        "date": "2026-08-06",
+        "margin_balance": 19697,
+        "margin_change": 473,
+        "short_balance": 952,
+        "short_change": 423
+      },
+      {
+        "date": "2026-08-07",
+        "margin_balance": 21146,
+        "margin_change": 1449,
+        "short_balance": 982,
+        "short_change": 30
+      },
+      {
+        "date": "2026-08-10",
+        "margin_balance": 22795,
+        "margin_change": 1649,
+        "short_balance": 1230,
+        "short_change": 248
+      }
+    ],
+    "fundamentals": {
+      "pe_ratio": 66.28,
+      "dividend_yield": 0.7,
+      "pb_ratio": 6.88
+    },
     "insights": [
       "近 5 個交易日股價上漲 47.92%",
       "近 20 個交易日股價上漲 18.92%",
       "收盤價位於 5 日均價（368.50）之上",
-      "外資近 9 個交易日累計買超 11,804,267 張",
-      "投信近 9 個交易日累計買超 2,657,000 張",
+      "外資近 9 個交易日累計買超 11,803 張",
+      "投信近 9 個交易日累計買超 2,657 張",
+      "融資餘額較 9 個交易日前增加 8,026 張",
+      "融券餘額較 9 個交易日前增加 995 張",
       "以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"
     ]
   },
@@ -2875,67 +3505,137 @@
     "institutional": [
       {
         "date": "2026-07-29",
-        "foreign": -608627,
-        "trust": 569614,
-        "dealer": 93516
+        "foreign": -609,
+        "trust": 570,
+        "dealer": 70
       },
       {
         "date": "2026-07-30",
-        "foreign": -2059760,
-        "trust": 1518157,
-        "dealer": 14351
+        "foreign": -2060,
+        "trust": 1518,
+        "dealer": 24
       },
       {
         "date": "2026-07-31",
-        "foreign": -1944678,
-        "trust": 1543272,
-        "dealer": -115414
+        "foreign": -1945,
+        "trust": 1543,
+        "dealer": -121
       },
       {
         "date": "2026-08-03",
-        "foreign": -895059,
-        "trust": -87640,
-        "dealer": 8753
+        "foreign": -895,
+        "trust": -88,
+        "dealer": 10
       },
       {
         "date": "2026-08-04",
-        "foreign": 2044768,
-        "trust": -2553000,
-        "dealer": 54516
+        "foreign": 2045,
+        "trust": -2553,
+        "dealer": 64
       },
       {
         "date": "2026-08-05",
-        "foreign": 733653,
-        "trust": -1120922,
-        "dealer": 2238
+        "foreign": 734,
+        "trust": -1121,
+        "dealer": -11
       },
       {
         "date": "2026-08-06",
-        "foreign": 793987,
-        "trust": -459846,
-        "dealer": -2239
+        "foreign": 794,
+        "trust": -460,
+        "dealer": 0
       },
       {
         "date": "2026-08-07",
-        "foreign": 144700,
-        "trust": 165000,
-        "dealer": -99127
+        "foreign": 145,
+        "trust": 165,
+        "dealer": -155
       },
       {
         "date": "2026-08-10",
-        "foreign": -173325,
-        "trust": -28264,
-        "dealer": 11364
+        "foreign": -173,
+        "trust": -28,
+        "dealer": 35
       }
     ],
-    "margin": [],
-    "fundamentals": {},
+    "margin": [
+      {
+        "date": "2026-07-29",
+        "margin_balance": 1206,
+        "margin_change": -188,
+        "short_balance": 8,
+        "short_change": 4
+      },
+      {
+        "date": "2026-07-30",
+        "margin_balance": 1308,
+        "margin_change": 102,
+        "short_balance": 12,
+        "short_change": 4
+      },
+      {
+        "date": "2026-07-31",
+        "margin_balance": 1243,
+        "margin_change": -65,
+        "short_balance": 17,
+        "short_change": 5
+      },
+      {
+        "date": "2026-08-03",
+        "margin_balance": 1394,
+        "margin_change": 151,
+        "short_balance": 20,
+        "short_change": 3
+      },
+      {
+        "date": "2026-08-04",
+        "margin_balance": 1483,
+        "margin_change": 89,
+        "short_balance": 16,
+        "short_change": -4
+      },
+      {
+        "date": "2026-08-05",
+        "margin_balance": 1539,
+        "margin_change": 56,
+        "short_balance": 8,
+        "short_change": -8
+      },
+      {
+        "date": "2026-08-06",
+        "margin_balance": 1541,
+        "margin_change": 2,
+        "short_balance": 11,
+        "short_change": 3
+      },
+      {
+        "date": "2026-08-07",
+        "margin_balance": 1468,
+        "margin_change": -73,
+        "short_balance": 9,
+        "short_change": -2
+      },
+      {
+        "date": "2026-08-10",
+        "margin_balance": 1521,
+        "margin_change": 53,
+        "short_balance": 9,
+        "short_change": 0
+      }
+    ],
+    "fundamentals": {
+      "pe_ratio": 51.79,
+      "dividend_yield": 0.96,
+      "pb_ratio": 26.07
+    },
     "insights": [
       "近 5 個交易日股價上漲 3.57%",
       "近 20 個交易日股價上漲 9.73%",
       "收盤價位於 5 日均價（1969.00）之上",
-      "外資近 9 個交易日累計賣超 1,964,341 張",
-      "投信近 9 個交易日累計賣超 453,629 張",
+      "外資近 9 個交易日累計賣超 1,964 張",
+      "投信近 9 個交易日累計賣超 454 張",
+      "融資餘額較 9 個交易日前增加 315 張",
+      "融券餘額較 9 個交易日前增加 1 張",
       "以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"
     ]
   },
@@ -3169,67 +3869,137 @@
     "institutional": [
       {
         "date": "2026-07-29",
-        "foreign": -65801,
-        "trust": 7000,
-        "dealer": -25590
+        "foreign": -66,
+        "trust": 7,
+        "dealer": -44
       },
       {
         "date": "2026-07-30",
-        "foreign": -287567,
-        "trust": 853,
-        "dealer": -7789
+        "foreign": -288,
+        "trust": 1,
+        "dealer": -30
       },
       {
         "date": "2026-07-31",
-        "foreign": 465786,
-        "trust": 5000,
-        "dealer": 14901
+        "foreign": 466,
+        "trust": 5,
+        "dealer": 60
       },
       {
         "date": "2026-08-03",
-        "foreign": -65357,
-        "trust": 2000,
-        "dealer": 8773
+        "foreign": -65,
+        "trust": 2,
+        "dealer": -18
       },
       {
         "date": "2026-08-04",
-        "foreign": 81857,
-        "trust": -1000,
-        "dealer": -8759
+        "foreign": 82,
+        "trust": -1,
+        "dealer": -30
       },
       {
         "date": "2026-08-05",
-        "foreign": 293027,
-        "trust": -1000,
-        "dealer": 5719
+        "foreign": 293,
+        "trust": -1,
+        "dealer": 38
       },
       {
         "date": "2026-08-06",
-        "foreign": 283464,
+        "foreign": 283,
         "trust": 0,
-        "dealer": -16903
+        "dealer": -5
       },
       {
         "date": "2026-08-07",
-        "foreign": -277404,
+        "foreign": -277,
         "trust": 0,
-        "dealer": -7623
+        "dealer": -7
       },
       {
         "date": "2026-08-10",
-        "foreign": 8175,
-        "trust": 2000,
-        "dealer": -2370
+        "foreign": 8,
+        "trust": 2,
+        "dealer": 8
       }
     ],
-    "margin": [],
-    "fundamentals": {},
+    "margin": [
+      {
+        "date": "2026-07-29",
+        "margin_balance": 2842,
+        "margin_change": -99,
+        "short_balance": 37,
+        "short_change": 13
+      },
+      {
+        "date": "2026-07-30",
+        "margin_balance": 2825,
+        "margin_change": -17,
+        "short_balance": 41,
+        "short_change": 4
+      },
+      {
+        "date": "2026-07-31",
+        "margin_balance": 2808,
+        "margin_change": -17,
+        "short_balance": 34,
+        "short_change": -7
+      },
+      {
+        "date": "2026-08-03",
+        "margin_balance": 2803,
+        "margin_change": -5,
+        "short_balance": 34,
+        "short_change": 0
+      },
+      {
+        "date": "2026-08-04",
+        "margin_balance": 2832,
+        "margin_change": 29,
+        "short_balance": 31,
+        "short_change": -3
+      },
+      {
+        "date": "2026-08-05",
+        "margin_balance": 2785,
+        "margin_change": -47,
+        "short_balance": 29,
+        "short_change": -2
+      },
+      {
+        "date": "2026-08-06",
+        "margin_balance": 2789,
+        "margin_change": 4,
+        "short_balance": 25,
+        "short_change": -4
+      },
+      {
+        "date": "2026-08-07",
+        "margin_balance": 2792,
+        "margin_change": 3,
+        "short_balance": 25,
+        "short_change": 0
+      },
+      {
+        "date": "2026-08-10",
+        "margin_balance": 2835,
+        "margin_change": 43,
+        "short_balance": 25,
+        "short_change": 0
+      }
+    ],
+    "fundamentals": {
+      "pe_ratio": 29.14,
+      "dividend_yield": 2.56,
+      "pb_ratio": 2.68
+    },
     "insights": [
       "近 5 個交易日股價上漲 0.26%",
       "近 20 個交易日股價下跌 11.14%",
       "收盤價位於 5 日均價（195.40）之上",
-      "外資近 9 個交易日累計買超 436,180 張",
-      "投信近 9 個交易日累計買超 14,853 張",
+      "外資近 9 個交易日累計買超 436 張",
+      "投信近 9 個交易日累計買超 15 張",
+      "融資餘額較 9 個交易日前減少 7 張",
+      "融券餘額較 9 個交易日前減少 12 張",
       "以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"
     ]
   },
@@ -3463,67 +4233,137 @@
     "institutional": [
       {
         "date": "2026-07-29",
-        "foreign": -3951277,
-        "trust": 1917242,
-        "dealer": 249373
+        "foreign": -3951,
+        "trust": 1917,
+        "dealer": 351
       },
       {
         "date": "2026-07-30",
-        "foreign": -1656603,
-        "trust": 2515389,
-        "dealer": 132125
+        "foreign": -1657,
+        "trust": 2515,
+        "dealer": 90
       },
       {
         "date": "2026-07-31",
-        "foreign": -705747,
-        "trust": 15000,
-        "dealer": 45522
+        "foreign": -706,
+        "trust": 15,
+        "dealer": 36
       },
       {
         "date": "2026-08-03",
-        "foreign": 1785144,
-        "trust": 763577,
-        "dealer": 80882
+        "foreign": 1785,
+        "trust": 764,
+        "dealer": -144
       },
       {
         "date": "2026-08-04",
-        "foreign": -2383236,
-        "trust": 5933000,
-        "dealer": -142118
+        "foreign": -2383,
+        "trust": 5933,
+        "dealer": -168
       },
       {
         "date": "2026-08-05",
-        "foreign": 8712450,
-        "trust": 1817592,
-        "dealer": -69432
+        "foreign": 8712,
+        "trust": 1818,
+        "dealer": -182
       },
       {
         "date": "2026-08-06",
-        "foreign": -615618,
-        "trust": 581000,
-        "dealer": -62742
+        "foreign": -616,
+        "trust": 581,
+        "dealer": -28
       },
       {
         "date": "2026-08-07",
-        "foreign": -790555,
-        "trust": 74000,
-        "dealer": 57291
+        "foreign": -791,
+        "trust": 74,
+        "dealer": -48
       },
       {
         "date": "2026-08-10",
-        "foreign": 3502767,
-        "trust": 31000,
-        "dealer": 160589
+        "foreign": 3503,
+        "trust": 31,
+        "dealer": 162
       }
     ],
-    "margin": [],
-    "fundamentals": {},
+    "margin": [
+      {
+        "date": "2026-07-29",
+        "margin_balance": 39681,
+        "margin_change": -343,
+        "short_balance": 157,
+        "short_change": -59
+      },
+      {
+        "date": "2026-07-30",
+        "margin_balance": 40085,
+        "margin_change": 404,
+        "short_balance": 396,
+        "short_change": 239
+      },
+      {
+        "date": "2026-07-31",
+        "margin_balance": 40619,
+        "margin_change": 534,
+        "short_balance": 435,
+        "short_change": 39
+      },
+      {
+        "date": "2026-08-03",
+        "margin_balance": 40795,
+        "margin_change": 176,
+        "short_balance": 477,
+        "short_change": 42
+      },
+      {
+        "date": "2026-08-04",
+        "margin_balance": 40728,
+        "margin_change": -67,
+        "short_balance": 475,
+        "short_change": -2
+      },
+      {
+        "date": "2026-08-05",
+        "margin_balance": 39230,
+        "margin_change": -1498,
+        "short_balance": 608,
+        "short_change": 133
+      },
+      {
+        "date": "2026-08-06",
+        "margin_balance": 39633,
+        "margin_change": 403,
+        "short_balance": 600,
+        "short_change": -8
+      },
+      {
+        "date": "2026-08-07",
+        "margin_balance": 39328,
+        "margin_change": -305,
+        "short_balance": 552,
+        "short_change": -48
+      },
+      {
+        "date": "2026-08-10",
+        "margin_balance": 39054,
+        "margin_change": -274,
+        "short_balance": 682,
+        "short_change": 130
+      }
+    ],
+    "fundamentals": {
+      "pe_ratio": 66.05,
+      "dividend_yield": 0.2,
+      "pb_ratio": 12.73
+    },
     "insights": [
       "近 5 個交易日股價上漲 14.68%",
       "近 20 個交易日股價上漲 9.86%",
       "收盤價位於 5 日均價（962.60）之上",
-      "外資近 9 個交易日累計買超 3,897,325 張",
-      "投信近 9 個交易日累計買超 13,647,800 張",
+      "外資近 9 個交易日累計買超 3,896 張",
+      "投信近 9 個交易日累計買超 13,648 張",
+      "融資餘額較 9 個交易日前減少 627 張",
+      "融券餘額較 9 個交易日前增加 525 張",
       "以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"
     ]
   },
@@ -3764,67 +4604,137 @@
     "institutional": [
       {
         "date": "2026-07-29",
-        "foreign": -4634756,
-        "trust": 751608,
-        "dealer": 368768
+        "foreign": -4635,
+        "trust": 752,
+        "dealer": 550
       },
       {
         "date": "2026-07-30",
-        "foreign": -3065746,
-        "trust": 273547,
-        "dealer": 787882
+        "foreign": -3066,
+        "trust": 274,
+        "dealer": 1382
       },
       {
         "date": "2026-07-31",
-        "foreign": -3648834,
-        "trust": 63000,
-        "dealer": 50895
+        "foreign": -3649,
+        "trust": 63,
+        "dealer": 97
       },
       {
         "date": "2026-08-03",
-        "foreign": 5452644,
-        "trust": 382486,
-        "dealer": 349961
+        "foreign": 5453,
+        "trust": 382,
+        "dealer": 280
       },
       {
         "date": "2026-08-04",
-        "foreign": -13160893,
-        "trust": 2971547,
-        "dealer": -968573
+        "foreign": -13161,
+        "trust": 2972,
+        "dealer": -1810
       },
       {
         "date": "2026-08-05",
-        "foreign": -2332853,
-        "trust": 1710465,
-        "dealer": -214615
+        "foreign": -2333,
+        "trust": 1710,
+        "dealer": 650
       },
       {
         "date": "2026-08-06",
-        "foreign": -4046813,
-        "trust": 237187,
-        "dealer": -103842
+        "foreign": -4047,
+        "trust": 237,
+        "dealer": 234
       },
       {
         "date": "2026-08-07",
-        "foreign": -3053732,
-        "trust": 557000,
-        "dealer": -19934
+        "foreign": -3054,
+        "trust": 557,
+        "dealer": -274
       },
       {
         "date": "2026-08-10",
-        "foreign": -283604,
-        "trust": 4484347,
-        "dealer": 307604
+        "foreign": -284,
+        "trust": 4484,
+        "dealer": 409
       }
     ],
-    "margin": [],
-    "fundamentals": {},
+    "margin": [
+      {
+        "date": "2026-07-29",
+        "margin_balance": 10030,
+        "margin_change": -388,
+        "short_balance": 336,
+        "short_change": 259
+      },
+      {
+        "date": "2026-07-30",
+        "margin_balance": 10575,
+        "margin_change": 545,
+        "short_balance": 135,
+        "short_change": -201
+      },
+      {
+        "date": "2026-07-31",
+        "margin_balance": 13486,
+        "margin_change": 2911,
+        "short_balance": 151,
+        "short_change": 16
+      },
+      {
+        "date": "2026-08-03",
+        "margin_balance": 13315,
+        "margin_change": -171,
+        "short_balance": 244,
+        "short_change": 93
+      },
+      {
+        "date": "2026-08-04",
+        "margin_balance": 14454,
+        "margin_change": 1139,
+        "short_balance": 165,
+        "short_change": -79
+      },
+      {
+        "date": "2026-08-05",
+        "margin_balance": 11959,
+        "margin_change": -2495,
+        "short_balance": 186,
+        "short_change": 21
+      },
+      {
+        "date": "2026-08-06",
+        "margin_balance": 12531,
+        "margin_change": 572,
+        "short_balance": 179,
+        "short_change": -7
+      },
+      {
+        "date": "2026-08-07",
+        "margin_balance": 12781,
+        "margin_change": 250,
+        "short_balance": 180,
+        "short_change": 1
+      },
+      {
+        "date": "2026-08-10",
+        "margin_balance": 14042,
+        "margin_change": 1261,
+        "short_balance": 196,
+        "short_change": 16
+      }
+    ],
+    "fundamentals": {
+      "pe_ratio": 45.59,
+      "dividend_yield": 1.04,
+      "pb_ratio": 7.12
+    },
     "insights": [
       "近 5 個交易日股價上漲 3.28%",
       "近 20 個交易日股價下跌 5.97%",
       "收盤價位於 5 日均價（597.60）之上",
-      "外資近 9 個交易日累計賣超 28,774,587 張",
-      "投信近 9 個交易日累計買超 11,431,187 張",
+      "外資近 9 個交易日累計賣超 28,776 張",
+      "投信近 9 個交易日累計買超 11,431 張",
+      "融資餘額較 9 個交易日前增加 4,012 張",
+      "融券餘額較 9 個交易日前減少 140 張",
       "以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"
     ]
   },
@@ -4058,67 +4968,137 @@
     "institutional": [
       {
         "date": "2026-07-29",
-        "foreign": 2923767,
-        "trust": -2146000,
-        "dealer": -12339
+        "foreign": 2924,
+        "trust": -2146,
+        "dealer": -176
       },
       {
         "date": "2026-07-30",
-        "foreign": -6582485,
-        "trust": 3685834,
-        "dealer": -236632
+        "foreign": -6582,
+        "trust": 3686,
+        "dealer": -525
       },
       {
         "date": "2026-07-31",
-        "foreign": -1712541,
-        "trust": 527000,
-        "dealer": 224235
+        "foreign": -1713,
+        "trust": 527,
+        "dealer": 193
       },
       {
         "date": "2026-08-03",
-        "foreign": -3935560,
-        "trust": -4395,
-        "dealer": 66122
+        "foreign": -3936,
+        "trust": -4,
+        "dealer": 21
       },
       {
         "date": "2026-08-04",
-        "foreign": 197354,
-        "trust": 471000,
-        "dealer": 218495
+        "foreign": 197,
+        "trust": 471,
+        "dealer": -93
       },
       {
         "date": "2026-08-05",
-        "foreign": -6692607,
-        "trust": 931836,
-        "dealer": -233319
+        "foreign": -6693,
+        "trust": 932,
+        "dealer": -193
       },
       {
         "date": "2026-08-06",
-        "foreign": 2608229,
-        "trust": -618458,
-        "dealer": 144402
+        "foreign": 2608,
+        "trust": -618,
+        "dealer": 372
       },
       {
         "date": "2026-08-07",
-        "foreign": -3782560,
-        "trust": 1253000,
-        "dealer": -152362
+        "foreign": -3783,
+        "trust": 1253,
+        "dealer": -438
       },
       {
         "date": "2026-08-10",
-        "foreign": 409524,
-        "trust": 29000,
-        "dealer": 231805
+        "foreign": 410,
+        "trust": 29,
+        "dealer": 269
       }
     ],
-    "margin": [],
-    "fundamentals": {},
+    "margin": [
+      {
+        "date": "2026-07-29",
+        "margin_balance": 17472,
+        "margin_change": -2545,
+        "short_balance": 0,
+        "short_change": 0
+      },
+      {
+        "date": "2026-07-30",
+        "margin_balance": 17560,
+        "margin_change": 88,
+        "short_balance": 93,
+        "short_change": 93
+      },
+      {
+        "date": "2026-07-31",
+        "margin_balance": 23156,
+        "margin_change": 5596,
+        "short_balance": 77,
+        "short_change": -16
+      },
+      {
+        "date": "2026-08-03",
+        "margin_balance": 22812,
+        "margin_change": -344,
+        "short_balance": 69,
+        "short_change": -8
+      },
+      {
+        "date": "2026-08-04",
+        "margin_balance": 22169,
+        "margin_change": -643,
+        "short_balance": 102,
+        "short_change": 33
+      },
+      {
+        "date": "2026-08-05",
+        "margin_balance": 22706,
+        "margin_change": 537,
+        "short_balance": 112,
+        "short_change": 10
+      },
+      {
+        "date": "2026-08-06",
+        "margin_balance": 22689,
+        "margin_change": -17,
+        "short_balance": 135,
+        "short_change": 23
+      },
+      {
+        "date": "2026-08-07",
+        "margin_balance": 23561,
+        "margin_change": 872,
+        "short_balance": 124,
+        "short_change": -11
+      },
+      {
+        "date": "2026-08-10",
+        "margin_balance": 22310,
+        "margin_change": -1251,
+        "short_balance": 149,
+        "short_change": 25
+      }
+    ],
+    "fundamentals": {
+      "pe_ratio": 28.56,
+      "dividend_yield": 1.56,
+      "pb_ratio": 3.73
+    },
     "insights": [
       "近 5 個交易日股價上漲 20.96%",
       "近 20 個交易日股價下跌 7.68%",
       "收盤價位於 5 日均價（266.70）之上",
-      "外資近 9 個交易日累計賣超 16,566,879 張",
-      "投信近 9 個交易日累計買超 4,128,817 張",
+      "外資近 9 個交易日累計賣超 16,568 張",
+      "投信近 9 個交易日累計買超 4,130 張",
+      "融資餘額較 9 個交易日前增加 4,838 張",
+      "融券餘額較 9 個交易日前增加 149 張",
       "以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"
     ]
   },
@@ -4352,67 +5332,137 @@
     "institutional": [
       {
         "date": "2026-07-29",
-        "foreign": -4579628,
-        "trust": 4758,
-        "dealer": 84731
+        "foreign": -4580,
+        "trust": 5,
+        "dealer": 41
       },
       {
         "date": "2026-07-30",
-        "foreign": -2857390,
-        "trust": 3525028,
-        "dealer": -145782
+        "foreign": -2857,
+        "trust": 3525,
+        "dealer": -27
       },
       {
         "date": "2026-07-31",
-        "foreign": -162930,
-        "trust": -10000,
-        "dealer": 103493
+        "foreign": -163,
+        "trust": -10,
+        "dealer": 128
       },
       {
         "date": "2026-08-03",
-        "foreign": -6398287,
-        "trust": 3719708,
-        "dealer": 177471
+        "foreign": -6398,
+        "trust": 3720,
+        "dealer": 50
       },
       {
         "date": "2026-08-04",
-        "foreign": -3728450,
-        "trust": 1662737,
-        "dealer": 27426
+        "foreign": -3728,
+        "trust": 1663,
+        "dealer": -204
       },
       {
         "date": "2026-08-05",
-        "foreign": -2081058,
-        "trust": 213052,
-        "dealer": -119272
+        "foreign": -2081,
+        "trust": 213,
+        "dealer": -302
       },
       {
         "date": "2026-08-06",
-        "foreign": -1072082,
-        "trust": -290074,
-        "dealer": 88262
+        "foreign": -1072,
+        "trust": -290,
+        "dealer": 117
       },
       {
         "date": "2026-08-07",
-        "foreign": -3166540,
-        "trust": 7000,
-        "dealer": 14225
+        "foreign": -3167,
+        "trust": 7,
+        "dealer": 3
       },
       {
         "date": "2026-08-10",
-        "foreign": -3881552,
-        "trust": 37533,
-        "dealer": -149005
+        "foreign": -3882,
+        "trust": 38,
+        "dealer": -504
       }
     ],
-    "margin": [],
-    "fundamentals": {},
+    "margin": [
+      {
+        "date": "2026-07-29",
+        "margin_balance": 18098,
+        "margin_change": -1559,
+        "short_balance": 20,
+        "short_change": -246
+      },
+      {
+        "date": "2026-07-30",
+        "margin_balance": 17518,
+        "margin_change": -580,
+        "short_balance": 28,
+        "short_change": 8
+      },
+      {
+        "date": "2026-07-31",
+        "margin_balance": 17749,
+        "margin_change": 231,
+        "short_balance": 35,
+        "short_change": 7
+      },
+      {
+        "date": "2026-08-03",
+        "margin_balance": 18756,
+        "margin_change": 1007,
+        "short_balance": 81,
+        "short_change": 46
+      },
+      {
+        "date": "2026-08-04",
+        "margin_balance": 18378,
+        "margin_change": -378,
+        "short_balance": 99,
+        "short_change": 18
+      },
+      {
+        "date": "2026-08-05",
+        "margin_balance": 18170,
+        "margin_change": -208,
+        "short_balance": 101,
+        "short_change": 2
+      },
+      {
+        "date": "2026-08-06",
+        "margin_balance": 19164,
+        "margin_change": 994,
+        "short_balance": 227,
+        "short_change": 126
+      },
+      {
+        "date": "2026-08-07",
+        "margin_balance": 19688,
+        "margin_change": 524,
+        "short_balance": 616,
+        "short_change": 389
+      },
+      {
+        "date": "2026-08-10",
+        "margin_balance": 19731,
+        "margin_change": 43,
+        "short_balance": 257,
+        "short_change": -359
+      }
+    ],
+    "fundamentals": {
+      "pe_ratio": 32.57,
+      "dividend_yield": 0.6,
+      "pb_ratio": 4.85
+    },
     "insights": [
       "近 5 個交易日股價上漲 6.42%",
       "近 20 個交易日股價下跌 19.06%",
       "收盤價位於 5 日均價（246.40）之上",
-      "外資近 9 個交易日累計賣超 27,927,917 張",
-      "投信近 9 個交易日累計買超 8,869,742 張",
+      "外資近 9 個交易日累計賣超 27,928 張",
+      "投信近 9 個交易日累計買超 8,871 張",
+      "融資餘額較 9 個交易日前增加 1,633 張",
+      "融券餘額較 9 個交易日前增加 237 張",
       "以上僅為歷史數據統計整理，不構成任何投資建議，亦不代表對未來股價的預測。"
     ]
   },
