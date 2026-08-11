@@ -1,10 +1,8 @@
 """測試 twse_api.py 的純解析函式。
 
 fixture 資料取自 2026-08-11 透過 GitHub Actions（有網路的環境）對 TWSE 真實端點的實際
-回應（見 debug_endpoints.py 的除錯輸出），不是憑文件猜的欄位順序。
-
-parse_all_companies / parse_all_stock_day 的 fixture 是例外：這兩個函式尚未對照過
-真實回應（見 twse_api.py 的註解），fixture 只驗證「解析邏輯本身自洽」。
+回應（見 debug_endpoints.py / debug_universe_endpoints.py 的除錯輸出），不是憑文件猜的
+欄位順序。
 """
 from datetime import date
 
@@ -150,15 +148,18 @@ def test_recent_months_wraps_year_boundary():
 
 
 def test_parse_all_companies():
+    # 真實 t187ap03_L 回應節錄（2026-08-11）：產業別是數字代碼，不是文字
     payload = [
-        {"公司代號": "2330", "公司簡稱": "台積電", "產業別": "半導體業"},
-        {"公司代號": "2317", "公司簡稱": "鴻海", "產業別": "電腦及週邊設備業"},
-        {"公司代號": "9999", "公司簡稱": "無產業別測試", "產業別": ""},
+        {"公司代號": "2330", "公司簡稱": "台積電", "產業別": "24"},
+        {"公司代號": "2317", "公司簡稱": "鴻海", "產業別": "31"},
+        {"公司代號": "1101", "公司簡稱": "台泥", "產業別": "01"},
+        {"公司代號": "9999", "公司簡稱": "未知代碼測試", "產業別": "99"},
     ]
     result = parse_all_companies(payload)
     assert result["2330"] == {"name": "台積電", "industry": "半導體業"}
-    assert result["2317"] == {"name": "鴻海", "industry": "電腦及週邊設備業"}
-    assert result["9999"] == {"name": "無產業別測試", "industry": None}
+    assert result["2317"] == {"name": "鴻海", "industry": "其他電子業"}
+    assert result["1101"] == {"name": "台泥", "industry": "水泥工業"}
+    assert result["9999"] == {"name": "未知代碼測試", "industry": "產業別代碼 99"}
 
 
 def test_parse_all_companies_skips_non_list_payload():
@@ -167,23 +168,39 @@ def test_parse_all_companies_skips_non_list_payload():
 
 
 def test_parse_all_companies_skips_rows_without_stock_id():
-    payload = [{"公司簡稱": "缺代號"}, {"公司代號": "1234", "公司簡稱": "有代號", "產業別": "其他業"}]
+    payload = [{"公司簡稱": "缺代號"}, {"公司代號": "1234", "公司簡稱": "有代號", "產業別": "20"}]
     result = parse_all_companies(payload)
     assert list(result.keys()) == ["1234"]
+    assert result["1234"]["industry"] == "其他業"
 
 
 def test_parse_all_stock_day():
-    payload = {
-        "data": [
-            ["2330", "台積電", "21,498,241", "50,000,000,000", "2,390.00", "2,410.00", "2,380.00", "2380.00", "+10.00", "20,000"],
-            ["2317", "鴻海", "34,854,398", "9,000,000,000", "260.00", "266.00", "259.00", "264.50", "+4.50", "15,000"],
-        ]
-    }
+    # 真實 STOCK_DAY_ALL（OpenAPI 版）回應節錄（2026-08-11）：list of dict，英文鍵名
+    payload = [
+        {
+            "Date": "1150810", "Code": "2330", "Name": "台積電",
+            "TradeVolume": "21498241", "TradeValue": "50000000000",
+            "OpeningPrice": "2390.00", "HighestPrice": "2410.00", "LowestPrice": "2380.00",
+            "ClosingPrice": "2380.00", "Change": "10.0000", "Transaction": "20000",
+        },
+        {
+            "Date": "1150810", "Code": "2317", "Name": "鴻海",
+            "TradeVolume": "34854398", "TradeValue": "9000000000",
+            "OpeningPrice": "260.00", "HighestPrice": "266.00", "LowestPrice": "259.00",
+            "ClosingPrice": "264.50", "Change": "-4.5000", "Transaction": "15000",
+        },
+    ]
     result = parse_all_stock_day(payload)
     assert result["2330"] == {"name": "台積電", "close": 2380.0, "change": 10.0, "volume": 21498241}
-    assert result["2317"]["close"] == 264.5
+    assert result["2317"]["change"] == -4.5
 
 
-def test_parse_all_stock_day_skips_malformed_rows():
-    assert parse_all_stock_day({"data": [["2330", "台積電"]]}) == {}
-    assert parse_all_stock_day({}) == {}
+def test_parse_all_stock_day_skips_non_list_payload():
+    assert parse_all_stock_day({"data": []}) == {}
+    assert parse_all_stock_day(None) == {}
+
+
+def test_parse_all_stock_day_skips_rows_without_code():
+    payload = [{"Name": "缺代碼"}, {"Code": "1234", "Name": "有代碼", "ClosingPrice": "10.00"}]
+    result = parse_all_stock_day(payload)
+    assert list(result.keys()) == ["1234"]

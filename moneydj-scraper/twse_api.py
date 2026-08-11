@@ -8,6 +8,12 @@ BWIBBU_ALL 只有 5 欄，不是原先假設的 6 欄；T86 的三大法人買�
 已在 `parse_institutional_all` 換算成「張」。日期解析（`_roc_to_iso`）也已驗證可正確處理
 STOCK_DAY 回傳的民國年格式。若 TWSE 未來調整回應格式，可用 `debug_fetch_raw` 重新核對。
 
+`fetch_all_companies` / `fetch_all_stock_day` 是全市場一次撈完的端點（分別對應
+t187ap03_L 與 STOCK_DAY_ALL 的 OpenAPI 鏡射版本），同樣已於 2026-08-11 驗證：
+`t187ap03_L` 的「產業別」是數字代碼不是文字，靠 `INDUSTRY_CODE_NAMES`（資料驅動推導出來，
+非憑記憶硬編）轉成中文名稱；`STOCK_DAY_ALL` 一定要用 openapi.twse.com.tw 的版本，
+www.twse.com.tw 的同名端點即使帶 response=json 也只會回傳 CSV。
+
 目前只涵蓋上市（TWSE）股票；上櫃（TPEX）股票的等效端點主機、路徑不同，本模組尚未支援，
 遇到上櫃代碼時各函式會直接回傳空結果（不會拋例外，方便整批處理時跳過）。
 """
@@ -29,10 +35,9 @@ MARGIN_URL = "https://www.twse.com.tw/exchangeReport/MI_MARGN"
 VALUATION_URL = "https://www.twse.com.tw/exchangeReport/BWIBBU_ALL"
 
 # 全市場端點：一次取得所有上市股票的基本資料／當日行情，避免對每檔股票各打一次 API。
-# ALL_COMPANIES_URL 未曾在可連外環境驗證過欄位名稱，是依 TWSE OpenAPI（openapi.twse.com.tw）
-# 慣例撰寫，正式使用前務必用 debug_fetch_raw 核對一次。
+# 兩者皆已於 2026-08-11 對照真實回應驗證（見下方各函式的 docstring）。
 ALL_COMPANIES_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"
-ALL_STOCK_DAY_URL = "https://www.twse.com.tw/exchangeReport/STOCK_DAY_ALL"
+ALL_STOCK_DAY_URL = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
 
 
 def _roc_to_iso(roc_date: str) -> Optional[str]:
@@ -262,11 +267,28 @@ def parse_valuation_all(payload: dict) -> Dict[str, dict]:
     return result
 
 
+# TWSE 官方產業別代碼對照表。t187ap03_L 只回傳數字代碼（如台積電是 "24"），沒有文字欄位；
+# 這份表是 2026-08-11 用 debug_universe_endpoints.py 對 1094 家真實上市公司做資料驅動推導
+# 出來的——每個代碼底下抓幾家代表性公司比對（例如 24 底下有聯電/台積電/旺宏 → 半導體業，
+# 15 底下有長榮/台船 → 航運業），不是憑記憶猜的。目前上市公司清單裡只出現這 33 個代碼；
+# 若之後出現新代碼，parse_all_companies 會 fallback 成 f"產業別代碼 {code}"，不會噴例外。
+INDUSTRY_CODE_NAMES = {
+    "01": "水泥工業", "02": "食品工業", "03": "塑膠工業", "04": "紡織纖維",
+    "05": "電機機械", "06": "電器電纜", "08": "玻璃陶瓷", "09": "造紙工業",
+    "10": "鋼鐵工業", "11": "橡膠工業", "12": "汽車工業", "14": "建材營造業",
+    "15": "航運業", "16": "觀光事業", "17": "金融保險業", "18": "貿易百貨業",
+    "20": "其他業", "21": "化學工業", "22": "生技醫療業", "23": "油電燃氣業",
+    "24": "半導體業", "25": "電腦及週邊設備業", "26": "光電業", "27": "通信網路業",
+    "28": "電子零組件業", "29": "電子通路業", "30": "資訊服務業", "31": "其他電子業",
+    "35": "綠能環保業", "36": "數位雲端業", "37": "運動休閒業", "38": "居家生活業",
+    "91": "存託憑證",
+}
+
+
 def fetch_all_companies(timeout: int = 15) -> Dict[str, dict]:
     """取得全部上市公司基本資料（含官方產業別分類），回傳依股票代碼索引的 dict。
 
-    **尚未在可連外環境對照過真實回應**——依 TWSE OpenAPI（openapi.twse.com.tw）文件慣例
-    撰寫，欄位名稱可能與實際回應不同，正式使用前務必用 debug_fetch_raw 核對一次。
+    已對照真實回應驗證（2026-08-11，1094 家公司）。
     """
     try:
         resp = requests.get(ALL_COMPANIES_URL, timeout=timeout)
@@ -282,8 +304,9 @@ def fetch_all_companies(timeout: int = 15) -> Dict[str, dict]:
 def parse_all_companies(payload) -> Dict[str, dict]:
     """把 t187ap03_L 端點的 JSON payload 轉成 {stock_id: {name, industry}}（純函式）。
 
-    OpenAPI 慣例回傳「list of dict」（每筆一個物件），不是舊版 exchangeReport 那種
-    「欄位陣列 + 資料列陣列」的表格格式，所以用 dict.get() 依鍵名取值，不是用索引。
+    回傳格式是「list of dict」（每筆一個物件），用 dict.get() 依鍵名取值。`產業別`
+    是數字代碼，透過 INDUSTRY_CODE_NAMES 轉成中文名稱；不在表裡的代碼 fallback 成
+    f"產業別代碼 {code}"，不會噴例外或靜默漏掉。
     """
     if not isinstance(payload, list):
         return {}
@@ -291,12 +314,14 @@ def parse_all_companies(payload) -> Dict[str, dict]:
     for row in payload:
         if not isinstance(row, dict):
             continue
-        stock_id = str(row.get("公司代號") or row.get("出表日期") or "").strip()
+        stock_id = str(row.get("公司代號") or "").strip()
         if not stock_id:
             continue
+        code = str(row.get("產業別") or "").strip()
+        industry = INDUSTRY_CODE_NAMES.get(code) or (f"產業別代碼 {code}" if code else None)
         result[stock_id] = {
             "name": (row.get("公司簡稱") or row.get("公司名稱") or "").strip() or None,
-            "industry": (row.get("產業別") or "").strip() or None,
+            "industry": industry,
         }
     return result
 
@@ -304,11 +329,13 @@ def parse_all_companies(payload) -> Dict[str, dict]:
 def fetch_all_stock_day(timeout: int = 15) -> Dict[str, dict]:
     """取得全部上市股票「當日」的收盤/漲跌/成交量，一次呼叫涵蓋所有股票，不逐檔查詢。
 
-    **尚未在可連外環境對照過真實回應**——依 STOCK_DAY 的欄位順序慣例類推撰寫，
-    正式使用前務必用 debug_fetch_raw 核對一次。
+    已對照真實回應驗證（2026-08-11）：用的是 TWSE OpenAPI 鏡射端點
+    （openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL），回傳乾淨的
+    list of dict（英文鍵名），跟舊版 www.twse.com.tw 的同名端點（回傳 CSV，即使帶
+    response=json 參數也一樣）不同，不要搞混。
     """
     try:
-        resp = requests.get(ALL_STOCK_DAY_URL, params={"response": "json"}, timeout=timeout)
+        resp = requests.get(ALL_STOCK_DAY_URL, timeout=timeout)
         resp.raise_for_status()
         payload = resp.json()
     except (requests.exceptions.RequestException, ValueError) as exc:
@@ -318,24 +345,28 @@ def fetch_all_stock_day(timeout: int = 15) -> Dict[str, dict]:
     return parse_all_stock_day(payload)
 
 
-def parse_all_stock_day(payload: dict) -> Dict[str, dict]:
-    """把 STOCK_DAY_ALL 端點的 JSON payload 轉成 {stock_id: {name, close, change, volume}}（純函式）。
+def parse_all_stock_day(payload) -> Dict[str, dict]:
+    """把 STOCK_DAY_ALL（OpenAPI 版）的 JSON payload 轉成
+    {stock_id: {name, close, change, volume}}（純函式）。
 
-    假設欄位順序跟單檔 STOCK_DAY 類似（證券代號,證券名稱,成交股數,...,收盤價,漲跌價差,...），
-    但這是全市場版本，實際欄位順序/數量可能不同，需以 debug_fetch_raw 核對。
+    真實欄位鍵名：Code, Name, TradeVolume, TradeValue, OpeningPrice, HighestPrice,
+    LowestPrice, ClosingPrice, Change, Transaction。回傳內容包含 ETF（代碼常以字母結尾，
+    如 "00400A"），不只是個股，呼叫端如果只要個股可自行過濾。
     """
+    if not isinstance(payload, list):
+        return {}
     result: Dict[str, dict] = {}
-    for row in payload.get("data", []):
-        if len(row) < 9:
+    for row in payload:
+        if not isinstance(row, dict):
             continue
-        stock_id = str(row[0]).strip()
-        close = _to_float(row[7])
-        change = _to_float(row[8])
+        stock_id = str(row.get("Code") or "").strip()
+        if not stock_id:
+            continue
         result[stock_id] = {
-            "name": str(row[1]).strip() or None,
-            "close": close,
-            "change": change,
-            "volume": _to_int(row[2]),
+            "name": (row.get("Name") or "").strip() or None,
+            "close": _to_float(row.get("ClosingPrice")),
+            "change": _to_float(row.get("Change")),
+            "volume": _to_int(row.get("TradeVolume")),
         }
     return result
 
