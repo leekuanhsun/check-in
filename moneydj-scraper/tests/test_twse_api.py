@@ -15,6 +15,7 @@ from twse_api import (
     parse_all_companies,
     parse_all_stock_day,
     parse_institutional_all,
+    parse_instrument_types,
     parse_margin_all,
     parse_stock_day,
     parse_valuation_all,
@@ -204,3 +205,45 @@ def test_parse_all_stock_day_skips_rows_without_code():
     payload = [{"Name": "缺代碼"}, {"Code": "1234", "Name": "有代碼", "ClosingPrice": "10.00"}]
     result = parse_all_stock_day(payload)
     assert list(result.keys()) == ["1234"]
+
+
+def _isin_html_fixture() -> bytes:
+    """跟 ISIN strMode=2 真實回應同結構的最小 fixture（欄位、分類標題列順序取自
+    2026-08-11 debug_isin.py 對照真實回應的輸出）。"""
+    html = (
+        "<table><tr>"
+        "<td>有價證券代號及名稱</td><td>國際證券辨識號碼(ISIN Code)</td><td>上市日</td>"
+        "<td>市場別</td><td>產業別</td><td>CFICode</td><td>備註</td>"
+        "</tr>"
+        "<tr><td colspan=7>股票</td></tr>"
+        "<tr><td>2330　台積電</td><td>TW0002330008</td><td>1994/09/05</td>"
+        "<td>上市</td><td>半導體業</td><td>ESVUFR</td><td></td></tr>"
+        "<tr><td colspan=7>ETF</td></tr>"
+        "<tr><td>0050　元大台灣50</td><td>TW0000050004</td><td>2003/06/30</td>"
+        "<td>上市</td><td></td><td>CEOGEU</td><td></td></tr>"
+        "<tr><td>00400A　主動國泰動能高息</td><td>TW00000400A3</td><td>2026/04/09</td>"
+        "<td>上市</td><td></td><td>CEOJEU</td><td></td></tr>"
+        "<tr><td colspan=7>ETN</td></tr>"
+        "<tr><td>020000　富邦特選蘋果N</td><td>TW0000200005</td><td>2019/04/30</td>"
+        "<td>上市</td><td></td><td>CMXXXU</td><td></td></tr>"
+        "<tr><td colspan=7>受益證券-不動產投資信託</td></tr>"
+        "<tr><td>01001T　土銀富邦R1</td><td>TW00001001T8</td><td>2005/03/10</td>"
+        "<td>上市</td><td></td><td>CBCIXU</td><td></td></tr>"
+        "</table>"
+    )
+    return html.encode("big5")
+
+
+def test_parse_instrument_types():
+    result = parse_instrument_types(_isin_html_fixture())
+    assert result == {
+        "2330": "股票",
+        "0050": "ETF",
+        "00400A": "ETF",
+        "020000": "ETN",
+        "01001T": "受益證券-不動產投資信託",
+    }
+
+
+def test_parse_instrument_types_empty_html():
+    assert parse_instrument_types(b"<table></table>") == {}

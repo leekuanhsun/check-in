@@ -7,9 +7,12 @@ fetch_all_stock_day），只抓「當下快照」（代碼/名稱/官方產業�
 那樣會是數萬次請求，時間跟對 TWSE 伺服器的負擔都不合理。想看特定股票的 K 線/法人/
 資券明細，用 fetch_real_data.py 把該股票加進 concept_categories.py 後單獨抓。
 
-category 欄位是 TWSE 官方產業別分類（半導體業、電子零組件業……），不是人工整理的
-概念股主題；concept_theme 欄位則保留 concept_categories.py 裡的概念股主題名稱
-（例如「AI 伺服器供應鏈」），只有在該清單裡的股票才會有值，其餘股票是 None。
+category 欄位優先取 TWSE 官方產業別分類（半導體業、電子零組件業……，來自 t187ap03_L，
+只涵蓋普通股）；t187ap03_L 沒有的代碼（ETF／ETN／權證／特別股／TDR／REIT 等），改用
+ISIN 公開資訊站（fetch_instrument_types，strMode=2）取得的商品類型（如「ETF」「ETN」
+「上市認購(售)權證」）補上，兩者都沒有才 fallback 成「未分類」。concept_theme 欄位則
+保留 concept_categories.py 裡的概念股主題名稱（例如「AI 伺服器供應鏈」），只有在該
+清單裡的股票才會有值，其餘股票是 None。
 
 上櫃（TPEX）股票不在這份清單裡——TWSE 全市場端點本來就只涵蓋上市股票，等效的上櫃
 端點在 www.tpex.org.tw，尚未串接。
@@ -19,7 +22,7 @@ from dataclasses import asdict
 
 from concept_categories import CATEGORIES
 from models import StockRecord
-from twse_api import fetch_all_companies, fetch_all_stock_day
+from twse_api import fetch_all_companies, fetch_all_stock_day, fetch_instrument_types
 
 
 def _concept_lookup():
@@ -39,6 +42,10 @@ def main() -> None:
     print("fetching today's all-market quotes...")
     quotes = fetch_all_stock_day()
     print(f"got {len(quotes)} quotes")
+
+    print("fetching instrument-type classification (ETF/ETN/warrant/etc.)...")
+    instrument_types = fetch_instrument_types()
+    print(f"got {len(instrument_types)} instrument-type entries")
 
     concept_lookup = _concept_lookup()
 
@@ -68,7 +75,7 @@ def main() -> None:
                 change=f"{change:+.2f}" if change is not None else None,
                 change_pct=f"{change_pct:+.2f}%" if change_pct is not None else None,
                 volume=f"{quote['volume']:,}" if quote.get("volume") is not None else None,
-                category=company.get("industry") or "未分類",
+                category=company.get("industry") or instrument_types.get(stock_id) or "未分類",
                 concept_theme=theme,
                 source_url="https://openapi.twse.com.tw/v1/opendata/t187ap03_L",
             )

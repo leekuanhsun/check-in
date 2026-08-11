@@ -18,6 +18,7 @@ www.twse.com.tw 的同名端點即使帶 response=json 也只會回傳 CSV。
 遇到上櫃代碼時各函式會直接回傳空結果（不會拋例外，方便整批處理時跳過）。
 """
 import logging
+import re
 import time
 from datetime import date, timedelta
 from typing import Dict, List, Optional
@@ -38,6 +39,13 @@ VALUATION_URL = "https://www.twse.com.tw/exchangeReport/BWIBBU_ALL"
 # 兩者皆已於 2026-08-11 對照真實回應驗證（見下方各函式的 docstring）。
 ALL_COMPANIES_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"
 ALL_STOCK_DAY_URL = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
+
+# ISIN 公開資訊站，strMode=2 是「本國上市證券」總表，涵蓋股票以外的所有上市商品類型
+# （ETF／ETN／認購售權證／特別股／TDR／受益證券-不動產投資信託……），用來補
+# t187ap03_L（只含普通股）沒有涵蓋到的股票代碼分類。已於 2026-08-11 對照真實回應
+# 驗證：回傳 Big5 編碼 HTML 表格，每個商品類型前面有一列「分類標題列」（只有 1 個
+# <td>，如 "ETF"、"ETN"），後面接該類型逐檔的資料列（7 欄）。
+INSTRUMENT_TYPES_URL = "https://isin.twse.com.tw/isin/C_public.jsp?strMode=2"
 
 
 def _roc_to_iso(roc_date: str) -> Optional[str]:
@@ -368,6 +376,51 @@ def parse_all_stock_day(payload) -> Dict[str, dict]:
             "change": _to_float(row.get("Change")),
             "volume": _to_int(row.get("TradeVolume")),
         }
+    return result
+
+
+def fetch_instrument_types(timeout: int = 20) -> Dict[str, str]:
+    """取得全部上市商品的類型分類（股票／ETF／ETN／權證／特別股／TDR／REIT……）。
+
+    已對照真實回應驗證（2026-08-11）：涵蓋 8 種分類（股票、上市認購(售)權證、特別股、
+    創新板、ETF、ETN、臺灣存託憑證(TDR)、受益證券-不動產投資信託），主要用來補
+    t187ap03_L（只含普通股）沒涵蓋到的代碼，讓 fetch_universe.py 不必再把它們全部
+    歸為「未分類」。
+    """
+    try:
+        resp = requests.get(INSTRUMENT_TYPES_URL, timeout=timeout)
+        resp.raise_for_status()
+    except requests.exceptions.RequestException as exc:
+        logger.warning("fetch_instrument_types failed: %s", exc)
+        return {}
+
+    return parse_instrument_types(resp.content)
+
+
+def parse_instrument_types(html_bytes: bytes) -> Dict[str, str]:
+    """把 ISIN strMode=2 頁面的 Big5 HTML 轉成 {stock_id: category}（純函式）。
+
+    表格結構：分類標題列只有一個 <td>（值即分類名稱，如 "ETF"）；資料列有 7 個
+    <td>，第一欄是 "代碼\\u3000名稱"（中間是全形空格，非一般空白）。用標題列切換
+    「目前分類」，逐列套用到後面的資料列，直到下一個標題列為止。
+    """
+    text = html_bytes.decode("big5", errors="replace")
+    rows = re.findall(r"<tr[^>]*>(.*?)</tr>", text, re.S)
+
+    result: Dict[str, str] = {}
+    current_category: Optional[str] = None
+    for row in rows[1:]:  # skip header row
+        cells = re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)
+        texts = [re.sub(r"<.*?>", "", c).strip() for c in cells]
+        if not texts:
+            continue
+        if len(cells) == 1:
+            current_category = texts[0]
+            continue
+        code_name = texts[0]
+        stock_id = code_name.split("　")[0].strip()
+        if stock_id and current_category:
+            result[stock_id] = current_category
     return result
 
 

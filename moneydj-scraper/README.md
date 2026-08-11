@@ -151,7 +151,14 @@ GitHub Actions 對照真實回應驗證並修正**（`MI_MARGN` 的個股資料�
 - `twse_api.fetch_all_stock_day()`：呼叫 OpenAPI 版的 `STOCK_DAY_ALL`
   （`openapi.twse.com.tw`，不是 `www.twse.com.tw` 的同名端點——後者即使帶 `response=json`
   參數也只會回傳 CSV），一次取得全部上市股票／ETF 當日的收盤/漲跌/成交量。
-- `fetch_universe.py` 把這兩者合併成 `universe_stocks.json`（約 1,379 筆），並把
+- `twse_api.fetch_instrument_types()`：`t187ap03_L` 只涵蓋普通股，ETF／ETN／權證／特別股／
+  TDR／REIT 受益證券等代碼不在裡面，原本一律 fallback 成「未分類」。改用 ISIN 公開資訊站
+  （`isin.twse.com.tw/isin/C_public.jsp?strMode=2`，本國上市證券總表）補上：這是 Big5 編碼
+  HTML 表格，每種商品類型前面有一列只含 1 個 `<td>` 的分類標題列（如 `ETF`、`ETN`、
+  `上市認購(售)權證`、`特別股`、`臺灣存託憑證(TDR)`、`受益證券-不動產投資信託`），後面接該
+  類型逐檔的資料列；已於 2026-08-11 對照真實回應驗證。`category` 欄位取值順序是
+  `t187ap03_L` 產業別 → ISIN 商品類型 → 都沒有才是「未分類」。
+- `fetch_universe.py` 把這三者合併成 `universe_stocks.json`（約 1,379 筆），並把
   `concept_categories.py` 裡有出現的股票額外標上 `concept_theme`（該股票所屬的精選概念股題材
   名稱，例如「AI 伺服器供應鏈」），沒有的股票 `concept_theme` 為 `null`。
 
