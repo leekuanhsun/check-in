@@ -41,10 +41,20 @@ CATEGORIES = {
     ],
 }
 
+# 每檔股票的「合理量級」錨點（新台幣元），純粹讓範例資料的數量級看起來合理，
+# 不是任何真實報價來源、也未對照過即時行情 —— 實際價格請以真實爬取結果為準。
+PRICE_ANCHORS = {
+    "2330": 950, "2317": 200, "2382": 280, "3231": 140, "2356": 55,
+    "6669": 2800, "2308": 400, "1519": 500, "6213": 200, "2360": 600,
+    "1503": 200, "3037": 180, "8155": 250, "3711": 140, "6239": 90,
+    "2449": 110, "6147": 110, "3374": 90,
+}
+
 records = []
 for category, stocks in CATEGORIES.items():
     for stock_id, stock_name, role in stocks:
-        close = round(random.uniform(35, 980), 2)
+        anchor = PRICE_ANCHORS.get(stock_id, 100)
+        close = round(anchor * random.uniform(0.9, 1.1), 2)
         pct = round(random.uniform(-6.5, 6.5), 2)
         change = round(close * pct / 100, 2)
         volume = random.randint(800, 45000)
