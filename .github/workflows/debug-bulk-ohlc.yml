@@ -8,6 +8,7 @@ on:
     paths:
       - ".github/workflows/debug-bulk-ohlc.yml"
       - "moneydj-scraper/debug_bulk_ohlc.py"
+      - "moneydj-scraper/debug_universe_detail_stats.py"
       - "moneydj-scraper/fetch_universe_detail.py"
       - "moneydj-scraper/twse_api.py"
 
@@ -29,20 +30,8 @@ jobs:
           echo "--- file size ---"
           ls -lh universe_detail.json
           du -h universe_detail.json
-          echo "--- sample record (2330) ---"
-          python3 -c "
-import json
-d = json.load(open('universe_detail.json', encoding='utf-8'))
-print('total stocks:', len(d))
-r = d.get('2330', {})
-print('2330 ohlc rows:', len(r.get('ohlc', [])))
-print('2330 institutional rows:', len(r.get('institutional', [])))
-print('2330 margin rows:', len(r.get('margin', [])))
-print('2330 fundamentals:', r.get('fundamentals'))
-print('2330 insights:', r.get('insights'))
-got_ohlc = sum(1 for v in d.values() if v.get('ohlc'))
-print('stocks with any ohlc:', got_ohlc, '/', len(d))
-"
+          echo "--- sample stats ---"
+          python3 debug_universe_detail_stats.py
       - uses: actions/upload-artifact@v4
         with:
           name: universe-detail-dry-run
