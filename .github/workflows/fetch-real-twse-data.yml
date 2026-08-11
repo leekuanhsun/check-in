@@ -8,6 +8,7 @@ on:
     paths:
       - ".github/workflows/fetch-real-twse-data.yml"
       - "moneydj-scraper/fetch_real_data.py"
+      - "moneydj-scraper/concept_categories.py"
       - "moneydj-scraper/twse_api.py"
       - "moneydj-scraper/insights.py"
       - "moneydj-scraper/models.py"

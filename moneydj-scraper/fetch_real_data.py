@@ -10,36 +10,10 @@
 import json
 from dataclasses import asdict
 
+from concept_categories import CATEGORIES
 from insights import summarize_stock_insights
 from models import StockRecord
 from twse_api import fetch_stock_details
-
-CATEGORIES = {
-    "AI 伺服器供應鏈": [
-        ("2330", "台積電", "晶圓代工"),
-        ("2317", "鴻海", "系統組裝"),
-        ("2382", "廣達", "伺服器組裝"),
-        ("3231", "緯創", "伺服器組裝"),
-        ("2356", "英業達", "伺服器組裝"),
-        ("6669", "緯穎", "雲端伺服器"),
-        ("2308", "台達電", "電源供應器"),
-    ],
-    "電動車供應鏈": [
-        ("1519", "華城", "電力設備"),
-        ("6213", "聯茂", "PCB 材料"),
-        ("2360", "致茂", "測試設備"),
-        ("1503", "士電", "重電設備"),
-        ("3037", "欣興", "PCB"),
-        ("8155", "訊芯-KY", "被動元件"),
-    ],
-    "半導體封測": [
-        ("3711", "日月光投控", "封測大廠"),
-        ("6239", "力成", "記憶體封測"),
-        ("2449", "京元電子", "IC 測試"),
-        ("6147", "頎邦", "驅動 IC 封測"),
-        ("3374", "精材", "晶圓級封裝"),
-    ],
-}
 
 
 def main() -> None:
