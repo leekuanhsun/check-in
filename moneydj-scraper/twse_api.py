@@ -28,6 +28,12 @@ INSTITUTIONAL_URL = "https://www.twse.com.tw/fund/T86"
 MARGIN_URL = "https://www.twse.com.tw/exchangeReport/MI_MARGN"
 VALUATION_URL = "https://www.twse.com.tw/exchangeReport/BWIBBU_ALL"
 
+# 全市場端點：一次取得所有上市股票的基本資料／當日行情，避免對每檔股票各打一次 API。
+# ALL_COMPANIES_URL 未曾在可連外環境驗證過欄位名稱，是依 TWSE OpenAPI（openapi.twse.com.tw）
+# 慣例撰寫，正式使用前務必用 debug_fetch_raw 核對一次。
+ALL_COMPANIES_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"
+ALL_STOCK_DAY_URL = "https://www.twse.com.tw/exchangeReport/STOCK_DAY_ALL"
+
 
 def _roc_to_iso(roc_date: str) -> Optional[str]:
     """把 TWSE 回傳的民國年日期（如 "114/07/01"）轉成 ISO 格式 "2025-07-01"。"""
@@ -252,6 +258,84 @@ def parse_valuation_all(payload: dict) -> Dict[str, dict]:
             "pe_ratio": _to_float(row[2]),
             "dividend_yield": _to_float(row[3]),
             "pb_ratio": _to_float(row[4]),
+        }
+    return result
+
+
+def fetch_all_companies(timeout: int = 15) -> Dict[str, dict]:
+    """取得全部上市公司基本資料（含官方產業別分類），回傳依股票代碼索引的 dict。
+
+    **尚未在可連外環境對照過真實回應**——依 TWSE OpenAPI（openapi.twse.com.tw）文件慣例
+    撰寫，欄位名稱可能與實際回應不同，正式使用前務必用 debug_fetch_raw 核對一次。
+    """
+    try:
+        resp = requests.get(ALL_COMPANIES_URL, timeout=timeout)
+        resp.raise_for_status()
+        payload = resp.json()
+    except (requests.exceptions.RequestException, ValueError) as exc:
+        logger.warning("fetch_all_companies failed: %s", exc)
+        return {}
+
+    return parse_all_companies(payload)
+
+
+def parse_all_companies(payload) -> Dict[str, dict]:
+    """把 t187ap03_L 端點的 JSON payload 轉成 {stock_id: {name, industry}}（純函式）。
+
+    OpenAPI 慣例回傳「list of dict」（每筆一個物件），不是舊版 exchangeReport 那種
+    「欄位陣列 + 資料列陣列」的表格格式，所以用 dict.get() 依鍵名取值，不是用索引。
+    """
+    if not isinstance(payload, list):
+        return {}
+    result: Dict[str, dict] = {}
+    for row in payload:
+        if not isinstance(row, dict):
+            continue
+        stock_id = str(row.get("公司代號") or row.get("出表日期") or "").strip()
+        if not stock_id:
+            continue
+        result[stock_id] = {
+            "name": (row.get("公司簡稱") or row.get("公司名稱") or "").strip() or None,
+            "industry": (row.get("產業別") or "").strip() or None,
+        }
+    return result
+
+
+def fetch_all_stock_day(timeout: int = 15) -> Dict[str, dict]:
+    """取得全部上市股票「當日」的收盤/漲跌/成交量，一次呼叫涵蓋所有股票，不逐檔查詢。
+
+    **尚未在可連外環境對照過真實回應**——依 STOCK_DAY 的欄位順序慣例類推撰寫，
+    正式使用前務必用 debug_fetch_raw 核對一次。
+    """
+    try:
+        resp = requests.get(ALL_STOCK_DAY_URL, params={"response": "json"}, timeout=timeout)
+        resp.raise_for_status()
+        payload = resp.json()
+    except (requests.exceptions.RequestException, ValueError) as exc:
+        logger.warning("fetch_all_stock_day failed: %s", exc)
+        return {}
+
+    return parse_all_stock_day(payload)
+
+
+def parse_all_stock_day(payload: dict) -> Dict[str, dict]:
+    """把 STOCK_DAY_ALL 端點的 JSON payload 轉成 {stock_id: {name, close, change, volume}}（純函式）。
+
+    假設欄位順序跟單檔 STOCK_DAY 類似（證券代號,證券名稱,成交股數,...,收盤價,漲跌價差,...），
+    但這是全市場版本，實際欄位順序/數量可能不同，需以 debug_fetch_raw 核對。
+    """
+    result: Dict[str, dict] = {}
+    for row in payload.get("data", []):
+        if len(row) < 9:
+            continue
+        stock_id = str(row[0]).strip()
+        close = _to_float(row[7])
+        change = _to_float(row[8])
+        result[stock_id] = {
+            "name": str(row[1]).strip() or None,
+            "close": close,
+            "change": change,
+            "volume": _to_int(row[2]),
         }
     return result
 

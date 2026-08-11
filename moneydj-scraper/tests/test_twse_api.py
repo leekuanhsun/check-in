@@ -2,6 +2,9 @@
 
 fixture 資料取自 2026-08-11 透過 GitHub Actions（有網路的環境）對 TWSE 真實端點的實際
 回應（見 debug_endpoints.py 的除錯輸出），不是憑文件猜的欄位順序。
+
+parse_all_companies / parse_all_stock_day 的 fixture 是例外：這兩個函式尚未對照過
+真實回應（見 twse_api.py 的註解），fixture 只驗證「解析邏輯本身自洽」。
 """
 from datetime import date
 
@@ -11,6 +14,8 @@ from twse_api import (
     _roc_to_iso,
     _to_float,
     _to_int,
+    parse_all_companies,
+    parse_all_stock_day,
     parse_institutional_all,
     parse_margin_all,
     parse_stock_day,
@@ -142,3 +147,43 @@ def test_recent_weekdays_excludes_weekends():
 def test_recent_months_wraps_year_boundary():
     months = _recent_months(3, end_date=date(2026, 1, 15))
     assert months == ["202511", "202512", "202601"]
+
+
+def test_parse_all_companies():
+    payload = [
+        {"公司代號": "2330", "公司簡稱": "台積電", "產業別": "半導體業"},
+        {"公司代號": "2317", "公司簡稱": "鴻海", "產業別": "電腦及週邊設備業"},
+        {"公司代號": "9999", "公司簡稱": "無產業別測試", "產業別": ""},
+    ]
+    result = parse_all_companies(payload)
+    assert result["2330"] == {"name": "台積電", "industry": "半導體業"}
+    assert result["2317"] == {"name": "鴻海", "industry": "電腦及週邊設備業"}
+    assert result["9999"] == {"name": "無產業別測試", "industry": None}
+
+
+def test_parse_all_companies_skips_non_list_payload():
+    assert parse_all_companies({"data": []}) == {}
+    assert parse_all_companies(None) == {}
+
+
+def test_parse_all_companies_skips_rows_without_stock_id():
+    payload = [{"公司簡稱": "缺代號"}, {"公司代號": "1234", "公司簡稱": "有代號", "產業別": "其他業"}]
+    result = parse_all_companies(payload)
+    assert list(result.keys()) == ["1234"]
+
+
+def test_parse_all_stock_day():
+    payload = {
+        "data": [
+            ["2330", "台積電", "21,498,241", "50,000,000,000", "2,390.00", "2,410.00", "2,380.00", "2380.00", "+10.00", "20,000"],
+            ["2317", "鴻海", "34,854,398", "9,000,000,000", "260.00", "266.00", "259.00", "264.50", "+4.50", "15,000"],
+        ]
+    }
+    result = parse_all_stock_day(payload)
+    assert result["2330"] == {"name": "台積電", "close": 2380.0, "change": 10.0, "volume": 21498241}
+    assert result["2317"]["close"] == 264.5
+
+
+def test_parse_all_stock_day_skips_malformed_rows():
+    assert parse_all_stock_day({"data": [["2330", "台積電"]]}) == {}
+    assert parse_all_stock_day({}) == {}

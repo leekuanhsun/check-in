@@ -14,6 +14,7 @@ class StockRecord:
     change_pct: Optional[str] = None
     volume: Optional[str] = None
     category: Optional[str] = None
+    concept_theme: Optional[str] = None
     source_url: Optional[str] = None
     scraped_at: str = field(default_factory=lambda: datetime.now().isoformat(timespec="seconds"))
 
