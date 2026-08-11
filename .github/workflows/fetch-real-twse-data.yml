@@ -50,11 +50,17 @@ jobs:
           git add real_concept_stocks.json real_concept_detail.json
           git diff --cached --quiet && exit 0
           git commit -m "Update real TWSE concept-stock data [skip ci]"
+          # These are auto-generated single-line JSON blobs, so a line-based
+          # rebase/merge on conflict is pointless (any remote change collides).
+          # On rejection, just re-stack our fresh fetch on top of the new tip
+          # instead of trying to merge diffs.
           for i in 1 2 3 4 5; do
             git push && exit 0
-            echo "push rejected, rebasing onto latest remote (attempt $i)..."
+            echo "push rejected, re-stacking onto latest remote (attempt $i)..."
             git fetch origin "$GITHUB_REF_NAME"
-            git rebase "origin/$GITHUB_REF_NAME"
+            git reset --soft "origin/$GITHUB_REF_NAME"
+            git add real_concept_stocks.json real_concept_detail.json
+            git commit -m "Update real TWSE concept-stock data [skip ci]"
             sleep $((i * 2))
           done
           git push
