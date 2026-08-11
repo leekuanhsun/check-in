@@ -1,0 +1,22 @@
+name: DEBUG - bulk ohlc lookup
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - claude/moneydj-concept-scraper-igtou1
+    paths:
+      - ".github/workflows/debug-bulk-ohlc.yml"
+      - "moneydj-scraper/debug_bulk_ohlc.py"
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run debug script
+        working-directory: moneydj-scraper
+        run: python debug_bulk_ohlc.py
