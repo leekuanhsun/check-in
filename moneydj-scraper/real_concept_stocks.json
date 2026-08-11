@@ -10,7 +10,7 @@
     "category": "AI 伺服器供應鏈",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "2317",
@@ -23,20 +23,20 @@
     "category": "AI 伺服器供應鏈",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "2382",
     "stock_name": "廣達",
     "role": "伺服器組裝",
-    "close_price": "291.50",
-    "change": "+12.50",
-    "change_pct": "+4.48%",
-    "volume": "49,270,092",
+    "close_price": "315.50",
+    "change": "+2.00",
+    "change_pct": "+0.64%",
+    "volume": "15,798,104",
     "category": "AI 伺服器供應鏈",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "3231",
@@ -49,7 +49,7 @@
     "category": "AI 伺服器供應鏈",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "2356",
@@ -62,7 +62,7 @@
     "category": "AI 伺服器供應鏈",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "6669",
@@ -75,7 +75,7 @@
     "category": "AI 伺服器供應鏈",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "2308",
@@ -88,20 +88,20 @@
     "category": "AI 伺服器供應鏈",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "1519",
     "stock_name": "華城",
     "role": "電力設備",
-    "close_price": null,
-    "change": null,
-    "change_pct": null,
-    "volume": null,
+    "close_price": "703.00",
+    "change": "+32.00",
+    "change_pct": "+4.77%",
+    "volume": "1,959,348",
     "category": "電動車供應鏈",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "6213",
@@ -114,7 +114,7 @@
     "category": "電動車供應鏈",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "2360",
@@ -127,7 +127,7 @@
     "category": "電動車供應鏈",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "1503",
@@ -140,7 +140,7 @@
     "category": "電動車供應鏈",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "3037",
@@ -153,7 +153,7 @@
     "category": "電動車供應鏈",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "3711",
@@ -166,7 +166,7 @@
     "category": "半導體封測",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "6239",
@@ -179,20 +179,20 @@
     "category": "半導體封測",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "2449",
     "stock_name": "京元電子",
     "role": "IC 測試",
-    "close_price": "223.50",
-    "change": "+20.00",
-    "change_pct": "+9.83%",
-    "volume": "6,714,788",
+    "close_price": "246.00",
+    "change": "-2.50",
+    "change_pct": "-1.01%",
+    "volume": "17,657,100",
     "category": "半導體封測",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "2421",
@@ -205,7 +205,7 @@
     "category": "散熱概念股",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "3017",
@@ -218,7 +218,7 @@
     "category": "散熱概念股",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "8996",
@@ -231,7 +231,7 @@
     "category": "散熱概念股",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "2049",
@@ -244,7 +244,7 @@
     "category": "機器人與自動化概念股",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "2395",
@@ -257,7 +257,7 @@
     "category": "機器人與自動化概念股",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "6515",
@@ -270,7 +270,7 @@
     "category": "機器人與自動化概念股",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "1590",
@@ -283,7 +283,7 @@
     "category": "機器人與自動化概念股",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "2337",
@@ -296,7 +296,7 @@
     "category": "記憶體概念股",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   },
   {
     "stock_id": "3006",
@@ -309,6 +309,6 @@
     "category": "記憶體概念股",
     "concept_theme": null,
     "source_url": "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-    "scraped_at": "2026-08-11T08:45:31"
+    "scraped_at": "2026-08-11T08:50:56"
   }
 ]
