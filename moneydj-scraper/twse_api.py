@@ -35,6 +35,12 @@ INSTITUTIONAL_URL = "https://www.twse.com.tw/fund/T86"
 MARGIN_URL = "https://www.twse.com.tw/exchangeReport/MI_MARGN"
 VALUATION_URL = "https://www.twse.com.tw/exchangeReport/BWIBBU_ALL"
 
+# 全市場「任一歷史日期」OHLC 端點。跟 ALL_STOCK_DAY_URL（STOCK_DAY_ALL）不同——後者只有
+# 「今天」，沒有 date 參數；MI_INDEX 帶 type=ALLBUT0999 可以指定任意歷史交易日，一次回傳
+# 全部個股（不含權證/牛熊證）當天的開高低收/成交量，讓「全市場逐日回補 K 線」變成
+# O(天數) 而不是 O(股票數 x 月數)。已於 2026-08-11 對照真實回應驗證（見下方函式 docstring）。
+MARKET_OHLC_URL = "https://www.twse.com.tw/exchangeReport/MI_INDEX"
+
 # 全市場端點：一次取得所有上市股票的基本資料／當日行情，避免對每檔股票各打一次 API。
 # 兩者皆已於 2026-08-11 對照真實回應驗證（見下方各函式的 docstring）。
 ALL_COMPANIES_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"
@@ -275,6 +281,64 @@ def parse_valuation_all(payload: dict) -> Dict[str, dict]:
     return result
 
 
+def fetch_market_ohlc_all(trade_date: date, timeout: int = 10) -> Dict[str, dict]:
+    """取得某一日「全市場」開高低收/成交量，回傳依股票代碼索引的 dict。
+
+    已對照真實回應驗證（2026-08-11，1377 檔）。跟 T86／MI_MARGN 一樣，個股資料表
+    藏在 payload["tables"] 底下多張表格中的其中一張（該日還有大盤指數、成交統計等
+    其他表格），用 fields[0]=="證券代號" 辨識，不能假設固定索引位置。
+    """
+    date_str = trade_date.strftime("%Y%m%d")
+    try:
+        resp = requests.get(
+            MARKET_OHLC_URL,
+            params={"response": "json", "date": date_str, "type": "ALLBUT0999"},
+            timeout=timeout,
+        )
+        resp.raise_for_status()
+        payload = resp.json()
+    except (requests.exceptions.RequestException, ValueError) as exc:
+        logger.warning("market_ohlc fetch failed for %s: %s", date_str, exc)
+        return {}
+
+    return parse_market_ohlc_all(payload, trade_date)
+
+
+def parse_market_ohlc_all(payload: dict, trade_date: date) -> Dict[str, dict]:
+    """把 MI_INDEX（type=ALLBUT0999）的 JSON payload 轉成
+    {stock_id: {date, open, high, low, close, volume}}（純函式）。
+
+    個股「每日收盤行情」表格以 fields=["證券代號","證券名稱",...] 辨識。官方欄位序
+    （index）：0 證券代號, 1 證券名稱, 2 成交股數, 5 開盤價, 6 最高價, 7 最低價,
+    8 收盤價。成交量沿用「股」為單位，跟 parse_stock_day／parse_all_stock_day 一致，
+    不做張數轉換。
+    """
+    tables = payload.get("tables") or []
+    stock_table = None
+    for t in tables:
+        fields = t.get("fields") or []
+        if len(fields) >= 2 and fields[0] == "證券代號" and fields[1] == "證券名稱":
+            stock_table = t
+            break
+    if stock_table is None:
+        return {}
+
+    result: Dict[str, dict] = {}
+    for row in stock_table.get("data", []):
+        if len(row) < 9:
+            continue
+        stock_id = str(row[0]).strip()
+        result[stock_id] = {
+            "date": trade_date.isoformat(),
+            "open": _to_float(row[5]),
+            "high": _to_float(row[6]),
+            "low": _to_float(row[7]),
+            "close": _to_float(row[8]),
+            "volume": _to_int(row[2]),
+        }
+    return result
+
+
 # TWSE 官方產業別代碼對照表。t187ap03_L 只回傳數字代碼（如台積電是 "24"），沒有文字欄位；
 # 這份表是 2026-08-11 用 debug_universe_endpoints.py 對 1094 家真實上市公司做資料驅動推導
 # 出來的——每個代碼底下抓幾家代表性公司比對（例如 24 底下有聯電/台積電/旺宏 → 半導體業，
@@ -483,6 +547,62 @@ def fetch_stock_details(
             if sid in day_margin:
                 margin_by_stock[sid].append(day_margin[sid])
         if di < len(days) - 1:
+            time.sleep(delay)
+
+    valuation = fetch_valuation_all(timeout=timeout)
+
+    details: Dict[str, dict] = {}
+    for sid in stock_ids:
+        details[sid] = {
+            "ohlc": sorted(ohlc_by_stock[sid], key=lambda r: r["date"]),
+            "institutional": sorted(institutional_by_stock[sid], key=lambda r: r["date"]),
+            "margin": sorted(margin_by_stock[sid], key=lambda r: r["date"]),
+            "fundamentals": valuation.get(sid, {}),
+        }
+    return details
+
+
+def fetch_universe_details(
+    stock_ids: List[str],
+    ohlc_days: int = 60,
+    recent_days: int = 20,
+    timeout: int = 15,
+    delay: float = 0.3,
+) -> Dict[str, dict]:
+    """整合「全市場逐日」K 線／三大法人買賣超／融資融券／基本資訊，回傳依股票代碼索引
+    的明細字典，可以涵蓋任意數量的股票（例如全市場 ~1379 檔）。
+
+    跟 fetch_stock_details 不同：那支對「每一檔股票」各打一次 STOCK_DAY（逐檔逐月），
+    股票數一多（~1000+ 檔）請求數會是數萬次，不可行；這支全部改用「全市場一次撈完」
+    的端點（fetch_market_ohlc_all／fetch_institutional_all／fetch_margin_all），每個
+    交易日只呼叫一次，總請求數只跟天數成正比、不跟股票數成正比——不管 stock_ids 傳
+    24 檔還是 1379 檔，預設參數下都是 ohlc_days + recent_days*2 + 1 ≈ 101 次請求。
+    """
+    stock_ids = list(dict.fromkeys(stock_ids))
+    stock_id_set = set(stock_ids)
+    ohlc_by_stock: Dict[str, List[dict]] = {sid: [] for sid in stock_ids}
+    institutional_by_stock: Dict[str, List[dict]] = {sid: [] for sid in stock_ids}
+    margin_by_stock: Dict[str, List[dict]] = {sid: [] for sid in stock_ids}
+
+    ohlc_days_list = _recent_weekdays(ohlc_days)
+    for di, day in enumerate(ohlc_days_list):
+        day_ohlc = fetch_market_ohlc_all(day, timeout=timeout)
+        for sid, row in day_ohlc.items():
+            if sid in stock_id_set:
+                ohlc_by_stock[sid].append(row)
+        if di < len(ohlc_days_list) - 1:
+            time.sleep(delay)
+
+    recent_days_list = _recent_weekdays(recent_days)
+    for di, day in enumerate(recent_days_list):
+        day_institutional = fetch_institutional_all(day, timeout=timeout)
+        day_margin = fetch_margin_all(day, timeout=timeout)
+        for sid in stock_ids:
+            if sid in day_institutional:
+                institutional_by_stock[sid].append(day_institutional[sid])
+            if sid in day_margin:
+                margin_by_stock[sid].append(day_margin[sid])
+        if di < len(recent_days_list) - 1:
             time.sleep(delay)
 
     valuation = fetch_valuation_all(timeout=timeout)

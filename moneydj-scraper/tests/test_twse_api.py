@@ -17,6 +17,7 @@ from twse_api import (
     parse_institutional_all,
     parse_instrument_types,
     parse_margin_all,
+    parse_market_ohlc_all,
     parse_stock_day,
     parse_valuation_all,
 )
@@ -118,6 +119,46 @@ def test_parse_margin_all():
 def test_parse_margin_all_no_matching_table_returns_empty():
     payload = {"tables": [{"fields": ["項目", "買進"], "data": [["x", "1"]]}]}
     assert parse_margin_all(payload, date(2026, 8, 10)) == {}
+
+
+def test_parse_market_ohlc_all():
+    # 真實回應（2026-08-06）：個股「每日收盤行情」表格藏在 tables 陣列裡（同一天還有
+    # 大盤指數、成交統計等其他表格），用 fields 判斷，不是固定索引位置。
+    payload = {
+        "tables": [
+            {
+                "title": "115年08月06日 價格指數(臺灣證券交易所)",
+                "fields": ["指數", "收盤指數", "漲跌(+/-)", "漲跌點數", "漲跌百分比(%)", "特殊處理註記"],
+                "data": [["寶島股價指數", "49,294.46", "-", "155.80", "-0.32", ""]],
+            },
+            {
+                "title": "115年08月06日 每日收盤行情(全部(不含權證、牛熊證、可展延牛熊證))",
+                "fields": [
+                    "證券代號", "證券名稱", "成交股數", "成交筆數", "成交金額", "開盤價", "最高價",
+                    "最低價", "收盤價", "漲跌(+/-)", "漲跌價差", "最後揭示買價", "最後揭示買量",
+                    "最後揭示賣價", "最後揭示賣量", "本益比",
+                ],
+                "data": [
+                    ["00400A", "主動國泰動能高息", "37,160,775", "6,993", "511,633,219",
+                     "13.65", "13.91", "13.51", "13.89", "+", "0.20", "13.89", "131", "13.90", "306", "0.00"],
+                ],
+            },
+        ],
+    }
+    result = parse_market_ohlc_all(payload, date(2026, 8, 6))
+    assert result["00400A"] == {
+        "date": "2026-08-06",
+        "open": 13.65,
+        "high": 13.91,
+        "low": 13.51,
+        "close": 13.89,
+        "volume": 37160775,
+    }
+
+
+def test_parse_market_ohlc_all_no_matching_table_returns_empty():
+    payload = {"tables": [{"fields": ["指數", "收盤指數"], "data": [["x", "1"]]}]}
+    assert parse_market_ohlc_all(payload, date(2026, 8, 6)) == {}
 
 
 def test_parse_valuation_all():
