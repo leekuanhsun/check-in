@@ -12,6 +12,7 @@ on:
       - "moneydj-scraper/insights.py"
       - "moneydj-scraper/models.py"
       - "moneydj-scraper/requirements.txt"
+      - "moneydj-scraper/debug_endpoints.py"
 
 permissions:
   contents: write
@@ -29,6 +30,10 @@ jobs:
       - name: Install dependencies
         working-directory: moneydj-scraper
         run: pip install -r requirements.txt
+
+      - name: Debug raw TWSE endpoint shapes
+        working-directory: moneydj-scraper
+        run: python debug_endpoints.py
 
       - name: Fetch real data from TWSE
         working-directory: moneydj-scraper
