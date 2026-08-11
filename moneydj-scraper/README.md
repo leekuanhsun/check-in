@@ -9,7 +9,8 @@ Goodinfo 等任何網站的頁面，爬完後再跨來源比對。不做股價�
 
 ```
 dashboard.html          純前端資料儀表板（含範例資料、上傳、K線/法人/資券/重點整理觀點）
-fetch_real_data.py      用 twse_api.py 抓 18 檔範例股票的真實資料（分類/角色沿用人工整理清單）
+concept_categories.py    人工整理的概念股分類/成分股清單（單一事實來源，只留下實測拿得到真實資料的上市股票）
+fetch_real_data.py      用 twse_api.py 抓 concept_categories.py 清單的真實資料
 real_concept_stocks.json / real_concept_detail.json   fetch_real_data.py 的真實輸出快照
 fetcher.py             請求層：UA 輪替、Big5/cp950/utf-8 解碼、重試（指數退避）
 parser.py               解析層：表格解析、欄位映射、_split_id_and_name / _extract_id_from_href、rank_today_gainers
@@ -131,8 +132,9 @@ GitHub Actions 對照真實回應驗證並修正**（`MI_MARGN` 的個股資料�
 
 ## 儀表板（dashboard.html）
 
-`dashboard.html` 是純前端、不需架站的單檔頁面（用瀏覽器直接打開即可），內建範例資料
-（`generate_sample_data.py` / `generate_sample_detail.py` 產生的 18 檔虛構股票），功能：
+`dashboard.html` 是純前端、不需架站的單檔頁面（用瀏覽器直接打開即可）。**內建資料是真實資料**：
+`concept_categories.py` 清單（6 個題材、24 檔股票）透過 `fetch_real_data.py` 從 TWSE 官方端點抓下來
+的快照（`real_concept_stocks.json` / `real_concept_detail.json`），不是虛構範例。功能：
 
 - 分類篩選、代碼／名稱搜尋、各欄位排序、當日漲跌幅排行（Top 5 漲幅／跌幅）
 - 點任一列（或列尾的「K線/法人 ›」按鈕）開啟個股詳情：K 線＋成交量（Canvas 手繪，含十字準線與
@@ -142,14 +144,19 @@ GitHub Actions 對照真實回應驗證並修正**（`MI_MARGN` 的個股資料�
   點開會顯示「尚無此股票的 K 線資料」，不會壞掉。
 - 深色模式自動跟隨系統設定，K 線圖會依主題重繪配色（紅漲綠跌，符合台股慣例）。
 
-要接上真實資料：在有網路的環境跑
+要更新內建的資料快照：跑 GitHub Actions 的 `fetch-real-twse-data.yml`（見上一節），或在有網路的
+環境本機執行
 
 ```bash
-python main.py --targets targets.json --with-detail
+python fetch_real_data.py
 ```
 
-會產生 `moneydj_concept_stocks.json`（股票清單）與 `moneydj_concept_detail.json`（個股明細），
-把這兩個檔案分別用儀表板上方的兩個上傳按鈕載入即可，不需要改任何程式碼。
+產生新的 `real_concept_stocks.json` / `real_concept_detail.json` 後，把這兩個檔案分別用儀表板
+上方的兩個上傳按鈕載入即可，不需要改任何程式碼；也可以直接把它們的內容貼進
+`dashboard.html` 裡 `id="sample-data"` / `id="sample-detail"` 的 `<script>` 區塊，取代成新的內建快照。
+
+`generate_sample_data.py` / `generate_sample_detail.py` 仍保留作為離線開發用的虛構資料產生器
+（同一份 `concept_categories.py` 清單，但價格是隨機數，不是真實報價），供沒有網路時測試用。
 
 ## 用 GitHub Actions 抓真實資料
 
@@ -161,13 +168,14 @@ MoneyDJ／TWSE／TradingView。GitHub Actions runner 有自己的網路，不受
   `moneydj-scraper/fetch_real_data.py`、`twse_api.py`、`insights.py`、`models.py`、
   `requirements.txt` 或 workflow 本身的 commit 時自動執行；也可以在 GitHub UI 手動
   `workflow_dispatch`（但 API 觸發需要 workflow 檔案先存在於預設分支）。
-- 執行內容：`fetch_real_data.py` 沿用人工整理的分類/角色清單（18 檔股票），呼叫
-  `twse_api.fetch_stock_details()` 取得真實日 K 線／三大法人買賣超／融資融券／基本資訊，
-  價格變動（`change`／`change_pct`）由最近兩個交易日的真實收盤價自行計算，不依賴
-  `STOCK_DAY` 自帶的漲跌欄位。
+- 執行內容：`fetch_real_data.py` 沿用 `concept_categories.py` 裡人工整理的分類/角色清單
+  （6 個題材、24 檔股票，見下方模組結構），呼叫 `twse_api.fetch_stock_details()` 取得真實
+  日 K 線／三大法人買賣超／融資融券／基本資訊，價格變動（`change`／`change_pct`）由最近
+  兩個交易日的真實收盤價自行計算，不依賴 `STOCK_DAY` 自帶的漲跌欄位。
 - 結果會寫成 `real_concept_stocks.json` 與 `real_concept_detail.json`，並自動 commit
   回觸發的分支（也會上傳成 workflow artifact）。已知限制：只支援上市（TWSE）股票，
-  上櫃（TPEX）代碼目前會是空結果（範例清單中的 8155／6147／3374 屬此情況）。
+  上櫃（TPEX）代碼會是空結果——`concept_categories.py` 裡的清單只留下已實測抓得到資料的
+  股票，新增候選股票後請照同樣方式先跑一次真實抓取，把還是空值的移除。
 - 這兩個檔案跟 `--with-detail` 的輸出格式完全一樣，一樣可以直接用儀表板的兩個上傳按鈕載入。
 
 ## 測試
