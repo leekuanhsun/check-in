@@ -1,8 +1,7 @@
 """測試 twse_api.py 的純解析函式。
 
-注意：以下 fixture JSON 是依 twse_api.py 內文件註解描述的欄位順序手動建構，用來驗證
-「本模組的解析邏輯本身自洽」，不代表已對照過 TWSE 真實回應（這個環境無法連線驗證，
-見 README 的已知限制）。串接真實資料前務必用 debug_fetch_raw 核對一次。
+fixture 資料取自 2026-08-11 透過 GitHub Actions（有網路的環境）對 TWSE 真實端點的實際
+回應（見 debug_endpoints.py 的除錯輸出），不是憑文件猜的欄位順序。
 """
 from datetime import date
 
@@ -63,21 +62,48 @@ def test_parse_stock_day_skips_malformed_rows():
 
 
 def test_parse_institutional_all():
-    row = ["2330", "台積電"] + ["0"] * 2 + ["1,234"] + ["0"] * 5 + ["-200"] + ["0"] * 6 + ["50"]
+    # 2026-08-10 對 2330 的真實 T86 回應列（19 欄，單位：股）
+    row = [
+        "2330", "台積電          ", "13,479,627", "13,360,531", "119,096",
+        "0", "0", "0", "251,132", "98,503", "152,629", "448,255",
+        "394,050", "79,163", "314,887", "301,245", "167,877", "133,368", "719,980",
+    ]
     payload = {"stat": "OK", "data": [row]}
-    result = parse_institutional_all(payload, date(2026, 8, 5))
-    assert result["2330"]["date"] == "2026-08-05"
-    assert result["2330"]["foreign"] == 1234
-    assert result["2330"]["trust"] == -200
-    assert result["2330"]["dealer"] == 50
+    result = parse_institutional_all(payload, date(2026, 8, 10))
+    assert result["2330"]["date"] == "2026-08-10"
+    # 股轉張：119,096 / 1000 -> 119；152,629 / 1000 -> 153；448,255 / 1000 -> 448
+    assert result["2330"]["foreign"] == 119
+    assert result["2330"]["trust"] == 153
+    assert result["2330"]["dealer"] == 448
 
 
 def test_parse_margin_all():
-    row = ["2330", "台積電", "100", "50", "0", "10000", "10050", "999999", "20", "30", "0", "3000", "2990", "9999"]
-    payload = {"data": [row]}
-    result = parse_margin_all(payload, date(2026, 8, 5))
+    # 真實回應把個股資料放在 tables[1]（tables[0] 是全市場單列彙總），
+    # 用 fields 判斷、不是寫死 tables[0]／tables[1] 的位置
+    payload = {
+        "stat": "OK",
+        "tables": [
+            {
+                "title": "115年08月10日 信用交易統計",
+                "fields": ["項目", "買進", "賣出", "現金(券)償還", "前日餘額", "今日餘額"],
+                "data": [["融資(交易單位)", "436,013", "412,135", "7,092", "8,986,437", "9,003,223"]],
+            },
+            {
+                "title": "115年08月10日 融資融券彙總 (全部)",
+                "fields": [
+                    "代號", "名稱", "買進", "賣出", "現金償還", "前日餘額", "今日餘額", "次一營業日限額",
+                    "買進", "賣出", "現券償還", "前日餘額", "今日餘額", "次一營業日限額", "資券互抵", "註記",
+                ],
+                "data": [
+                    ["2330", "台積電", "100", "50", "0", "10000", "10050", "999999",
+                     "20", "30", "0", "3000", "2990", "9999", "0", " "],
+                ],
+            },
+        ],
+    }
+    result = parse_margin_all(payload, date(2026, 8, 10))
     assert result["2330"] == {
-        "date": "2026-08-05",
+        "date": "2026-08-10",
         "margin_balance": 10050,
         "margin_change": 50,
         "short_balance": 2990,
@@ -85,10 +111,23 @@ def test_parse_margin_all():
     }
 
 
+def test_parse_margin_all_no_matching_table_returns_empty():
+    payload = {"tables": [{"fields": ["項目", "買進"], "data": [["x", "1"]]}]}
+    assert parse_margin_all(payload, date(2026, 8, 10)) == {}
+
+
 def test_parse_valuation_all():
-    payload = {"data": [["2330", "台積電", "1.8", "2025", "18.5", "5.6"]]}
+    # 真實 BWIBBU_ALL 只有 5 欄；本益比虧損股常見回傳 "-"
+    payload = {
+        "fields": ["股票代號", "股票名稱", "本益比", "殖利率(%)", "股價淨值比"],
+        "data": [
+            ["1101", "台泥", "-", "3.26", "0.78"],
+            ["2330", "台積電", "18.5", "1.8", "5.6"],
+        ],
+    }
     result = parse_valuation_all(payload)
-    assert result["2330"] == {"dividend_yield": 1.8, "pe_ratio": 18.5, "pb_ratio": 5.6}
+    assert result["1101"] == {"pe_ratio": None, "dividend_yield": 3.26, "pb_ratio": 0.78}
+    assert result["2330"] == {"pe_ratio": 18.5, "dividend_yield": 1.8, "pb_ratio": 5.6}
 
 
 def test_recent_weekdays_excludes_weekends():

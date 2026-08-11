@@ -1,10 +1,12 @@
 """TWSE（台灣證券交易所）個股資訊層：日 K 線、三大法人買賣超、融資融券、基本資訊。
 
 用的是 TWSE 官方公開資料端點（www.twse.com.tw 的 exchangeReport / fund 系列 JSON API），
-比 tradingview.py 用的未公開端點來得穩定、有官方文件，但欄位順序、日期格式（民國年）、
-回傳結構仍是依公開文件慣例撰寫，**尚未在可連外的環境對照過真實回應**。正式使用前請先用
-`debug_fetch_raw` 印出原始 JSON，核對本檔案裡各函式解析用的欄位索引（`row[N]`）是否吻合，
-不吻合要自行調整。
+比 tradingview.py 用的未公開端點來得穩定、有官方文件。STOCK_DAY／T86／MI_MARGN／BWIBBU_ALL
+四個端點的欄位順序與回傳結構已透過 GitHub Actions（有網路的環境）對照過真實回應並修正
+（2026-08-11）：MI_MARGN 的個股資料實際包在 `tables` 陣列裡、且不是 `tables[0]`；
+BWIBBU_ALL 只有 5 欄，不是原先假設的 6 欄；T86 的三大法人買賣超原始單位是「股」，
+已在 `parse_institutional_all` 換算成「張」。日期解析（`_roc_to_iso`）也已驗證可正確處理
+STOCK_DAY 回傳的民國年格式。若 TWSE 未來調整回應格式，可用 `debug_fetch_raw` 重新核對。
 
 目前只涵蓋上市（TWSE）股票；上櫃（TPEX）股票的等效端點主機、路徑不同，本模組尚未支援，
 遇到上櫃代碼時各函式會直接回傳空結果（不會拋例外，方便整批處理時跳過）。
@@ -98,12 +100,21 @@ def parse_stock_day(payload: dict) -> List[dict]:
     return rows
 
 
+def _shares_to_lots(text) -> Optional[int]:
+    """把股數換算成台灣慣用的「張」（1 張 = 1000 股，四捨五入）。"""
+    value = _to_float(text)
+    return round(value / 1000) if value is not None else None
+
+
 def fetch_institutional_all(trade_date: date, timeout: int = 10) -> Dict[str, dict]:
     """取得某一日「全市場」三大法人買賣超，回傳依股票代碼索引的 dict。
 
-    官方欄位（依文件慣例，節錄）：證券代號,證券名稱,外資買進股數,外資賣出股數,外資買賣超股數,
-    外資自營商買進股數,外資自營商賣出股數,外資自營商買賣超股數,投信買進股數,投信賣出股數,
-    投信買賣超股數,自營商買賣超股數(自行買賣),...,自營商買賣超股數,三大法人買賣超股數合計
+    已對照真實回應驗證（2026-08-11）。官方欄位（單位：股）：
+    證券代號,證券名稱,外陸資買進股數(不含外資自營商),外陸資賣出股數(不含外資自營商),
+    外陸資買賣超股數(不含外資自營商),外資自營商買進股數,外資自營商賣出股數,外資自營商買賣超股數,
+    投信買進股數,投信賣出股數,投信買賣超股數,自營商買賣超股數,自營商買進股數(自行買賣),
+    自營商賣出股數(自行買賣),自營商買賣超股數(自行買賣),自營商買進股數(避險),自營商買進股數(避險),
+    自營商買賣超股數(避險),三大法人買賣超股數
     """
     date_str = trade_date.strftime("%Y%m%d")
     try:
@@ -125,17 +136,22 @@ def fetch_institutional_all(trade_date: date, timeout: int = 10) -> Dict[str, di
 
 
 def parse_institutional_all(payload: dict, trade_date: date) -> Dict[str, dict]:
-    """把 T86 端點的 JSON payload 轉成 {stock_id: {date, foreign, trust, dealer}}（純函式）。"""
+    """把 T86 端點的 JSON payload 轉成 {stock_id: {date, foreign, trust, dealer}}（純函式）。
+
+    外資取「外陸資買賣超股數」（index 4），投信取「投信買賣超股數」（index 10），
+    自營商取「自營商買賣超股數」合計欄（index 11，自行買賣+避險的加總，不是只取避險分項）。
+    官方欄位單位是股，換算成張（÷1000）回傳，跟本專案 UI／insights 的「張」標示一致。
+    """
     result: Dict[str, dict] = {}
     for row in payload.get("data", []):
-        if len(row) < 11:
+        if len(row) < 19:
             continue
         stock_id = str(row[0]).strip()
         result[stock_id] = {
             "date": trade_date.isoformat(),
-            "foreign": _to_int(row[4]),
-            "trust": _to_int(row[10]),
-            "dealer": _to_int(row[17]) if len(row) > 17 else None,
+            "foreign": _shares_to_lots(row[4]),
+            "trust": _shares_to_lots(row[10]),
+            "dealer": _shares_to_lots(row[11]),
         }
     return result
 
@@ -143,9 +159,10 @@ def parse_institutional_all(payload: dict, trade_date: date) -> Dict[str, dict]:
 def fetch_margin_all(trade_date: date, timeout: int = 10) -> Dict[str, dict]:
     """取得某一日「全市場」融資融券餘額，回傳依股票代碼索引的 dict。
 
-    官方欄位（依文件慣例，節錄）：股票代號,股票名稱,融資買進,融資賣出,融資現金償還,
-    融資前日餘額,融資今日餘額,融資限額,融券買進,融券賣出,融券現券償還,融券前日餘額,
-    融券今日餘額,融券限額,資券互抵,註記
+    已對照真實回應驗證（2026-08-11）：資料包在 payload["tables"] 底下，含兩張表——
+    一張是全市場信用交易統計（單列彙總，非個股），另一張才是逐檔個股資料
+    （fields 以 "代號","名稱" 開頭），需要用 fields 判斷、挑出後者，不能假設固定在
+    tables[0]（這正是先前版本回傳全空的原因：誤讀成彙總表，每列都因欄位數不足被跳過）。
     """
     date_str = trade_date.strftime("%Y%m%d")
     try:
@@ -164,15 +181,23 @@ def fetch_margin_all(trade_date: date, timeout: int = 10) -> Dict[str, dict]:
 
 
 def parse_margin_all(payload: dict, trade_date: date) -> Dict[str, dict]:
-    """把 MI_MARGN 端點的 JSON payload 轉成 {stock_id: {...}}（純函式）。"""
+    """把 MI_MARGN 端點的 JSON payload 轉成 {stock_id: {...}}（純函式）。
+
+    個股資料所在的表格以 fields=["代號","名稱",...] 辨識，各表格在 tables 陣列裡的
+    順序不保證固定，所以用欄位名稱搜尋而非寫死索引。
+    """
     tables = payload.get("tables") or []
-    data_rows = payload.get("data")
-    if not data_rows and tables:
-        data_rows = tables[0].get("data", [])
-    data_rows = data_rows or []
+    stock_table = None
+    for t in tables:
+        fields = t.get("fields") or []
+        if len(fields) >= 2 and fields[0] == "代號" and fields[1] == "名稱":
+            stock_table = t
+            break
+    if stock_table is None:
+        return {}
 
     result: Dict[str, dict] = {}
-    for row in data_rows:
+    for row in stock_table.get("data", []):
         if len(row) < 13:
             continue
         stock_id = str(row[0]).strip()
@@ -201,7 +226,9 @@ def parse_margin_all(payload: dict, trade_date: date) -> Dict[str, dict]:
 def fetch_valuation_all(timeout: int = 10) -> Dict[str, dict]:
     """取得全市場最新一筆本益比/殖利率/股價淨值比，回傳依股票代碼索引的 dict。
 
-    官方欄位（依文件慣例，節錄）：證券代號,證券名稱,殖利率(%),股利年度,本益比,股價淨值比,...
+    已對照真實回應驗證（2026-08-11）。官方欄位（共 5 欄）：
+    股票代號,股票名稱,本益比,殖利率(%),股價淨值比。虧損公司本益比常回傳 "-"，
+    _to_float 會把它當成無法解析、安全回傳 None。
     """
     try:
         resp = requests.get(VALUATION_URL, params={"response": "json"}, timeout=timeout)
@@ -218,13 +245,13 @@ def parse_valuation_all(payload: dict) -> Dict[str, dict]:
     """把 BWIBBU_ALL 端點的 JSON payload 轉成 {stock_id: {pe_ratio, dividend_yield, pb_ratio}}（純函式）。"""
     result: Dict[str, dict] = {}
     for row in payload.get("data", []):
-        if len(row) < 6:
+        if len(row) < 5:
             continue
         stock_id = str(row[0]).strip()
         result[stock_id] = {
-            "dividend_yield": _to_float(row[2]),
-            "pe_ratio": _to_float(row[4]),
-            "pb_ratio": _to_float(row[5]),
+            "pe_ratio": _to_float(row[2]),
+            "dividend_yield": _to_float(row[3]),
+            "pb_ratio": _to_float(row[4]),
         }
     return result
 

@@ -9,6 +9,8 @@ Goodinfo 等任何網站的頁面，爬完後再跨來源比對。不做股價�
 
 ```
 dashboard.html          純前端資料儀表板（含範例資料、上傳、K線/法人/資券/重點整理觀點）
+fetch_real_data.py      用 twse_api.py 抓 18 檔範例股票的真實資料（分類/角色沿用人工整理清單）
+real_concept_stocks.json / real_concept_detail.json   fetch_real_data.py 的真實輸出快照
 fetcher.py             請求層：UA 輪替、Big5/cp950/utf-8 解碼、重試（指數退避）
 parser.py               解析層：表格解析、欄位映射、_split_id_and_name / _extract_id_from_href、rank_today_gainers
 models.py               資料模型：StockRecord
@@ -120,11 +122,12 @@ python main.py --targets targets.json --with-detail --detail-output concept_deta
 `margin` / `fundamentals` / `insights` 五個欄位；可以直接餵給儀表板的「上傳資料」功能查看個股明細
 （見下方儀表板一節）。
 
-**重要注意事項**：`twse_api.py` 用的是 TWSE 官方公開端點（`STOCK_DAY`、`T86`、`MI_MARGN`、
-`BWIBBU_ALL`），比 `tradingview.py` 的未公開端點穩定、有文件，但欄位順序、日期格式（民國年）
-仍是依公開文件慣例撰寫、**尚未在可連外環境對照過真實回應**。正式使用前務必用
-`twse_api.debug_fetch_raw(url, params)` 核對一次。另外目前只支援**上市（TWSE）**股票，
-上櫃（TPEX）代碼會直接拿到空結果（見「已知限制」）。
+`twse_api.py` 用的是 TWSE 官方公開端點（`STOCK_DAY`、`T86`、`MI_MARGN`、`BWIBBU_ALL`），
+比 `tradingview.py` 的未公開端點穩定、有文件。**四個端點的欄位順序已於 2026-08-11 透過
+GitHub Actions 對照真實回應驗證並修正**（`MI_MARGN` 的個股資料實際包在 `tables` 陣列裡且不是
+`tables[0]`；`BWIBBU_ALL` 只有 5 欄，原本假設的 6 欄是錯的；`T86` 的三大法人買賣超原始單位是
+「股」，已換算成「張」）。若 TWSE 未來調整回應格式，可用 `twse_api.debug_fetch_raw(url, params)`
+重新核對。另外目前只支援**上市（TWSE）**股票，上櫃（TPEX）代碼會直接拿到空結果（見「已知限制」）。
 
 ## 儀表板（dashboard.html）
 
@@ -147,6 +150,25 @@ python main.py --targets targets.json --with-detail
 
 會產生 `moneydj_concept_stocks.json`（股票清單）與 `moneydj_concept_detail.json`（個股明細），
 把這兩個檔案分別用儀表板上方的兩個上傳按鈕載入即可，不需要改任何程式碼。
+
+## 用 GitHub Actions 抓真實資料
+
+開發這個專案的沙盒環境本身出網政策擋掉所有外部網站（見「已知限制」），完全無法連線到
+MoneyDJ／TWSE／TradingView。GitHub Actions runner 有自己的網路，不受這個限制，所以
+`.github/workflows/fetch-real-twse-data.yml` 提供了一個繞過沙盒限制、直接拿到真實資料的路徑：
+
+- 觸發方式：對 `claude/moneydj-concept-scraper-igtou1` 分支推送會影響
+  `moneydj-scraper/fetch_real_data.py`、`twse_api.py`、`insights.py`、`models.py`、
+  `requirements.txt` 或 workflow 本身的 commit 時自動執行；也可以在 GitHub UI 手動
+  `workflow_dispatch`（但 API 觸發需要 workflow 檔案先存在於預設分支）。
+- 執行內容：`fetch_real_data.py` 沿用人工整理的分類/角色清單（18 檔股票），呼叫
+  `twse_api.fetch_stock_details()` 取得真實日 K 線／三大法人買賣超／融資融券／基本資訊，
+  價格變動（`change`／`change_pct`）由最近兩個交易日的真實收盤價自行計算，不依賴
+  `STOCK_DAY` 自帶的漲跌欄位。
+- 結果會寫成 `real_concept_stocks.json` 與 `real_concept_detail.json`，並自動 commit
+  回觸發的分支（也會上傳成 workflow artifact）。已知限制：只支援上市（TWSE）股票，
+  上櫃（TPEX）代碼目前會是空結果（範例清單中的 8155／6147／3374 屬此情況）。
+- 這兩個檔案跟 `--with-detail` 的輸出格式完全一樣，一樣可以直接用儀表板的兩個上傳按鈕載入。
 
 ## 測試
 
