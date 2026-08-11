@@ -2,6 +2,12 @@ name: DEBUG - isin lookup
 
 on:
   workflow_dispatch: {}
+  push:
+    branches:
+      - claude/moneydj-concept-scraper-igtou1
+    paths:
+      - ".github/workflows/debug-isin.yml"
+      - "moneydj-scraper/debug_isin.py"
 
 jobs:
   debug:
