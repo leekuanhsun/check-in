@@ -179,6 +179,153 @@ button{font-family:inherit;}
   letter-spacing:.02em;
 }
 
+.user-btn{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  border:1px solid var(--line);
+  background:var(--card-alt);
+  border-radius:999px;
+  padding:5px 12px 5px 5px;
+  cursor:pointer;
+  color:var(--ink);
+  max-width:150px;
+}
+.user-btn:active{transform:scale(0.96);}
+.user-btn-name{
+  font-size:.78rem;
+  font-weight:600;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.user-avatar{
+  flex:none;
+  width:26px;height:26px;
+  border-radius:50%;
+  background:var(--accent);
+  color:var(--card);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);
+  font-weight:600;
+  font-size:.78rem;
+}
+
+/* ---------- Users screen ---------- */
+.user-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:16px 18px 28px;
+}
+.user-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:var(--card-alt);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:8px;
+}
+.user-row.is-active{
+  border-color:var(--accent);
+  background:var(--accent-tint);
+}
+.user-row-main{
+  flex:1;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border:none;
+  background:none;
+  padding:6px;
+  cursor:pointer;
+  color:inherit;
+  text-align:left;
+}
+.user-row .user-avatar{
+  width:38px;height:38px;
+  font-size:.95rem;
+}
+.user-row-text{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.user-row-name{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:.98rem;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.user-row-tag{
+  font-family:var(--font-mono);
+  font-size:.62rem;
+  font-weight:600;
+  color:var(--accent);
+  background:var(--card);
+  border:1px solid var(--accent);
+  border-radius:999px;
+  padding:1px 7px;
+}
+.user-row-meta{
+  font-family:var(--font-mono);
+  font-size:.72rem;
+  color:var(--ink-faint);
+}
+.iconbtn.small{
+  width:32px;height:32px;
+  flex:none;
+}
+.user-row-add{
+  justify-content:center;
+  gap:8px;
+  color:var(--accent);
+  cursor:pointer;
+  padding:14px 8px;
+  font-size:.9rem;
+  font-weight:600;
+}
+.user-row-add svg{width:16px;height:16px;}
+.user-row.editing{
+  flex-wrap:wrap;
+}
+.user-name-input{
+  flex:1 1 100%;
+  min-width:0;
+  border:1px solid var(--line);
+  background:var(--card);
+  color:var(--ink);
+  border-radius:10px;
+  padding:10px 12px;
+  font-size:.92rem;
+  font-family:inherit;
+}
+.user-name-input:focus{
+  outline:none;
+  border-color:var(--accent);
+}
+.user-row.editing .ctrl-btn{
+  flex:1;
+  justify-content:center;
+}
+.user-row.confirm-delete{
+  flex-direction:column;
+  align-items:stretch;
+  gap:8px;
+  padding:12px;
+}
+.user-row.confirm-delete .danger-note{
+  margin-bottom:0;
+}
+
 .screen{
   flex:1;
   overflow-y:auto;
@@ -749,17 +896,109 @@ button{font-family:inherit;}
   function meaningText(w) { return w.pos.map(p => p.meanings.join('；')).join('；'); }
   function posSummary(w) { return w.pos.map(p => `(${p.pos}) ${p.meanings.join('；')}`).join('  '); }
 
-  // ---------- persistence ----------
-  const LS_LEARNED = 'vocabweb.learned';
-  const LS_QUIZ = 'vocabweb.quiz';
+  // ---------- users ----------
+  const LS_USERS = 'vocabweb.users';
+  const LS_ACTIVE_USER = 'vocabweb.activeUser';
+  const LS_LEARNED_LEGACY = 'vocabweb.learned';
+  const LS_QUIZ_LEGACY = 'vocabweb.quiz';
+
+  function userLearnedKey(id) { return 'vocabweb.learned.' + id; }
+  function userQuizKey(id) { return 'vocabweb.quiz.' + id; }
+  function genUserId() { return 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  let users = [];
+  let activeUserId = null;
   let learned = new Set();
   let quizResults = {};
-  let confirmingClear = false;
-  try { learned = new Set(JSON.parse(localStorage.getItem(LS_LEARNED) || '[]')); } catch (e) {}
-  try { quizResults = JSON.parse(localStorage.getItem(LS_QUIZ) || '{}'); } catch (e) {}
 
-  function saveLearned() { try { localStorage.setItem(LS_LEARNED, JSON.stringify([...learned])); } catch (e) {} }
-  function saveQuiz() { try { localStorage.setItem(LS_QUIZ, JSON.stringify(quizResults)); } catch (e) {} }
+  let confirmingClear = false;
+  let addingUser = false;
+  let renamingUserId = null;
+  let deletingUserId = null;
+
+  function saveUsers() { try { localStorage.setItem(LS_USERS, JSON.stringify(users)); } catch (e) {} }
+
+  function loadUsers() {
+    try {
+      const stored = JSON.parse(localStorage.getItem(LS_USERS) || 'null');
+      if (Array.isArray(stored) && stored.length) users = stored;
+    } catch (e) {}
+
+    if (!users.length) {
+      const id = genUserId();
+      users = [{ id, name: '使用者 1' }];
+      let legacyLearned = null, legacyQuiz = null;
+      try { legacyLearned = JSON.parse(localStorage.getItem(LS_LEARNED_LEGACY) || 'null'); } catch (e) {}
+      try { legacyQuiz = JSON.parse(localStorage.getItem(LS_QUIZ_LEGACY) || 'null'); } catch (e) {}
+      if (legacyLearned || legacyQuiz) {
+        try {
+          localStorage.setItem(userLearnedKey(id), JSON.stringify(legacyLearned || []));
+          localStorage.setItem(userQuizKey(id), JSON.stringify(legacyQuiz || {}));
+          localStorage.removeItem(LS_LEARNED_LEGACY);
+          localStorage.removeItem(LS_QUIZ_LEGACY);
+        } catch (e) {}
+      }
+      saveUsers();
+    }
+
+    activeUserId = localStorage.getItem(LS_ACTIVE_USER);
+    if (!activeUserId || !users.some(u => u.id === activeUserId)) {
+      activeUserId = users[0].id;
+      try { localStorage.setItem(LS_ACTIVE_USER, activeUserId); } catch (e) {}
+    }
+  }
+
+  function currentUser() { return users.find(u => u.id === activeUserId) || users[0]; }
+
+  function learnedCountForUser(id) {
+    try {
+      const arr = JSON.parse(localStorage.getItem(userLearnedKey(id)) || '[]');
+      return Array.isArray(arr) ? arr.length : 0;
+    } catch (e) { return 0; }
+  }
+
+  function loadUserData() {
+    learned = new Set();
+    quizResults = {};
+    try { learned = new Set(JSON.parse(localStorage.getItem(userLearnedKey(activeUserId)) || '[]')); } catch (e) {}
+    try { quizResults = JSON.parse(localStorage.getItem(userQuizKey(activeUserId)) || '{}'); } catch (e) {}
+  }
+
+  function switchUser(id) {
+    if (id === activeUserId) return;
+    activeUserId = id;
+    try { localStorage.setItem(LS_ACTIVE_USER, activeUserId); } catch (e) {}
+    loadUserData();
+  }
+
+  function createUser(name) {
+    const id = genUserId();
+    users.push({ id, name: (name || '').slice(0, 20) || ('使用者 ' + (users.length + 1)) });
+    saveUsers();
+    switchUser(id);
+    return id;
+  }
+
+  function renameUser(id, name) {
+    const u = users.find(u => u.id === id);
+    const trimmed = (name || '').trim().slice(0, 20);
+    if (u && trimmed) { u.name = trimmed; saveUsers(); }
+  }
+
+  function deleteUser(id) {
+    if (users.length <= 1) return;
+    users = users.filter(u => u.id !== id);
+    saveUsers();
+    try { localStorage.removeItem(userLearnedKey(id)); localStorage.removeItem(userQuizKey(id)); } catch (e) {}
+    if (activeUserId === id) switchUser(users[0].id);
+  }
+
+  loadUsers();
+  loadUserData();
+
+  // ---------- per-user progress ----------
+  function saveLearned() { try { localStorage.setItem(userLearnedKey(activeUserId), JSON.stringify([...learned])); } catch (e) {} }
+  function saveQuiz() { try { localStorage.setItem(userQuizKey(activeUserId), JSON.stringify(quizResults)); } catch (e) {} }
   function clearAllProgress() {
     learned = new Set();
     quizResults = {};
@@ -828,6 +1067,9 @@ button{font-family:inherit;}
     chevR: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>',
     download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>',
     upload: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V9"/><path d="M7 13l5-5 5 5"/><path d="M5 20h14"/></svg>',
+    edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
   };
 
   function ringSvg(pct, colorVar) {
@@ -855,17 +1097,27 @@ button{font-family:inherit;}
     toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
   }
 
+  function focusInputSoon(id) {
+    requestAnimationFrame(() => {
+      const el = document.getElementById(id);
+      if (el) { el.focus(); el.select(); }
+    });
+  }
+
   // ---------- backup: export / import ----------
   function exportProgress() {
+    const user = currentUser();
     const payload = {
       app: 'vocabweb',
       version: 1,
       exportedAt: new Date().toISOString(),
+      userName: user.name,
       learned: [...learned],
       quiz: quizResults,
     };
     const json = JSON.stringify(payload, null, 2);
-    const filename = 'vocab-progress-' + new Date().toISOString().slice(0, 10) + '.json';
+    const safeName = user.name.replace(/[^\w一-鿿-]+/g, '') || 'user';
+    const filename = 'vocab-progress-' + safeName + '-' + new Date().toISOString().slice(0, 10) + '.json';
     if (window.claude && window.claude.downloads) {
       window.claude.downloads.save({ filename, data: json })
         .then(() => showToast('已匯出備份'))
@@ -921,6 +1173,7 @@ button{font-family:inherit;}
     setAccent(s.band || null);
     let html = '';
     if (s.screen === 'home') html = renderHome();
+    else if (s.screen === 'users') html = renderUsers();
     else if (s.screen === 'groups') html = renderGroups(s.band);
     else if (s.screen === 'group') html = renderGroupDetail(s.band, s.group);
     else if (s.screen === 'study') html = renderStudy(s.band, s.group, s.index || 0, !!s.flipped);
@@ -929,7 +1182,7 @@ button{font-family:inherit;}
     bindEvents(s);
   }
 
-  function topbar(title, sub, showBack) {
+  function topbar(title, sub, showBack, rightHtml) {
     return `<div class="topbar">
       ${showBack ? `<button class="iconbtn" data-action="back" aria-label="返回">${ICONS.back}</button>` : ''}
       <div>
@@ -937,6 +1190,7 @@ button{font-family:inherit;}
         ${sub ? `<div class="topbar-sub">${esc(sub)}</div>` : ''}
       </div>
       <div class="spacer"></div>
+      ${rightHtml || ''}
     </div>`;
   }
 
@@ -954,7 +1208,13 @@ button{font-family:inherit;}
         <div class="band-ring">${ringSvg(pct, b.accent)}<div class="band-ring-pct" style="color:var(${b.accent})">${Math.round(pct * 100)}%</div></div>
       </button>`;
     }).join('');
-    return `${topbar('字卡抽屜', 'TOEIC · 1000 WORDS', false)}
+    const user = currentUser();
+    const initial = (user.name || '?').trim().charAt(0).toUpperCase() || '?';
+    const userBtn = `<button class="user-btn" data-action="open-users">
+      <span class="user-avatar">${esc(initial)}</span>
+      <span class="user-btn-name">${esc(user.name)}</span>
+    </button>`;
+    return `${topbar('字卡抽屜', 'TOEIC · 1000 WORDS', false, userBtn)}
     <div class="screen">
       <div class="home-hero">
         <div class="home-kicker">挑選你的目標分數</div>
@@ -963,7 +1223,7 @@ button{font-family:inherit;}
       </div>
       <div class="band-list">${rows}</div>
       <div class="backup-section">
-        <div class="backup-title">備份進度</div>
+        <div class="backup-title">備份進度 · ${esc(user.name)}</div>
         <div class="backup-note">此裝置的進度存在瀏覽器裡，換裝置或清除瀏覽資料會消失。建議不定期「匯出備份」存成檔案，需要時再「匯入備份」還原。</div>
         <div class="backup-row">
           <button class="ctrl-btn grow" data-action="export-progress">${ICONS.download} 匯出備份</button>
@@ -974,7 +1234,7 @@ button{font-family:inherit;}
       <div class="danger-section">
         ${confirmingClear ? `
           <div class="danger-title">清除進度</div>
-          <div class="danger-note">確定要清除這個瀏覽器上的所有學習進度嗎？已熟記的單字和測驗成績都會被移除，此動作無法復原。若還沒備份，建議先按「匯出備份」。</div>
+          <div class="danger-note">確定要清除「${esc(user.name)}」這個使用者的所有學習進度嗎？已熟記的單字和測驗成績都會被移除，此動作無法復原。若還沒備份，建議先按「匯出備份」。</div>
           <div class="backup-row">
             <button class="ctrl-btn grow" data-action="clear-cancel">取消</button>
             <button class="ctrl-btn grow danger" data-action="clear-confirm">確定清除</button>
@@ -984,6 +1244,55 @@ button{font-family:inherit;}
           <button class="ctrl-btn danger" data-action="clear-ask">${ICONS.cross} 清除全部進度</button>
         `}
       </div>
+    </div>`;
+  }
+
+  function renderUsers() {
+    const rows = users.map(u => {
+      const isActive = u.id === activeUserId;
+      const initial = (u.name || '?').trim().charAt(0).toUpperCase() || '?';
+      const count = learnedCountForUser(u.id);
+
+      if (renamingUserId === u.id) {
+        return `<div class="user-row editing">
+          <input type="text" class="user-name-input" id="rename-input" value="${esc(u.name)}" maxlength="20" placeholder="使用者名稱">
+          <button class="ctrl-btn" data-action="user-rename-cancel">取消</button>
+          <button class="ctrl-btn on" data-action="user-rename-confirm" data-userid="${u.id}">儲存</button>
+        </div>`;
+      }
+      if (deletingUserId === u.id) {
+        return `<div class="user-row confirm-delete">
+          <div class="danger-note">確定要刪除「${esc(u.name)}」嗎？這個使用者的所有進度都會被移除，無法復原。</div>
+          <div class="backup-row">
+            <button class="ctrl-btn grow" data-action="user-delete-cancel">取消</button>
+            <button class="ctrl-btn grow danger" data-action="user-delete-confirm" data-userid="${u.id}">確定刪除</button>
+          </div>
+        </div>`;
+      }
+      return `<div class="user-row ${isActive ? 'is-active' : ''}">
+        <button class="user-row-main" data-action="switch-user" data-userid="${u.id}">
+          <span class="user-avatar">${esc(initial)}</span>
+          <span class="user-row-text">
+            <span class="user-row-name">${esc(u.name)}${isActive ? '<span class="user-row-tag">使用中</span>' : ''}</span>
+            <span class="user-row-meta">已學 ${count}/1000 字</span>
+          </span>
+        </button>
+        <button class="iconbtn small" data-action="user-rename-ask" data-userid="${u.id}" aria-label="重新命名">${ICONS.edit}</button>
+        ${users.length > 1 ? `<button class="iconbtn small" data-action="user-delete-ask" data-userid="${u.id}" aria-label="刪除使用者">${ICONS.trash}</button>` : ''}
+      </div>`;
+    }).join('');
+
+    const addRow = addingUser ? `
+      <div class="user-row editing">
+        <input type="text" class="user-name-input" id="new-user-input" placeholder="輸入使用者名稱" maxlength="20">
+        <button class="ctrl-btn" data-action="user-add-cancel">取消</button>
+        <button class="ctrl-btn on" data-action="user-add-confirm">新增</button>
+      </div>` : `
+      <button class="user-row user-row-add" data-action="user-add-ask">${ICONS.plus} 新增使用者</button>`;
+
+    return `${topbar('切換使用者', '每個使用者的學習進度分開記錄', true)}
+    <div class="screen">
+      <div class="user-list">${rows}${addRow}</div>
     </div>`;
   }
 
@@ -1159,6 +1468,16 @@ button{font-family:inherit;}
         importInput.value = '';
       });
     }
+    const newUserInput = document.getElementById('new-user-input');
+    if (newUserInput) {
+      newUserInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleAction('user-add-confirm', null, s); });
+    }
+    const renameInput = document.getElementById('rename-input');
+    if (renameInput) {
+      renameInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') handleAction('user-rename-confirm', { dataset: { userid: renamingUserId } }, s);
+      });
+    }
   }
 
   function handleAction(action, el, s) {
@@ -1179,6 +1498,47 @@ button{font-family:inherit;}
         render();
         showToast('已清除全部進度');
         break;
+      case 'open-users':
+        addingUser = false; renamingUserId = null; deletingUserId = null;
+        push({ screen: 'users' });
+        break;
+      case 'switch-user':
+        switchUser(el.dataset.userid);
+        back();
+        showToast('已切換至「' + currentUser().name + '」');
+        break;
+      case 'user-add-ask': addingUser = true; render(); focusInputSoon('new-user-input'); break;
+      case 'user-add-cancel': addingUser = false; render(); break;
+      case 'user-add-confirm': {
+        const inp = document.getElementById('new-user-input');
+        const name = inp ? inp.value : '';
+        addingUser = false;
+        createUser(name);
+        render();
+        showToast('已新增使用者');
+        break;
+      }
+      case 'user-rename-ask': renamingUserId = el.dataset.userid; render(); focusInputSoon('rename-input'); break;
+      case 'user-rename-cancel': renamingUserId = null; render(); break;
+      case 'user-rename-confirm': {
+        const id = el.dataset.userid;
+        const inp = document.getElementById('rename-input');
+        const name = inp ? inp.value : '';
+        renamingUserId = null;
+        if (name.trim()) renameUser(id, name);
+        render();
+        break;
+      }
+      case 'user-delete-ask': deletingUserId = el.dataset.userid; render(); break;
+      case 'user-delete-cancel': deletingUserId = null; render(); break;
+      case 'user-delete-confirm': {
+        const id = el.dataset.userid;
+        deletingUserId = null;
+        deleteUser(id);
+        render();
+        showToast('已刪除使用者');
+        break;
+      }
       case 'flip': s.flipped = !s.flipped; render(); break;
       case 'toggle-learned': {
         const words = groupWords(s.band, s.group);
