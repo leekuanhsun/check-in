@@ -1,11 +1,11 @@
-"""TEMP debug script: find real TWSE endpoint(s) that classify instrument type
-(ETF / warrant / beneficiary certificate / etc.) for stock_ids not covered by
-t187ap03_L (common-stock company list). Not part of the permanent codebase.
+"""TEMP debug script: parse the TWSE ISIN strMode=2 table (listed securities)
+to find how instrument type (stock / ETF / warrant / beneficiary cert) is
+encoded, for stock_ids not covered by t187ap03_L. Not part of permanent code.
 """
-import json
+import re
 import urllib.request
 
-TARGET_IDS = {"0050", "00400A", "01001T", "020000", "02001L", "020036"}
+TARGET_IDS = {"0050", "00400A", "01001T", "020000", "02001L", "020036", "2330"}
 
 
 def fetch(url):
@@ -14,47 +14,43 @@ def fetch(url):
         return resp.read()
 
 
-print("=== fetching swagger catalog ===")
-try:
-    raw = fetch("https://openapi.twse.com.tw/v1/swagger.json")
-    data = json.loads(raw)
-    paths = list(data.get("paths", {}).keys())
-    print(f"total paths: {len(paths)}")
-    for p in paths:
-        pl = p.lower()
-        if "etf" in pl or "isin" in pl or "opendata" in p:
-            print(p)
-except Exception as e:
-    print("swagger fetch failed:", e)
+raw = fetch("https://isin.twse.com.tw/isin/C_public.jsp?strMode=2")
+text = raw.decode("big5", errors="replace")
 
-print()
-print("=== candidate opendata endpoints ===")
-candidates = [
-    "https://openapi.twse.com.tw/v1/opendata/t187ap03_L",  # known-good: common stock
-    "https://openapi.twse.com.tw/v1/opendata/t187ap46_L_1",  # guess: ETF list?
-    "https://openapi.twse.com.tw/v1/opendata/t187ap41_L",  # guess: warrant list?
-]
-for url in candidates:
-    try:
-        raw = fetch(url)
-        data = json.loads(raw)
-        if isinstance(data, list):
-            print(url, "-> list len", len(data), "sample keys:", list(data[0].keys()) if data else None)
-        else:
-            print(url, "-> non-list:", str(data)[:200])
-    except Exception as e:
-        print(url, "-> FAILED:", e)
+rows = re.findall(r"<tr[^>]*>(.*?)</tr>", text, re.S)
+print(f"total <tr> rows: {len(rows)}")
 
-print()
-print("=== ISIN public HTML lookup (strMode by instrument type) ===")
-for mode in [2, 4, 5, 7]:
-    url = f"https://isin.twse.com.tw/isin/C_public.jsp?strMode={mode}"
-    try:
-        raw = fetch(url)
-        text = raw.decode("big5", errors="replace")
-        # print first table row after header to see shape
-        snippet = text[text.find("<tbody"):text.find("<tbody") + 800] if "<tbody" in text else text[:500]
-        print(f"--- strMode={mode} (len={len(text)}) ---")
-        print(snippet[:600])
-    except Exception as e:
-        print(url, "-> FAILED:", e)
+# print header row (first one)
+header_cells = re.findall(r"<td[^>]*>(.*?)</td>", rows[0], re.S)
+print("HEADER:", [re.sub(r"<.*?>", "", c).strip() for c in header_cells])
+
+# category-header rows have colspan and no real data; data rows have several <td>
+found = 0
+category_context = None
+for row in rows[1:]:
+    cells = re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)
+    texts = [re.sub(r"<.*?>", "", c).strip() for c in cells]
+    if len(cells) == 1:
+        # this is a category divider row, e.g. "股票" / "ETF" / "認購權證" ...
+        category_context = texts[0]
+        continue
+    if not texts:
+        continue
+    code_name = texts[0]
+    code = code_name.split("　")[0].strip() if "　" in code_name else code_name.split(" ")[0].strip()
+    if code in TARGET_IDS:
+        print(f"MATCH code={code!r} category_context={category_context!r} row={texts}")
+        found += 1
+
+print(f"matched {found}/{len(TARGET_IDS)} target ids")
+
+# also print the distinct category_context values seen, to know the full taxonomy
+category_context = None
+seen_categories = []
+for row in rows[1:]:
+    cells = re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)
+    texts = [re.sub(r"<.*?>", "", c).strip() for c in cells]
+    if len(cells) == 1 and texts and texts[0] not in seen_categories:
+        seen_categories.append(texts[0])
+
+print("all category dividers seen:", seen_categories)
