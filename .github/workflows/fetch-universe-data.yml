@@ -8,7 +8,6 @@ on:
     paths:
       - ".github/workflows/fetch-universe-data.yml"
       - "moneydj-scraper/fetch_universe.py"
-      - "moneydj-scraper/debug_universe_endpoints.py"
       - "moneydj-scraper/concept_categories.py"
       - "moneydj-scraper/twse_api.py"
       - "moneydj-scraper/models.py"
@@ -30,10 +29,6 @@ jobs:
       - name: Install dependencies
         working-directory: moneydj-scraper
         run: pip install -r requirements.txt
-
-      - name: Debug raw universe endpoint shapes
-        working-directory: moneydj-scraper
-        run: python debug_universe_endpoints.py
 
       - name: Fetch full TWSE universe
         working-directory: moneydj-scraper
