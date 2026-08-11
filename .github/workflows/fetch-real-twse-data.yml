@@ -2,6 +2,16 @@ name: Fetch real TWSE concept-stock data
 
 on:
   workflow_dispatch: {}
+  push:
+    branches:
+      - claude/moneydj-concept-scraper-igtou1
+    paths:
+      - ".github/workflows/fetch-real-twse-data.yml"
+      - "moneydj-scraper/fetch_real_data.py"
+      - "moneydj-scraper/twse_api.py"
+      - "moneydj-scraper/insights.py"
+      - "moneydj-scraper/models.py"
+      - "moneydj-scraper/requirements.txt"
 
 permissions:
   contents: write
