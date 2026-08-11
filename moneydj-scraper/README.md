@@ -12,10 +12,12 @@ Goodinfo 等任何網站的頁面，爬完後再跨來源比對。不做股價�
 ## 模組結構
 
 ```
-dashboard.html          純前端資料儀表板（全市場真實資料 + 精選概念股明細，含上傳/K線/法人/資券/重點整理觀點）
+dashboard.html          純前端資料儀表板（全市場真實資料 + 全市場 K線/法人/資券明細，含上傳/重點整理觀點）
 concept_categories.py    人工整理的概念股分類/成分股清單（單一事實來源，只留下實測拿得到真實資料的上市股票）
 fetch_universe.py       抓「全部上市股票」的代碼/名稱/官方產業分類/當日價格（不含歷史明細）
 universe_stocks.json    fetch_universe.py 的真實輸出快照（~1,379 檔）
+fetch_universe_detail.py 抓「全部上市股票」的 K 線/三大法人/融資融券/基本資訊歷史明細
+universe_detail.json    fetch_universe_detail.py 的真實輸出快照（~1,379 檔）
 fetch_real_data.py      用 twse_api.py 抓 concept_categories.py 清單（精選概念股）的完整明細
 real_concept_stocks.json / real_concept_detail.json   fetch_real_data.py 的真實輸出快照
 fetcher.py             請求層：UA 輪替、Big5/cp950/utf-8 解碼、重試（指數退避）
@@ -166,35 +168,62 @@ GitHub Actions 對照真實回應驗證並修正**（`MI_MARGN` 的個股資料�
 python fetch_universe.py
 ```
 
+### 全部上市股票的歷史明細（K 線／法人／資券）
+
+`fetch_universe.py` 只抓「當下快照」；`fetch_universe_detail.py` 才抓歷史明細，涵蓋範圍
+一樣是**全部上市股票**（不限 24 檔精選概念股）：
+
+- 核心是 `twse_api.fetch_universe_details()`，內部用四個「全市場一次撈完」的端點：
+  - `twse_api.fetch_market_ohlc_all()`：`MI_INDEX`（`type=ALLBUT0999`）取得「任一歷史交易日」
+    全市場開高低收/成交量，已於 2026-08-11 對照真實回應驗證（1377 檔／次）。跟
+    `fetch_all_stock_day()`（`STOCK_DAY_ALL`）不同——後者只有「今天」，沒有 date 參數。
+  - `fetch_institutional_all()` / `fetch_margin_all()`：沿用既有的全市場三大法人／融資融券
+    端點，原本只套用在 24 檔精選概念股上，現在對 `stock_ids` 傳全市場清單即可涵蓋所有股票，
+    因為這兩個端點本來就是「一次撈全部，呼叫端自行過濾」，不過濾就是全市場。
+  - `fetch_valuation_all()`：同上，本益比/殖利率/股價淨值比本來就是全市場一次撈完。
+- 因為四個端點都是「全市場一次撈完」，總請求數只跟「天數」成正比、不跟「股票數」成正比——
+  預設參數（60 天 OHLC + 20 天法人/資券×2 + 1 次基本資訊 ≈ 101 次請求）不管涵蓋 24 檔還是
+  1,379 檔，成本完全一樣。實測（2026-08-11）：1,379 檔股票，1,378 檔有 OHLC 資料
+  （唯一缺資料的是 1519 華城的相鄰股票 1589，屬單次請求偶發失敗，非端點問題），總耗時約 3-4 分鐘。
+- 每檔股票額外用 `insights.summarize_stock_insights()` 產生重點整理觀點（純統計，附免責聲明），
+  輸出到 `universe_detail.json`（約 1,379 筆，未壓縮 JSON 約 21MB）。
+
+```bash
+python fetch_universe_detail.py
+```
+
 ## 儀表板（dashboard.html）
 
-`dashboard.html` 是純前端、不需架站的單檔頁面（用瀏覽器直接打開即可）。**內建資料是真實資料**，
-分兩層：
+`dashboard.html` 是純前端、不需架站的單檔頁面（用瀏覽器直接打開即可）。**內建資料是真實資料**：
 
 1. **股票清單**：`fetch_universe.py` 產生的 `universe_stocks.json`——全部上市股票／ETF
-   （約 1,379 檔），欄位含真實收盤價/漲跌與 TWSE 官方產業分類（分類欄位）。
-2. **個股明細**：`concept_categories.py` 精選清單（6 個題材、24 檔股票）透過 `fetch_real_data.py`
-   額外抓的完整 K 線／三大法人／融資融券／基本資訊（`real_concept_detail.json`）。這 24 檔在
-   股票名稱旁會多一個 🏷 標籤標示所屬題材；其餘約 1,355 檔只有目前股價，沒有歷史明細。
+   （約 1,379 檔），欄位含真實收盤價/漲跌與分類（TWSE 官方產業分類，或 ETF/ETN/權證等
+   商品類型）。
+2. **個股明細**：`fetch_universe_detail.py` 產生的 `universe_detail.json`——同樣涵蓋全部
+   ~1,379 檔股票的 K 線／三大法人買賣超／融資融券／基本資訊／重點整理觀點，不再侷限於
+   24 檔精選概念股。`concept_categories.py` 清單裡的股票額外多一個 🏷 標籤標示所屬概念股題材，
+   純粹是分類標籤，跟「有沒有明細資料」無關。
 
 功能：
 
-- 分類篩選（依 TWSE 官方產業分類）、代碼／名稱搜尋、各欄位排序、當日漲跌幅排行（Top 5 漲幅／跌幅）
-- 工具列「📈 只看有完整明細」可篩選出那 24 檔精選概念股，避免點到沒有明細的股票才發現沒資料
+- 分類篩選（依 TWSE 官方產業分類／商品類型）、代碼／名稱搜尋、各欄位排序、當日漲跌幅排行
+  （Top 5 漲幅／跌幅）
+- 工具列「📈 只看有完整明細」可篩選出有 K 線資料的股票（現在幾乎是全部，~1,378/1,379 檔）
 - 點任一列（或列尾的「K線/法人 ›」按鈕）開啟個股詳情：K 線＋成交量（Canvas 手繪，含十字準線與
   懸停 tooltip）、三大法人買賣超表、融資融券表、基本資訊（PER／殖利率／PBR）、重點整理觀點；
   沒有明細資料的股票會顯示「尚無此股票的 K 線資料」，不會壞掉
 - 兩個獨立上傳入口：「上傳股票資料」對應 `universe_stocks.json` 或 `main.py` 一般輸出
-  （`StockRecord` 陣列）；「上傳個股明細」對應 `--with-detail` / `fetch_real_data.py` 的輸出
-  （以股票代碼為 key 的字典）
+  （`StockRecord` 陣列）；「上傳個股明細」對應 `universe_detail.json` / `--with-detail` /
+  `fetch_real_data.py` 的輸出（以股票代碼為 key 的字典）
 - 深色模式自動跟隨系統設定，K 線圖會依主題重繪配色（紅漲綠跌，符合台股慣例）
 
-要更新內建的資料快照：跑 GitHub Actions 的 `fetch-universe-data.yml` / `fetch-real-twse-data.yml`
-（見下一節），或在有網路的環境本機執行
+要更新內建的資料快照：跑 GitHub Actions 的 `fetch-universe-data.yml` / `fetch-universe-detail.yml`
+/ `fetch-real-twse-data.yml`（見下一節），或在有網路的環境本機執行
 
 ```bash
-python fetch_universe.py       # 全部上市股票清單
-python fetch_real_data.py      # 精選概念股的完整明細
+python fetch_universe.py         # 全部上市股票清單（當下快照）
+python fetch_universe_detail.py  # 全部上市股票的 K 線/法人/資券歷史明細
+python fetch_real_data.py        # 精選概念股（沿用舊流程，非必要，universe_detail.json 已涵蓋）
 ```
 
 產生新的 JSON 後，把檔案分別用儀表板上方的兩個上傳按鈕載入即可，不需要改任何程式碼；也可以直接
@@ -208,7 +237,7 @@ python fetch_real_data.py      # 精選概念股的完整明細
 ## 用 GitHub Actions 抓真實資料
 
 開發這個專案的沙盒環境本身出網政策擋掉所有外部網站（見「已知限制」），完全無法連線到
-MoneyDJ／TWSE／TradingView。GitHub Actions runner 有自己的網路，不受這個限制，所以有兩個
+MoneyDJ／TWSE／TradingView。GitHub Actions runner 有自己的網路，不受這個限制，所以有三個
 workflow 分別繞過沙盒限制、直接拿到真實資料：
 
 **`.github/workflows/fetch-real-twse-data.yml`**（精選概念股完整明細）：
@@ -236,9 +265,18 @@ workflow 分別繞過沙盒限制、直接拿到真實資料：
   ~2 個月 K 線 + 10 天法人/資券，單次要跑 1～3 分鐘）。
 - 結果寫成 `universe_stocks.json`，同樣自動 commit 回分支。
 
-兩個 workflow 都監看 `twse_api.py`，同一次推送可能同時觸發兩者，各自把結果 commit 回同一個
-分支——這兩個 JSON 都是單行 minify 過的內容，一般的 `git rebase`／merge 在這種檔案上一定會
-衝突（無法逐行合併兩份不同的單行 JSON），所以兩個 workflow 的「commit 回分支」步驟在
+**`.github/workflows/fetch-universe-detail.yml`**（全部上市股票的 K 線/法人/資券歷史明細）：
+
+- 觸發方式跟上面類似，改看 `fetch_universe_detail.py`、`concept_categories.py`、`insights.py`、
+  `twse_api.py`、`models.py`、`requirements.txt` 或 workflow 本身的變動。
+- 執行內容：`fetch_universe_detail.py`（見「全部上市股票的歷史明細」一節），對全部 ~1,379 檔
+  股票抓 K 線／三大法人／融資融券／基本資訊，因為全部改用「全市場一次撈完」端點，單次執行約
+  3-4 分鐘（跟股票數無關，只跟天數有關）。
+- 結果寫成 `universe_detail.json`（約 21MB，未壓縮），同樣自動 commit 回分支。
+
+三個 workflow 都監看 `twse_api.py`，同一次推送可能同時觸發多個，各自把結果 commit 回同一個
+分支——這些 JSON 都是單行 minify 過的內容，一般的 `git rebase`／merge 在這種檔案上一定會
+衝突（無法逐行合併兩份不同的單行 JSON），所以每個 workflow 的「commit 回分支」步驟在
 push 被拒絕時，用的是 `git fetch` + `git reset --soft origin/<branch>` 重新在最新的分支頂端
 上重新提交自己這份最終內容，而不是嘗試 rebase／merge diff。
 
@@ -263,9 +301,10 @@ pytest
   且三大法人／融資融券是「每個交易日打一次全市場端點再過濾」，股票數多、天數多時請求數會累加，
   記得保留內建的延遲（`fetch_stock_details` 的 `delay` 參數），不要調成 0。
 - `fetch_universe.py` 只涵蓋上市（TWSE），不含上櫃（TPEX），且只抓當下快照（代碼/名稱/官方
-  產業分類/當日價格），刻意不逐檔抓歷史 K 線／法人／資券——對 1,000+ 檔股票這樣做請求數會是
-  數萬次，時間與對 TWSE 伺服器的負擔都不合理。想看特定股票的完整明細，把它加進
-  `concept_categories.py` 用 `fetch_real_data.py` 單獨抓。
+  產業分類/當日價格）；全市場歷史明細（K 線／法人／資券）改由 `fetch_universe_detail.py`
+  負責，見「全部上市股票的歷史明細」一節——靠的是「全市場一次撈完」端點，不是逐檔請求，
+  所以規模不是問題，但仍然不含上櫃（TPEX），且歷史長度固定（預設 60 天 OHLC + 20 天法人/資券），
+  不是無限回溯。
 - `INDUSTRY_CODE_NAMES`（`twse_api.py` 裡的產業別代碼對照表）是 2026-08-11 用當時 1094 家
   真實上市公司的資料反推出來的，涵蓋當時出現的 33 個代碼；未來若 TWSE 新增代碼，
   `parse_all_companies` 會 fallback 成 `"產業別代碼 {code}"`（不會報錯），但需要人工核對後
