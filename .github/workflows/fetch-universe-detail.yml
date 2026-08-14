@@ -8,6 +8,8 @@ on:
     paths:
       - ".github/workflows/fetch-universe-detail.yml"
       - "moneydj-scraper/fetch_universe_detail.py"
+      - "moneydj-scraper/compute_valuations.py"
+      - "moneydj-scraper/valuation.py"
       - "moneydj-scraper/concept_categories.py"
       - "moneydj-scraper/insights.py"
       - "moneydj-scraper/twse_api.py"
@@ -35,20 +37,26 @@ jobs:
         working-directory: moneydj-scraper
         run: python fetch_universe_detail.py
 
+      - name: Compute PE-based recommended buy prices
+        working-directory: moneydj-scraper
+        run: python compute_valuations.py
+
       - uses: actions/upload-artifact@v4
         with:
           name: universe-detail-data
-          path: moneydj-scraper/universe_detail.json
+          path: |
+            moneydj-scraper/universe_detail.json
+            moneydj-scraper/valuations.json
 
       - name: Commit results back to the branch
         working-directory: moneydj-scraper
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add universe_detail.json
+          git add universe_detail.json valuations.json
           git diff --cached --quiet && exit 0
-          git commit -m "Update full TWSE universe detail snapshot [skip ci]"
-          # Auto-generated single-line JSON blob - a line-based rebase/merge on
+          git commit -m "Update full TWSE universe detail + valuation snapshot [skip ci]"
+          # Auto-generated single-line JSON blobs - a line-based rebase/merge on
           # conflict is pointless (any remote change collides). On rejection,
           # just re-stack our fresh fetch on top of the new tip instead of
           # trying to merge diffs.
@@ -57,8 +65,8 @@ jobs:
             echo "push rejected, re-stacking onto latest remote (attempt $i)..."
             git fetch origin "$GITHUB_REF_NAME"
             git reset --soft "origin/$GITHUB_REF_NAME"
-            git add universe_detail.json
-            git commit -m "Update full TWSE universe detail snapshot [skip ci]"
+            git add universe_detail.json valuations.json
+            git commit -m "Update full TWSE universe detail + valuation snapshot [skip ci]"
             sleep $((i * 2))
           done
           git push

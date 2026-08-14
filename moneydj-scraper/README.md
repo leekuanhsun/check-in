@@ -18,6 +18,9 @@ fetch_universe.py       抓「全部上市股票」的代碼/名稱/官方產業
 universe_stocks.json    fetch_universe.py 的真實輸出快照（~1,379 檔）
 fetch_universe_detail.py 抓「全部上市股票」的 K 線/三大法人/融資融券/基本資訊歷史明細
 universe_detail.json    fetch_universe_detail.py 的真實輸出快照（~1,379 檔）
+valuation.py            本益比估值純函式：EPS 反推、同產業本益比中位數、建議買入價
+compute_valuations.py   合併 universe_stocks.json + universe_detail.json，算出建議買入價
+valuations.json         compute_valuations.py 的真實輸出快照（~1,379 檔）
 fetch_real_data.py      用 twse_api.py 抓 concept_categories.py 清單（精選概念股）的完整明細
 real_concept_stocks.json / real_concept_detail.json   fetch_real_data.py 的真實輸出快照
 fetcher.py             請求層：UA 輪替、Big5/cp950/utf-8 解碼、重試（指數退避）
@@ -192,6 +195,43 @@ python fetch_universe.py
 python fetch_universe_detail.py
 ```
 
+### 本益比估值：建議買入價
+
+`compute_valuations.py` 合併 `universe_stocks.json`（收盤價／產業分類）與
+`universe_detail.json`（本益比等基本資訊），依 `valuation.py` 的規則算出每檔股票的
+「建議買入價」，輸出 `valuations.json`。這支不打任何網路請求，純粹是本地端對既有兩份
+真實資料做二次加工計算，執行是毫秒級的。
+
+方法論（產業同儕比較估值，不是股價預測）：
+
+1. **EPS 反推**：`EPS = 收盤價 / 本益比`（本益比非正數，即虧損公司，視為無法反推，回傳
+   `None`，不會硬湊出負的 EPS）。
+2. **同產業本益比中位數**：同一個 `category`（TWSE 官方產業別分類，或 ETF/ETN 等商品類型）
+   裡其他股票本益比的中位數（比平均數更不受極端值影響），只採計正值本益比；同產業正值
+   本益比樣本數 < 3 就不產生該產業的估值基準，樣本太少不硬算。
+3. **建議買入價** = `EPS x 同產業本益比中位數 x 90%`（90% 是安全邊際，出自價值投資「用
+   低於估值的價格買進、留緩衝空間」的保守傳統，不是精準預測）。
+
+這條路線曾經先做過「動能/均值回歸/籌碼流向」多因子選股訊號 + walk-forward 回測（詳見
+commit history），對現有 ~58 天歷史資料跑出來的結果是負 Sharpe（樣本太小、不可靠），
+已依使用者決定捨棄，改成這個較保守、可解釋、不涉及方向性預測的本益比估值方法。
+
+已知限制（務必如實揭露）：
+
+- 這是跟「同產業其他股票的本益比」比較，不是根據公司成長性、財務體質、獲利品質等基本面
+  因素做的內在價值估算；本益比高低本身可能反映的是市場對成長性/風險的合理定價，不代表
+  「本益比低就是便宜、該買」。
+- TWSE 官方產業分類粗略，同產業內公司體質可能差異很大。
+- 本益比是單一時間點快照，不是本益比河流圖那種長期歷史區間，無法判斷目前本益比在歷史
+  相對高檔還是低檔。
+- ETF／ETN／特別股等不是一般公司股票的商品類型沒有意義的本益比，`recommended_buy_price`
+  會是 `None`（實測約 1,379 檔裡有 855 檔算得出來）。
+- 不構成任何投資建議，僅供參考，投資有風險，請自行判斷並承擔全部風險。
+
+```bash
+python compute_valuations.py
+```
+
 ## 儀表板（dashboard.html）
 
 `dashboard.html` 是純前端、不需架站的單檔頁面（用瀏覽器直接打開即可）。**內建資料是真實資料**：
@@ -201,8 +241,9 @@ python fetch_universe_detail.py
    商品類型）。
 2. **個股明細**：`fetch_universe_detail.py` 產生的 `universe_detail.json`——同樣涵蓋全部
    ~1,379 檔股票的 K 線／三大法人買賣超／融資融券／基本資訊／重點整理觀點，不再侷限於
-   24 檔精選概念股。`concept_categories.py` 清單裡的股票額外多一個 🏷 標籤標示所屬概念股題材，
-   純粹是分類標籤，跟「有沒有明細資料」無關。
+   24 檔精選概念股。`compute_valuations.py` 產生的 `valuations.json`（建議買入價，見「本益比
+   估值」一節）會合併進每檔股票的 `fundamentals` 欄位一起內建。`concept_categories.py` 清單
+   裡的股票額外多一個 🏷 標籤標示所屬概念股題材，純粹是分類標籤，跟「有沒有明細資料」無關。
 
 功能：
 
@@ -210,7 +251,8 @@ python fetch_universe_detail.py
   （Top 5 漲幅／跌幅）
 - 工具列「📈 只看有完整明細」可篩選出有 K 線資料的股票（現在幾乎是全部，~1,378/1,379 檔）
 - 點任一列（或列尾的「K線/法人 ›」按鈕）開啟個股詳情：K 線＋成交量（Canvas 手繪，含十字準線與
-  懸停 tooltip）、三大法人買賣超表、融資融券表、基本資訊（PER／殖利率／PBR）、重點整理觀點；
+  懸停 tooltip）、三大法人買賣超表、融資融券表、基本資訊（PER／殖利率／PBR／推算 EPS／同業
+  本益比中位數／建議買入價／現價 vs 建議買入價，見「本益比估值」一節）、重點整理觀點；
   沒有明細資料的股票會顯示「尚無此股票的 K 線資料」，不會壞掉
 - 兩個獨立上傳入口：「上傳股票資料」對應 `universe_stocks.json` 或 `main.py` 一般輸出
   （`StockRecord` 陣列）；「上傳個股明細」對應 `universe_detail.json` / `--with-detail` /
@@ -223,11 +265,15 @@ python fetch_universe_detail.py
 ```bash
 python fetch_universe.py         # 全部上市股票清單（當下快照）
 python fetch_universe_detail.py  # 全部上市股票的 K 線/法人/資券歷史明細
+python compute_valuations.py     # 依上面兩份資料算建議買入價
 python fetch_real_data.py        # 精選概念股（沿用舊流程，非必要，universe_detail.json 已涵蓋）
 ```
 
-產生新的 JSON 後，把檔案分別用儀表板上方的兩個上傳按鈕載入即可，不需要改任何程式碼；也可以直接
-把內容貼進 `dashboard.html` 裡 `id="sample-data"`（股票清單）／`id="sample-detail"`（個股明細）
+產生新的 JSON 後，把 `universe_stocks.json` 用儀表板上方「上傳股票資料」按鈕載入即可；
+`universe_detail.json` 若要連同 `valuations.json` 的建議買入價一起用「上傳個股明細」載入，
+需要先把 `valuations.json` 每筆的欄位合併進 `universe_detail.json` 對應股票的 `fundamentals`
+物件（`compute_valuations.py` 本身不做這個合併，是各自獨立的輸出檔）。也可以直接把合併後的
+內容貼進 `dashboard.html` 裡 `id="sample-data"`（股票清單）／`id="sample-detail"`（個股明細）
 的 `<script>` 區塊，取代成新的內建快照。
 
 `generate_sample_data.py` / `generate_sample_detail.py` 仍保留作為離線開發用的虛構資料產生器
@@ -265,14 +311,20 @@ workflow 分別繞過沙盒限制、直接拿到真實資料：
   ~2 個月 K 線 + 10 天法人/資券，單次要跑 1～3 分鐘）。
 - 結果寫成 `universe_stocks.json`，同樣自動 commit 回分支。
 
-**`.github/workflows/fetch-universe-detail.yml`**（全部上市股票的 K 線/法人/資券歷史明細）：
+**`.github/workflows/fetch-universe-detail.yml`**（全部上市股票的 K 線/法人/資券歷史明細 +
+本益比建議買入價）：
 
-- 觸發方式跟上面類似，改看 `fetch_universe_detail.py`、`concept_categories.py`、`insights.py`、
-  `twse_api.py`、`models.py`、`requirements.txt` 或 workflow 本身的變動。
-- 執行內容：`fetch_universe_detail.py`（見「全部上市股票的歷史明細」一節），對全部 ~1,379 檔
-  股票抓 K 線／三大法人／融資融券／基本資訊，因為全部改用「全市場一次撈完」端點，單次執行約
-  3-4 分鐘（跟股票數無關，只跟天數有關）。
-- 結果寫成 `universe_detail.json`（約 21MB，未壓縮），同樣自動 commit 回分支。
+- 觸發方式跟上面類似，改看 `fetch_universe_detail.py`、`compute_valuations.py`、
+  `valuation.py`、`concept_categories.py`、`insights.py`、`twse_api.py`、`models.py`、
+  `requirements.txt` 或 workflow 本身的變動。
+- 執行內容：先跑 `fetch_universe_detail.py`（見「全部上市股票的歷史明細」一節），對全部
+  ~1,379 檔股票抓 K 線／三大法人／融資融券／基本資訊，因為全部改用「全市場一次撈完」端點，
+  單次執行約 3-4 分鐘（跟股票數無關，只跟天數有關）；再跑 `compute_valuations.py`（見「本益比
+  估值」一節），依當時 checkout 出來的 `universe_stocks.json`（由另一個 workflow 維護，可能
+  不是同一次推送剛好也更新過，但通常兩者會一起觸發）算出建議買入價，這步是純本地計算，
+  不打任何網路請求。
+- 結果寫成 `universe_detail.json`（約 21MB，未壓縮）與 `valuations.json`，同樣自動 commit
+  回分支。
 
 三個 workflow 都監看 `twse_api.py`，同一次推送可能同時觸發多個，各自把結果 commit 回同一個
 分支——這些 JSON 都是單行 minify 過的內容，一般的 `git rebase`／merge 在這種檔案上一定會
