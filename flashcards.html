@@ -214,6 +214,22 @@
     .quiz-options{grid-template-columns:1fr;}
     .flashcard{font-size:1.4em;min-height:180px;}
   }
+
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(20,25,35,0.45);
+    display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;
+  }
+  .modal-overlay[hidden]{display:none;}
+  .modal-box{
+    background:#fff;border-radius:12px;padding:22px;max-width:360px;width:100%;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  }
+  .modal-message{margin:0 0 14px;font-size:1em;color:var(--text);white-space:pre-line;}
+  .modal-input{
+    width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:6px;
+    font-size:0.95em;margin-bottom:16px;box-sizing:border-box;
+  }
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;}
 </style>
 </head>
 <body>
@@ -359,6 +375,17 @@
   </div>
 
 </main>
+
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal-box">
+    <p class="modal-message" id="modalMessage"></p>
+    <input type="text" id="modalInput" class="modal-input">
+    <div class="modal-actions">
+      <button class="btn secondary" id="modalCancelBtn">取消</button>
+      <button class="btn" id="modalOkBtn">確定</button>
+    </div>
+  </div>
+</div>
 
 <script src="flashcards.js"></script>
 </body>

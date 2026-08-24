@@ -63,6 +63,57 @@ function normalize(s) {
   return (s || '').trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
+/* ---------------- Modal dialogs (replaces prompt/confirm/alert,
+   which sandboxed embeds such as the Artifact preview block) ---------------- */
+function showModal({ message, input = false, defaultValue = '', cancel = true }) {
+  return new Promise(resolve => {
+    const overlay = document.getElementById('modalOverlay');
+    const msgEl = document.getElementById('modalMessage');
+    const inputEl = document.getElementById('modalInput');
+    const okBtn = document.getElementById('modalOkBtn');
+    const cancelBtn = document.getElementById('modalCancelBtn');
+
+    msgEl.textContent = message;
+    inputEl.style.display = input ? 'block' : 'none';
+    inputEl.value = defaultValue;
+    cancelBtn.style.display = cancel ? 'inline-block' : 'none';
+
+    overlay.hidden = false;
+    if (input) { inputEl.focus(); inputEl.select(); } else { okBtn.focus(); }
+
+    function cleanup(result) {
+      overlay.hidden = true;
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+      inputEl.removeEventListener('keydown', onKeydown);
+      overlay.removeEventListener('mousedown', onOverlayClick);
+      resolve(result);
+    }
+    function onOk() { cleanup(input ? inputEl.value.trim() : true); }
+    function onCancel() { cleanup(input ? null : false); }
+    function onKeydown(e) {
+      if (e.key === 'Enter') { e.preventDefault(); onOk(); }
+      if (e.key === 'Escape') onCancel();
+    }
+    function onOverlayClick(e) { if (e.target === overlay) onCancel(); }
+
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+    inputEl.addEventListener('keydown', onKeydown);
+    overlay.addEventListener('mousedown', onOverlayClick);
+  });
+}
+
+function modalPrompt(message, defaultValue = '') {
+  return showModal({ message, input: true, defaultValue, cancel: true });
+}
+function modalConfirm(message) {
+  return showModal({ message, input: false, cancel: true });
+}
+function modalAlert(message) {
+  return showModal({ message, input: false, cancel: false });
+}
+
 /* ---------------- Tabs ---------------- */
 function initTabs() {
   document.querySelectorAll('.nav-tab').forEach(btn => {
@@ -154,17 +205,17 @@ function renderManage() {
 function initManage() {
   document.getElementById('deckSelect').addEventListener('change', e => setCurrentDeck(e.target.value));
 
-  document.getElementById('newDeckBtn').addEventListener('click', () => {
-    const name = prompt('新字卡集名稱：', '我的字卡');
+  document.getElementById('newDeckBtn').addEventListener('click', async () => {
+    const name = await modalPrompt('新字卡集名稱：', '我的字卡');
     if (!name) return;
     const deck = { id: uid(), name: name.trim(), cards: [] };
     decks.push(deck);
     setCurrentDeck(deck.id);
   });
 
-  document.getElementById('renameDeckBtn').addEventListener('click', () => {
+  document.getElementById('renameDeckBtn').addEventListener('click', async () => {
     const deck = getCurrentDeck();
-    const name = prompt('重新命名字卡集：', deck.name);
+    const name = await modalPrompt('重新命名字卡集：', deck.name);
     if (!name) return;
     deck.name = name.trim();
     saveDecks();
@@ -172,20 +223,21 @@ function initManage() {
     renderManage();
   });
 
-  document.getElementById('deleteDeckBtn').addEventListener('click', () => {
-    if (decks.length <= 1) { alert('至少需要保留一個字卡集。'); return; }
+  document.getElementById('deleteDeckBtn').addEventListener('click', async () => {
+    if (decks.length <= 1) { await modalAlert('至少需要保留一個字卡集。'); return; }
     const deck = getCurrentDeck();
-    if (!confirm(`確定要刪除字卡集「${deck.name}」嗎？此操作無法復原。`)) return;
+    const ok = await modalConfirm(`確定要刪除字卡集「${deck.name}」嗎？此操作無法復原。`);
+    if (!ok) return;
     decks = decks.filter(d => d.id !== deck.id);
     setCurrentDeck(decks[0].id);
   });
 
-  document.getElementById('addCardBtn').addEventListener('click', () => {
+  document.getElementById('addCardBtn').addEventListener('click', async () => {
     const zhInput = document.getElementById('newZh');
     const enInput = document.getElementById('newEn');
     const zh = zhInput.value.trim();
     const en = enInput.value.trim();
-    if (!zh || !en) { alert('請同時輸入中文與英文。'); return; }
+    if (!zh || !en) { await modalAlert('請同時輸入中文與英文。'); return; }
     getCurrentDeck().cards.push({ id: uid(), zh, en });
     saveDecks();
     zhInput.value = '';
@@ -198,7 +250,7 @@ function initManage() {
     if (e.key === 'Enter') document.getElementById('addCardBtn').click();
   });
 
-  document.getElementById('bulkImportBtn').addEventListener('click', () => {
+  document.getElementById('bulkImportBtn').addEventListener('click', async () => {
     const text = document.getElementById('bulkText').value;
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
     let added = 0;
@@ -215,13 +267,13 @@ function initManage() {
       }
     });
     if (added === 0) {
-      alert('沒有解析到有效字卡，請確認格式為「中文,英文」或「中文 - 英文」，每行一筆。');
+      await modalAlert('沒有解析到有效字卡，請確認格式為「中文,英文」或「中文 - 英文」，每行一筆。');
       return;
     }
     saveDecks();
     document.getElementById('bulkText').value = '';
     renderManage();
-    alert(`已匯入 ${added} 筆字卡。`);
+    await modalAlert(`已匯入 ${added} 筆字卡。`);
   });
 
   document.getElementById('bulkClearBtn').addEventListener('click', () => {
